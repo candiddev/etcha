@@ -2,7 +2,7 @@
 
 > Decentralized configuration management for distributed applications.
 
-[![Integration](https://github.com/candiddev/etcha/actions/workflows/workflow.yaml/badge.svg?branch=main)](https://github.com/candiddev/etcha/actions/workflows/workflow.yaml)
+[![Integration](https://github.com/candiddev/etcha/actions/workflows/integration.yaml/badge.svg?branch=main)](https://github.com/candiddev/etcha/actions/workflows/integration.yaml)
 
 Etcha is a source available command line (CLI) tool for building, testing, linting, and distributing application patterns.
 
