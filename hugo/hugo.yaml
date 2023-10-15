@@ -1,11 +1,3 @@
-disableLanguages:
-  - ar
-  - de
-  - es
-  - fr
-  - hi
-  - nl
-  - zh
 menu:
   main:
     - name: Get Etcha
