@@ -32,6 +32,7 @@ Please [contact us](mailto:info@candid.dev?subject=Etcha%20Pricing) for more inf
 
 - Unlimited Devices
 - Email Support with best effort response time
+- Prioritized features and bug fixes
 
 {{% stripe %}}
 {{% /card %}}

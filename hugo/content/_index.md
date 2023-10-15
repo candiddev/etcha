@@ -1,10 +1,11 @@
 ---
+description: Infinite Scale Configuration Management</br>For Distributed Platforms
 title: Etcha
 ---
 
 {{% blocks/section color="white" height=full %}}
 <h1>Infinite Scale Configuration Management</br>For Distributed Platforms</h1>
-<h3>Etcha creates distributed, serverless build and runtime configurations for your servers and apps.</h3>
+<h2>Etcha creates serverless build and runtime configurations for your servers and apps.</h2>
 
 ```mermaid
 flowchart TD
