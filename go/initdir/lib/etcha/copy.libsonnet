@@ -1,7 +1,8 @@
+// Copy a file from src to dst.  Will use curl to download the file.  Can optionally provide a custom check function.
+
 local n = import './native.libsonnet';
 
 function(check='', dst, src)
-
   {
     id: 'copy %s' % dst,
     change: if n.regexMatch('^http(s)?://', src) then

@@ -1,0 +1,8 @@
+{{ $file := os.ReadFile (printf "etcha/%s.libsonnet" (.Get 0)) }}
+{{ printf "**Usage**:" }}
+{{ printf "```jsonnet" }}
+{{ printf "local %[1]s = import 'lib/etcha/%[1]s.libsonnet'" (.Get 0) | safeHTML }}
+{{ printf "" }}
+{{ printf "%s(%s)" (.Get 0) (index (index (findRESubmatch `function\((.*)\)` $file) 0) 1) | safeHTML }}
+{{ printf "```" }}
+{{ printf "%s" (index (index (findRESubmatch `// (.*)` $file) 0) 1) | markdownify }}

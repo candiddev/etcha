@@ -97,18 +97,18 @@ jobs:
         run: |
           ./m tag-github-release
           ./m release
-      #- name: Build hugo
-      #  if: github.ref_name == 'main'
-      #  run: ./m build-hugo
-      #- name: Setup Pages
-      #  if: github.ref_name == 'main'
-      #  uses: actions/configure-pages@v3
-      #- name: Upload artifact
-      #  if: github.ref_name == 'main'
-      #  uses: actions/upload-pages-artifact@v2
-      #  with:
-      #    path: 'hugo/public'
-      #- name: Deploy to GitHub Pages
-      #  if: github.ref_name == 'main'
-      #  id: deployment
-      #  uses: actions/deploy-pages@v2
+      - name: Build hugo
+        if: github.ref_name == 'main'
+        run: ./m build-hugo
+      - name: Setup Pages
+        if: github.ref_name == 'main'
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        if: github.ref_name == 'main'
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: 'hugo/public'
+      - name: Deploy to GitHub Pages
+        if: github.ref_name == 'main'
+        id: deployment
+        uses: actions/deploy-pages@v2

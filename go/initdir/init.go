@@ -36,7 +36,7 @@ func Init(ctx context.Context, path string) errs.Err {
 
 	// Populate a README.md if one does not exist
 	r := filepath.Join(path, "README.md")
-	if _, err := os.Stat(readme); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(r); errors.Is(err, os.ErrNotExist) {
 		if err := os.WriteFile(r, []byte(readme), 0644); err != nil { //nolint:gosec
 			return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error creating %s", r), err))
 		}

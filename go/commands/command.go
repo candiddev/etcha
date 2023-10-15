@@ -26,8 +26,8 @@ const (
 // Command is a configuration to run.
 type Command struct {
 	Always    bool     `json:"always,omitempty"`
-	Check     string   `json:"check,omitempty"`
 	Change    string   `json:"change,omitempty"`
+	Check     string   `json:"check,omitempty"`
 	ChangedBy []string `json:"-"`
 	EnvPrefix string   `json:"envPrefix"`
 	Exec      *Exec    `json:"exec,omitempty"`
@@ -39,12 +39,9 @@ type Command struct {
 
 // Run will run the Command script for the given Mode.
 func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars, exec Exec, m Mode) (out *Output, newEnv types.EnvVars, err errs.Err) {
-	cfg := exec
-	if cfg.Override && cmd.Exec != nil {
-		cfg = *cmd.Exec
-	}
-
+	cfg := exec.Override(cmd.Exec)
 	cfgEnv := cfg.Environment
+	ctx = metrics.SetCommandID(ctx, cmd.ID)
 
 	if e := oldEnv.GetEnv(); len(e) > 0 {
 		cfg.Environment = append(e, cfg.Environment...)
@@ -61,18 +58,20 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 	}
 
 	if m == ModeRemove && cmd.Remove != "" {
+		ctx = metrics.SetCommandMode(ctx, metrics.CommandModeRemove)
+
 		logger.Info(ctx, fmt.Sprintf("Removing %s...", cmd.ID))
 
 		out.Removed = true
 
-		if out.Remove, err = cfg.Run(ctx, c, "", cmd.Remove); err != nil {
+		if out.Remove, err = cfg.Run(ctx, c, cmd.Remove, ""); err != nil {
 			out.RemoveFail = true
 			err := logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error removing id %s", cmd.ID)).Wrap(err.Errors()...), out.Remove.String())
 
 			newEnv[cmd.EnvPrefix+"_REMOVE"] = "1"
 			newEnv[cmd.EnvPrefix+"_REMOVE_OUT"] = out.Remove.String()
 
-			metrics.CommandsRemoved.WithLabelValues(cmd.ID, "1")
+			metrics.CollectCommands(ctx, true)
 
 			return out, newEnv, err
 		}
@@ -80,11 +79,13 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		newEnv[cmd.EnvPrefix+"_REMOVE"] = "0"
 		newEnv[cmd.EnvPrefix+"_REMOVE_OUT"] = out.Remove.String()
 
-		metrics.CommandsRemoved.WithLabelValues(cmd.ID, "0")
+		metrics.CollectCommands(ctx, false)
 	} else {
+		ctx = metrics.SetCommandMode(ctx, metrics.CommandModeCheck)
+
 		if cmd.Check == "" && !cmd.Always && len(cmd.ChangedBy) == 0 {
 			newEnv[cmd.EnvPrefix+"_CHECK"] = "0"
-			metrics.CommandsChecked.WithLabelValues(cmd.ID, "0")
+			metrics.CollectCommands(ctx, false)
 
 			return out, newEnv, nil
 		}
@@ -99,12 +100,12 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 
 			logger.Debug(ctx, fmt.Sprintf("Checking %s...", cmd.ID))
 
-			out.Check, err = cfg.Run(ctx, c, "", cmd.Check)
+			out.Check, err = cfg.Run(ctx, c, cmd.Check, "")
 			if err == nil {
 				newEnv[cmd.EnvPrefix+"_CHECK"] = "0"
 				newEnv[cmd.EnvPrefix+"_CHECK_OUT"] = out.Check.String()
 
-				metrics.CommandsChecked.WithLabelValues(cmd.ID, "0")
+				metrics.CollectCommands(ctx, false)
 
 				return out, newEnv, nil
 			}
@@ -115,21 +116,22 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 
 		cmd.ChangedBy = nil
 
-		metrics.CommandsChecked.WithLabelValues(cmd.ID, "1")
+		metrics.CollectCommands(ctx, true)
 		newEnv[cmd.EnvPrefix+"_CHECK"] = "1"
 
 		if m == ModeCheck || cmd.Change == "" {
 			return out, newEnv, nil
 		}
 
+		ctx = metrics.SetCommandMode(ctx, metrics.CommandModeChange)
 		out.Changed = true
 
 		logger.Info(ctx, fmt.Sprintf("Changing %s...", cmd.ID))
 
 		cfg.Environment = append(cfgEnv, newEnv.GetEnv()...) //nolint:gocritic
 
-		if out.Change, err = cfg.Run(ctx, c, "", cmd.Change); err != nil {
-			metrics.CommandsChanged.WithLabelValues(cmd.ID, "1")
+		if out.Change, err = cfg.Run(ctx, c, cmd.Change, ""); err != nil {
+			metrics.CollectCommands(ctx, true)
 			newEnv[cmd.EnvPrefix+"_CHANGE"] = "1"
 			newEnv[cmd.EnvPrefix+"_CHANGE_OUT"] = out.Change.String()
 
@@ -141,7 +143,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 
 		newEnv[cmd.EnvPrefix+"_CHANGE"] = "0"
 		newEnv[cmd.EnvPrefix+"_CHANGE_OUT"] = out.Change.String()
-		metrics.CommandsChanged.WithLabelValues(cmd.ID, "0")
+		metrics.CollectCommands(ctx, false)
 	}
 
 	return out, newEnv, logger.Error(ctx, nil)

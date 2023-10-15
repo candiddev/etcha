@@ -1,9 +1,10 @@
-// Package pattern contains functions for managing Etcha commands.
+// Package pattern contains functions for building, signing, testing, linting, and running patterns.
 package pattern
 
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -16,20 +17,23 @@ import (
 	"github.com/candiddev/shared/go/types"
 )
 
-var ErrPatternMissingKey = errors.New("missing pki.privateKey")
-var ErrPatternSigningJWT = errors.New("error signing jwt")
+var (
+	ErrPatternMissingKey = errors.New("missing build.signingKey")
+	ErrPatternSigningJWT = errors.New("error signing jwt")
+)
 
 // Pattern is a list of Build and Runtime Commands.
 type Pattern struct {
-	Audience     string            `json:"audience"`
+	Audience     []string          `json:"audience"`
 	Build        commands.Commands `json:"build"`
-	Exec         commands.Exec     `json:"exec"`
+	BuildExec    commands.Exec     `json:"buildExec,omitempty"`
 	ExpiresInSec int               `json:"expiresInSec"`
+	ID           string            `json:"id"`
 	Issuer       string            `json:"issuer"`
 	Run          commands.Commands `json:"run"`
 	RunEnv       types.EnvVars     `json:"runEnv"`
+	RunExec      commands.Exec     `json:"runExec,omitempty"`
 	Subject      string            `json:"subject"`
-	Version      string            `json:"version"`
 
 	Imports *jsonnet.Imports `json:"-"`
 	JWT     string           `json:"-"`
@@ -51,12 +55,12 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 		return nil, logger.Error(ctx, err)
 	}
 
-	if s, ok := c.Sources[configSource]; ok && s != nil && c.Exec.Override {
-		if !s.Exec.Override {
-			p.Exec = s.Exec
-		}
-	} else if !c.Exec.Override {
-		p.Exec = c.Exec
+	if s, ok := c.Sources[configSource]; ok && s != nil {
+		p.BuildExec = c.Exec.Override(s.Exec, &p.BuildExec)
+		p.RunExec = c.Exec.Override(s.Exec, &p.RunExec)
+	} else if !c.Exec.AllowOverride {
+		p.BuildExec = c.Exec
+		p.RunExec = c.Exec
 	}
 
 	if p.RunEnv == nil {
@@ -96,7 +100,7 @@ func ParsePatternFromPath(ctx context.Context, c *config.Config, configSource, p
 
 // Sign creates a signed JWT.
 func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest string, runEnv map[string]string) (string, errs.Err) {
-	if c.JWT.PrivateKey == "" {
+	if c.Build.SigningKey.IsNil() && len(c.Build.SigningCommands) == 0 {
 		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternMissingKey))
 	}
 
@@ -120,10 +124,33 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 		EtchaRunEnv:        p.RunEnv,
 	}
 
-	out, err := jwt.SignJWT(c.JWT.PrivateKey, j, e, p.Audience, p.Issuer, p.Subject)
+	t, err := jwt.New(j, e, p.Audience, p.ID, p.Issuer, p.Subject)
 	if err != nil {
-		return "", errs.ErrReceiver.Wrap(ErrPatternSigningJWT, err)
+		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, err))
 	}
 
-	return out, logger.Error(ctx, nil)
+	if len(c.Build.SigningCommands) > 0 {
+		e := types.EnvVars{
+			"ETCHA_PAYLOAD": t.PayloadBase64,
+		}
+
+		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, e, c.Exec.Override(c.Build.SigningCommandsExec), commands.ModeChange)
+		if err != nil {
+			return "", logger.Error(ctx, err)
+		}
+
+		for _, event := range out.Events() {
+			if event.Name == "jwt" && len(event.Outputs) > 0 {
+				return string(event.Outputs[0].Change), nil
+			}
+		}
+
+		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, fmt.Errorf("no token returned from signingCommands")))
+	}
+
+	if err := t.Sign(c.Build.SigningKey); err != nil {
+		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+	}
+
+	return t.String(), logger.Error(ctx, nil)
 }

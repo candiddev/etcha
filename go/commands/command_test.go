@@ -70,7 +70,7 @@ func TestCommandRun(t *testing.T) {
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{"hello=world"},
-					Exec:        " remove",
+					Exec:        "remove",
 				},
 			},
 			wantOutput: Output{
@@ -105,7 +105,7 @@ func TestCommandRun(t *testing.T) {
 			},
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: " check",
+					Exec: "check",
 				},
 			},
 			wantOutput: Output{
@@ -131,7 +131,7 @@ func TestCommandRun(t *testing.T) {
 			},
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: " check",
+					Exec: "check",
 				},
 			},
 			wantOutput: Output{
@@ -157,7 +157,7 @@ func TestCommandRun(t *testing.T) {
 			},
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: " check",
+					Exec: "check",
 				},
 			},
 			wantOutput: Output{
@@ -188,11 +188,11 @@ func TestCommandRun(t *testing.T) {
 			wantErr: ErrCommandsIDRequired,
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: " check",
+					Exec: "check",
 				},
 				{
 					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
-					Exec:        " change",
+					Exec:        "change",
 				},
 			},
 			wantOutput: Output{
@@ -224,11 +224,11 @@ func TestCommandRun(t *testing.T) {
 			},
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: " check",
+					Exec: "check",
 				},
 				{
 					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
-					Exec:        " change",
+					Exec:        "change",
 				},
 			},
 			wantOutput: Output{
@@ -250,7 +250,7 @@ func TestCommandRun(t *testing.T) {
 			c.RunMockOutputs([]string{"output", "output2"})
 
 			out, env, err := tc.cmd.Run(ctx, c, tc.env, Exec{
-				Override: tc.execOverride,
+				AllowOverride: tc.execOverride,
 			}, tc.mode)
 
 			assert.Equal(t, out, &tc.wantOutput)

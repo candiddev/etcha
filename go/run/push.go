@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/candiddev/etcha/go/config"
+	"github.com/candiddev/etcha/go/metrics"
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
@@ -23,8 +24,8 @@ var ErrPushRead = errors.New("error reading response")
 var ErrPushRequest = errors.New("error performing request")
 var ErrPushSourceMismatch = errors.New("push didn't match any sources")
 
-// PushResult is a list of changed and removed IDs.
-type PushResult struct {
+// Result is a list of changed and removed IDs.
+type Result struct {
 	Changed []string `json:"changed"`
 	Err     string   `json:"err"`
 	Exit    bool     `json:"exit"`
@@ -32,77 +33,79 @@ type PushResult struct {
 }
 
 // Push sends content to the dest.
-func Push(ctx context.Context, c *config.Config, dest, path string) (push *PushResult, err errs.Err) {
+func Push(ctx context.Context, c *config.Config, dest, path string) (r *Result, err errs.Err) {
 	logger.Info(ctx, fmt.Sprintf("Pushing config to %s...", dest))
+
+	r = &Result{}
 
 	p, err := pattern.ParsePatternFromPath(ctx, c, "", path)
 	if err != nil {
-		return nil, logger.Error(ctx, err)
+		return r, logger.Error(ctx, err)
 	}
 
 	jwt, err := p.Sign(ctx, c, "", nil)
 	if err != nil {
-		return nil, logger.Error(ctx, err)
+		return r, logger.Error(ctx, err)
 	}
 
 	req, e := http.NewRequestWithContext(ctx, http.MethodPost, dest, bytes.NewReader([]byte(jwt)))
 	if e != nil {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error creating request"), e))
+		return r, logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error creating request"), e))
 	}
 
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: c.Run.PushTLSSkipVerify, //nolint:gosec
+				InsecureSkipVerify: c.Build.PushTLSSkipVerify, //nolint:gosec
 			},
 		},
 	}
 
 	res, e := client.Do(req)
 	if e != nil {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushRequest, e))
+		return r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushRequest, e))
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushSourceMismatch))
+		return r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushSourceMismatch))
 	}
 
 	defer res.Body.Close()
 
 	if res.StatusCode == http.StatusTooManyRequests {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushRateLimit))
+		return r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushRateLimit))
 	}
 
 	if res.StatusCode == http.StatusNotModified {
 		logger.Info(ctx, "No changes")
 
-		return nil, nil
+		return r, nil
 	}
-
-	push = &PushResult{}
 
 	b, e := io.ReadAll(res.Body)
 	if e != nil {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushRead, e))
+		return r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushRead, e))
 	}
 
-	if e := json.Unmarshal(b, push); e != nil {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushDecode, e))
+	if e := json.Unmarshal(b, r); e != nil {
+		return r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPushDecode, e))
 	}
 
-	if push.Err != "" {
-		return push, logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New(push.Err)))
+	if r.Err != "" {
+		return r, logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New(r.Err)))
 	}
 
-	return push, logger.Error(ctx, nil)
+	return r, logger.Error(ctx, nil)
 }
 
 func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	c := chi.URLParam(r, "config")
+	ctx = metrics.SetSourceName(ctx, c)
 
-	if s, ok := s.Config.Sources[c]; !ok || !s.AllowPush {
+	src, ok := s.Config.Sources[c]
+	if !ok || !src.AllowPush {
 		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(fmt.Errorf("unknown config: %s", c))) //nolint: errcheck
 		w.WriteHeader(http.StatusNotFound)
 
@@ -125,7 +128,9 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if old, ok := s.JWTs[c]; !ok || old.Equal(push, s.Config.Sources[c].PullIgnoreVersion) != nil {
+	if old := s.JWTs.Get(c); old == nil || old.Equal(push, src.PullIgnoreVersion) != nil || src.RunAll {
+		ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPush)
+
 		r, err := s.diffExec(ctx, r.URL.Query().Has("check"), c, push)
 		if err != nil {
 			w.WriteHeader(errs.ErrReceiver.Status())

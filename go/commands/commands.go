@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/candiddev/etcha/go/metrics"
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
@@ -28,13 +27,22 @@ type Commands []*Command
 
 // Diff compares two commands and returns the differences.
 func (cmds Commands) Diff(old Commands) (change Commands, remove Commands) {
+	change = Commands{}
 	remove = Commands{}
+
+	// Copy cmds
+	for _, cmd := range cmds {
+		if cmd != nil {
+			c := *cmd
+			change = append(change, &c)
+		}
+	}
 
 	// Figure out what changed
 	for _, cmd := range old {
 		match := false
 
-		for _, newV := range cmds {
+		for _, newV := range change {
 			if cmd.ID == newV.ID {
 				if cmd.Change == newV.Change && cmd.Check == newV.Check && !newV.Always {
 					newV.Check = ""
@@ -51,7 +59,7 @@ func (cmds Commands) Diff(old Commands) (change Commands, remove Commands) {
 		}
 	}
 
-	return cmds, remove
+	return change, remove
 }
 
 // Run the commands, either as change (default) or remove, and optionally as check only.
@@ -87,10 +95,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 
 				// Match commands
 				for j := i + 1; j < len(cmds); j++ {
-					cfg := exec
-					if cfg.Override && cmds[j].Exec != nil {
-						cfg = *cmds[j].Exec
-					}
+					cfg := exec.Override(cmds[j].Exec)
 
 					cfg.Environment = append(env.GetEnv(), cfg.Environment...)
 
@@ -118,11 +123,9 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 
 						cout = append(cout, out)
 
-						if out.Change, e = cfg.Run(ctx, c, "", cmds[j].Change); e != nil {
+						if out.Change, e = cfg.Run(ctx, c, cmds[j].Change, ""); e != nil {
 							logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(err.Errors()...), out.Change.String()) //nolint:errcheck
 						}
-
-						metrics.CommandsChanged.WithLabelValues(cmds[j].ID, "0")
 					}
 				}
 			}

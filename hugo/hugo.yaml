@@ -1,0 +1,41 @@
+disableLanguages:
+  - ar
+  - de
+  - es
+  - fr
+  - hi
+  - nl
+  - zh
+menu:
+  main:
+    - name: Get Etcha
+      weight: 40
+      url: /docs/guides/get-etcha
+    - name: Source Code
+      weight: 50
+      url: https://github.com/candiddev/etcha
+      post: <sup><i class="ps-1 fa-solid fa-up-right-from-square fa-xs"
+        aria-hidden="true"></i></sup>
+params:
+  colorPrimary: red
+  colorSecondary: black
+  description: Etcha makes decentralized configuration management for distributed applications easy.
+  links:
+    developer:
+      - description: GitHub
+        icon: fab fa-github
+        name: GitHub
+        url: https://github.com/candiddev/etcha
+  logo: etcha
+  mermaid:
+    theme: default
+    themeVariables:
+      edgeLabelBackground: "#eceff1"
+      fontFamily: Trebuchet MS
+      fontSize: 18px
+  offlineSearch: true
+  search:
+  stripe:
+    buyButtonID: buy_btn_1NzlxYKMTluwLdTdkGl8xS18
+    publishableKey: pk_test_L42ooayfe2Ui3PnUrkKZr3Dk00m8WzYZRD
+title: Etcha

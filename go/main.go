@@ -6,7 +6,7 @@ import (
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/cli"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 			"build": {
 				ArgumentsRequired: []string{
 					"pattern path",
-					"destination jwt",
+					"destination path",
 				},
 				ArgumentsOptional: []string{
 					"config source, default: etcha",
@@ -46,10 +46,7 @@ func main() {
 				Run:   compare,
 				Usage: "Compare two JWTs to see if they have the same etchaBuildManifest, etchaPattern, and optionally etchaVersion",
 			},
-			"generate-ed25519": {
-				Run:   crypto.GenerateEd25519[*config.Config],
-				Usage: "Generate an Ed25519 keypair",
-			},
+			"generate-keys": cryptolib.GenerateKeys[*config.Config](),
 			"init": {
 				ArgumentsOptional: []string{
 					"directory, default: current directory",
@@ -57,9 +54,16 @@ func main() {
 				Run:   initDir,
 				Usage: "Initialize a directory for pattern development",
 			},
+			"jq": {
+				ArgumentsOptional: []string{
+					"jq query options",
+				},
+				Run:   jq,
+				Usage: "Query JSON from stdin using jq.  Supports standard JQ queries, and the -r flag to render raw values.",
+			},
 			"lint": {
 				ArgumentsRequired: []string{
-					"pattern path or directory",
+					"path",
 				},
 				ArgumentsOptional: []string{
 					"check formatting, default: no",
@@ -119,10 +123,13 @@ func main() {
 			},
 			"test": {
 				ArgumentsRequired: []string{
-					"pattern path or directory",
+					"path",
+				},
+				ArgumentsOptional: []string{
+					"test build commands, default: no",
 				},
 				Run:   test,
-				Usage: "Test a pattern or directory",
+				Usage: "Test all patterns in path",
 			},
 		},
 		Config:      c,

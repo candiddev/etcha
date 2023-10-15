@@ -17,7 +17,7 @@ func build(ctx context.Context, args []string, c *config.Config) errs.Err {
 		configSource = args[3]
 	}
 
-	p, err := pattern.ParsePatternFromPath(ctx, c, source, configSource)
+	p, err := pattern.ParsePatternFromPath(ctx, c, configSource, source)
 	if err != nil {
 		return err
 	}

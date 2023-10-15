@@ -11,47 +11,33 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
+	"github.com/candiddev/etcha/go/metrics"
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/shared/go/certificates"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
-	"github.com/ulule/limiter/v3"
 )
 
-type state struct {
-	JWTs          map[string]*pattern.JWT
-	JWTsMutex     sync.Mutex
-	Config        *config.Config
-	Patterns      map[string]*pattern.Pattern
-	PatternsMutex sync.Mutex
-	RateLimiter   *limiter.Limiter
-}
-
-func newState(c *config.Config) *state {
-	return &state{
-		Config:   c,
-		JWTs:     map[string]*pattern.JWT{},
-		Patterns: map[string]*pattern.Pattern{},
-	}
-}
-
-var ErrNoPublicKeys = errors.New("error running commands: no public keys specified")
+var ErrNoVerifyKeys = errors.New("error running commands: no verify keys specified")
 var ErrNilJWT = errors.New("received an empty JWT, this is probably a bug")
 
 // Run starts the Etcha listener.
 func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
-	s := newState(c)
+	s, err := newState(ctx, c)
+	if err != nil {
+		return logger.Error(ctx, err)
+	}
+
 	s.loadExecJWTs(ctx)
 
-	pubkey := len(c.JWT.PublicKeys) > 0
+	pubkey := len(c.Run.VerifyKeys) > 0
 	if !pubkey {
 		for i := range c.Sources {
-			if len(c.Sources[i].JWTPublicKeys) > 0 {
+			if len(c.Sources[i].VerifyKeys) > 0 {
 				pubkey = true
 
 				break
@@ -60,13 +46,13 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 	}
 
 	if !pubkey {
-		return logger.Error(ctx, errs.ErrReceiver.Wrap(ErrNoPublicKeys))
+		return logger.Error(ctx, errs.ErrReceiver.Wrap(ErrNoVerifyKeys))
 	}
 
 	if len(c.Sources) != 0 {
 		if once {
 			for source := range c.Sources {
-				if err := s.runSource(ctx, source); err != nil {
+				if _, err := s.runSource(ctx, source); err != nil {
 					logger.Error(ctx, err) //nolint: errcheck
 				}
 			}
@@ -85,80 +71,101 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 	return nil
 }
 
-func (s *state) diffExec(ctx context.Context, check bool, source string, j *pattern.JWT) (*PushResult, errs.Err) {
+func (s *state) diffExec(ctx context.Context, check bool, source string, j *pattern.JWT) (*Result, errs.Err) {
+	ctx = metrics.SetSourceName(ctx, source)
+
 	if j == nil {
-		return &PushResult{
+		metrics.CollectSources(ctx, true)
+
+		return &Result{
 			Err: ErrNilJWT.Error(),
 		}, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrNilJWT))
 	}
 
 	p, err := j.Pattern(ctx, s.Config, source)
 	if err != nil {
-		return &PushResult{
+		metrics.CollectSources(ctx, true)
+
+		return &Result{
 			Err: err.Error(),
 		}, logger.Error(ctx, err)
 	}
 
-	s.PatternsMutex.Lock()
-	defer s.PatternsMutex.Unlock()
-	pOld := s.Patterns[source]
-
-	if s.Config.Sources[source].RunAlwaysCheck {
-		pOld = nil
-	}
+	src := s.Config.Sources[source]
+	pOld := s.Patterns.Get(source)
 
 	logger.Info(ctx, fmt.Sprintf("Updating config for %s...", source))
 
-	o, err := p.DiffRun(ctx, s.Config, pOld, s.Config.Sources[source].CheckOnly || check)
-	if err != nil {
-		return &PushResult{
-			Err:  err.Error(),
-			Exit: s.Config.Handlers.RunEvents(ctx, s.Config.CLI, o),
-		}, logger.Error(ctx, err)
-	}
+	var o commands.Outputs
 
-	r := PushResult{
-		Changed: o.Changed(),
-		Removed: o.Removed(),
-	}
+	var r Result
 
-	if check {
-		r.Changed = o.CheckFail()
+	if !src.TriggerOnly {
+		o, err = p.DiffRun(ctx, s.Config, pOld, src.CheckOnly || check, src.NoRemove, src.RunAll)
+		if err != nil {
+			metrics.CollectSources(ctx, true)
 
-		return &r, logger.Error(ctx, nil)
+			return &Result{
+				Err:  err.Error(),
+				Exit: s.handleEvents(ctx, o, src),
+			}, logger.Error(ctx, err)
+		}
+
+		r = Result{
+			Changed: o.Changed(),
+			Removed: o.Removed(),
+		}
+
+		metrics.CollectSources(ctx, false)
+		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeChange), len(r.Changed))
+		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeRemove), len(r.Removed))
+
+		if check {
+			r.Changed = o.CheckFail()
+
+			return &r, logger.Error(ctx, nil)
+		}
 	}
 
 	jp := filepath.Join(s.Config.Run.StateDir, source+".jwt")
 
 	if err := os.WriteFile(jp+".tmp", []byte(j.Raw), 0644); err != nil { //nolint:gosec
-		return &PushResult{
+		metrics.CollectSources(ctx, true)
+
+		return &Result{
 			Err:  err.Error(),
-			Exit: s.Config.Handlers.RunEvents(ctx, s.Config.CLI, o),
+			Exit: s.handleEvents(ctx, o, src),
 		}, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 
 	if err := os.Rename(jp+".tmp", jp); err != nil {
-		return &PushResult{
+		metrics.CollectSources(ctx, true)
+
+		return &Result{
 			Err:  err.Error(),
-			Exit: s.Config.Handlers.RunEvents(ctx, s.Config.CLI, o),
+			Exit: s.handleEvents(ctx, o, src),
 		}, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 
-	s.Patterns[source] = p
+	metrics.CollectSources(ctx, false)
 
-	s.JWTsMutex.Lock()
-	s.JWTs[source] = j
-	s.JWTsMutex.Unlock()
+	s.JWTs.Set(source, j)
+	s.Patterns.Set(source, p)
 
-	r.Exit = s.Config.Handlers.RunEvents(ctx, s.Config.CLI, o)
+	r.Exit = s.handleEvents(ctx, o, src)
 
 	return &r, logger.Error(ctx, nil)
 }
 
 func (s *state) listen(ctx context.Context) errs.Err {
+	m, e := s.newMux(ctx)
+	if e != nil {
+		return logger.Error(ctx, e)
+	}
+
 	srv := http.Server{
 		Addr:              s.Config.Run.ListenAddress,
-		Handler:           s.newMux(ctx),
+		Handler:           m,
 		ReadHeaderTimeout: 60 * time.Second,
 	}
 
@@ -205,8 +212,6 @@ func (s *state) listen(ctx context.Context) errs.Err {
 func (s *state) loadExecJWTs(ctx context.Context) {
 	js := pattern.ParseJWTsFromDir(ctx, s.Config)
 
-	s.JWTsMutex.Lock()
-	s.PatternsMutex.Lock()
 	for n, j := range js {
 		p, err := j.Pattern(ctx, s.Config, n)
 		if err == nil {
@@ -217,9 +222,9 @@ func (s *state) loadExecJWTs(ctx context.Context) {
 				m = commands.ModeCheck
 			}
 
-			if _, err := p.Run.Run(ctx, s.Config.CLI, p.RunEnv, p.Exec, m); err == nil {
-				s.JWTs[n] = j
-				s.Patterns[n] = p
+			if _, err := p.Run.Run(ctx, s.Config.CLI, p.RunEnv, p.RunExec, m); err == nil {
+				s.JWTs.Set(n, j)
+				s.Patterns.Set(n, p)
 			} else {
 				logger.Error(ctx, err) //nolint:errcheck
 			}
@@ -227,16 +232,15 @@ func (s *state) loadExecJWTs(ctx context.Context) {
 			logger.Error(ctx, err) //nolint:errcheck
 		}
 	}
-
-	s.JWTsMutex.Unlock()
-	s.PatternsMutex.Unlock()
 }
 
-func (s *state) runSource(ctx context.Context, source string) errs.Err {
-	s.PatternsMutex.Lock()
-	oldJ := s.JWTs[source]
-	newJ := s.JWTs[source]
-	s.PatternsMutex.Unlock()
+func (s *state) runSource(ctx context.Context, source string) (*Result, errs.Err) {
+	var err errs.Err
+
+	r := &Result{}
+
+	oldJ := s.JWTs.Get(source)
+	newJ := s.JWTs.Get(source)
 
 	diff := false
 
@@ -245,14 +249,16 @@ func (s *state) runSource(ctx context.Context, source string) errs.Err {
 		newJ = j
 	}
 
-	if diff || s.Config.Sources[source].RunAlwaysCheck {
-		_, err := s.diffExec(ctx, false, source, newJ)
+	if diff || s.Config.Sources[source].RunAll {
+		ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPull)
+
+		r, err = s.diffExec(ctx, false, source, newJ)
 		if err != nil {
-			return logger.Error(ctx, err)
+			return r, logger.Error(ctx, err)
 		}
 	}
 
-	return nil
+	return r, nil
 }
 
 func (s *state) sourceRunner(ctx context.Context) {
@@ -269,7 +275,7 @@ func (s *state) sourceRunner(ctx context.Context) {
 	pull := make(chan string)
 
 	for k, v := range s.Config.Sources {
-		if v.RunFrequency > 0 {
+		if v.RunFrequencySec > 0 {
 			go func(ctx context.Context, id string, frequency int, pull chan string) {
 				t := time.NewTicker(time.Duration(frequency) * time.Second)
 
@@ -281,7 +287,7 @@ func (s *state) sourceRunner(ctx context.Context) {
 						pull <- id
 					}
 				}
-			}(ctx, k, v.RunFrequency, pull)
+			}(ctx, k, v.RunFrequencySec, pull)
 		}
 	}
 
@@ -290,8 +296,13 @@ func (s *state) sourceRunner(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case source := <-pull:
-			if err := s.runSource(ctx, source); err != nil {
+			r, err := s.runSource(ctx, source)
+			if err != nil {
 				logger.Error(ctx, err) //nolint: errcheck
+			}
+
+			if r.Exit {
+				os.Exit(1) //nolint:revive
 			}
 		}
 	}

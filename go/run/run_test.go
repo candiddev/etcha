@@ -9,11 +9,10 @@ import (
 
 	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
-	"github.com/candiddev/etcha/go/handlers"
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/shared/go/assert"
 	"github.com/candiddev/shared/go/cli"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/get"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
@@ -23,12 +22,12 @@ import (
 func TestRun(t *testing.T) {
 	logger.UseTestLogger(t)
 
-	_, pub, _ := crypto.NewEd25519()
+	_, pub, _ := cryptolib.NewKeysSign()
 
 	ctx := context.Background()
 	c := config.Default()
 	c.CLI.RunMock()
-	c.JWT.PublicKeys = crypto.Ed25519PublicKeys{
+	c.Run.VerifyKeys = cryptolib.KeysVerify{
 		pub,
 	}
 	c.Run.ListenAddress = ""
@@ -99,43 +98,33 @@ func TestStateDiffExec(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 	c.CLI.RunMock()
-	c.Exec.Override = true
-	c.Handlers = handlers.Handlers{
-		"test": {
-			Exec: commands.Exec{
-				Command: "handler",
-			},
-			EventExit: true,
-			Events: []string{
-				"test",
-			},
-		},
-	}
+	c.Exec.AllowOverride = true
 	c.Run.StateDir = "testdata"
 	c.Sources = map[string]*config.Source{
 		"etcha": {
-			Exec: commands.Exec{
-				Override: true,
+			Exec: &commands.Exec{
+				AllowOverride: true,
 			},
 		},
 	}
-	s := newState(c)
+	s, _ := newState(ctx, c)
 
 	tests := []struct {
-		alwaysCheck bool
 		check       bool
 		j           *pattern.JWT
 		mockErrors  []error
 		name        string
+		runAll      bool
+		triggerOnly bool
 		wantErr     error
 		wantInputs  []cli.RunMockInput
-		wantResult  *PushResult
+		wantResult  *Result
 		wantJWT     string
 	}{
 		{
 			name:    "nil_jwt",
 			wantErr: ErrNilJWT,
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Err: ErrNilJWT.Error(),
 			},
 		},
@@ -147,7 +136,7 @@ func TestStateDiffExec(t *testing.T) {
 				},
 			},
 			wantErr: commands.ErrCommandsEmpty,
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Err: commands.ErrCommandsEmpty.Error(),
 			},
 		},
@@ -167,10 +156,10 @@ func TestStateDiffExec(t *testing.T) {
 			},
 			wantErr: ErrNilJWT,
 			wantInputs: []cli.RunMockInput{
-				{Exec: " checkA"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: " changeA"},
+				{Exec: "checkA"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
 			},
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Err: "error changing id a: error running commands: " + ErrNilJWT.Error() + ": ",
 			},
 		},
@@ -193,9 +182,9 @@ func TestStateDiffExec(t *testing.T) {
 				Raw: "hello",
 			},
 			wantInputs: []cli.RunMockInput{
-				{Environment: []string{"hello=world"}, Exec: " checkA"},
+				{Environment: []string{"hello=world"}, Exec: "checkA"},
 			},
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Changed: []string{"a"},
 			},
 		},
@@ -214,11 +203,11 @@ func TestStateDiffExec(t *testing.T) {
 				Raw: "hello",
 			},
 			wantInputs: []cli.RunMockInput{
-				{Exec: " checkA"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: " changeA"},
+				{Exec: "checkA"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
 			},
 			wantJWT: "hello",
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Changed: []string{"a"},
 			},
 		},
@@ -234,10 +223,10 @@ func TestStateDiffExec(t *testing.T) {
 				Raw: "anew",
 			},
 			wantJWT:    "anew",
-			wantResult: &PushResult{},
+			wantResult: &Result{},
 		},
 		{
-			name: "good_alwayscheck",
+			name: "good_runAll",
 			j: &pattern.JWT{
 				EtchaPattern: &jsonnet.Imports{
 					Entrypoint: "/main.jsonnet",
@@ -247,18 +236,35 @@ func TestStateDiffExec(t *testing.T) {
 				},
 				Raw: "anew2",
 			},
+			runAll: true,
 			wantInputs: []cli.RunMockInput{
-				{Exec: " checkA"},
+				{Exec: "checkA"},
 			},
 			wantJWT:    "anew2",
-			wantResult: &PushResult{},
+			wantResult: &Result{},
+		},
+		{
+			name: "good_triggerOnly",
+			j: &pattern.JWT{
+				EtchaPattern: &jsonnet.Imports{
+					Entrypoint: "/main.jsonnet",
+					Files: map[string]string{
+						"/main.jsonnet": `{run:[{change:"changeA",check:"checkA",id:"a",remove:"removeA"}]}`,
+					},
+				},
+				Raw: "anew2",
+			},
+			triggerOnly: true,
+			wantJWT:     "anew2",
+			wantResult:  &Result{},
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			s.Config.CLI.RunMockErrors(tc.mockErrors)
-			s.Config.Sources["etcha"].RunAlwaysCheck = tc.alwaysCheck
+			s.Config.Sources["etcha"].RunAll = tc.runAll
+			s.Config.Sources["etcha"].TriggerOnly = tc.triggerOnly
 
 			r, err := s.diffExec(ctx, tc.check, "etcha", tc.j)
 
@@ -282,6 +288,8 @@ func TestStateLoadExecJWTs(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 	c.CLI.RunMock()
+	c.Exec.Command = ""
+	c.Exec.WorkDir = ""
 	c.Run.StateDir = "testdata"
 	c.Sources = map[string]*config.Source{
 		"1": {
@@ -292,9 +300,9 @@ func TestStateLoadExecJWTs(t *testing.T) {
 		},
 	}
 
-	prv, pub, _ := crypto.NewEd25519()
-	c.JWT.PrivateKey = prv
-	c.JWT.PublicKeys = crypto.Ed25519PublicKeys{
+	prv, pub, _ := cryptolib.NewKeysSign()
+	c.Build.SigningKey = prv
+	c.Run.VerifyKeys = cryptolib.KeysVerify{
 		pub,
 	}
 
@@ -307,7 +315,9 @@ func TestStateLoadExecJWTs(t *testing.T) {
 	os.WriteFile("testdata/1.jwt", []byte(j), 0600)
 
 	jwt2 := pattern.Pattern{
-		Audience: "2",
+		Audience: []string{
+			"2",
+		},
 		Imports: &jsonnet.Imports{
 			Entrypoint: "/main.jsonnet",
 			Files: map[string]string{
@@ -318,13 +328,13 @@ func TestStateLoadExecJWTs(t *testing.T) {
 	j, _ = jwt2.Sign(ctx, c, "", nil)
 	os.WriteFile("testdata/2.jwt", []byte(j), 0600)
 
-	s := newState(c)
+	s, _ := newState(ctx, c)
 
 	s.loadExecJWTs(ctx)
 
-	assert.Equal(t, s.JWTs["2"].Audience[0], "2")
-	assert.Equal(t, s.Patterns["2"].Run[0].ID, "a")
-	assert.Equal(t, s.Config.CLI.RunMockInputs(), []cli.RunMockInput{{Exec: " checkA"}})
+	assert.Equal(t, s.JWTs.Get("2").Audience[0], "2")
+	assert.Equal(t, s.Patterns.Get("2").Run[0].ID, "a")
+	assert.Equal(t, s.Config.CLI.RunMockInputs(), []cli.RunMockInput{{Exec: "checkA"}})
 
 	os.RemoveAll("testdata")
 }
@@ -336,12 +346,14 @@ func TestStateRunSource(t *testing.T) {
 
 	ctx := context.Background()
 	c := config.Default()
-	s := newState(c)
+	s, _ := newState(ctx, c)
 	c.CLI.RunMock()
+	c.Exec.Command = ""
+	c.Exec.WorkDir = ""
 	c.Run.StateDir = "testdata"
-	prv, pub, _ := crypto.NewEd25519()
-	c.JWT.PrivateKey = prv
-	c.JWT.PublicKeys = crypto.Ed25519PublicKeys{
+	prv, pub, _ := cryptolib.NewKeysSign()
+	c.Build.SigningKey = prv
+	c.Run.VerifyKeys = cryptolib.KeysVerify{
 		pub,
 	}
 
@@ -358,8 +370,8 @@ func TestStateRunSource(t *testing.T) {
 
 	j, _ := pattern.ParseJWT(ctx, c, j1, "1")
 	p, _ := j.Pattern(ctx, c, "1")
-	s.JWTs["1"] = j
-	s.Patterns["1"] = p
+	s.JWTs.Set("1", j)
+	s.Patterns.Set("1", p)
 
 	jwt2 := pattern.Pattern{
 		Imports: &jsonnet.Imports{
@@ -381,28 +393,59 @@ func TestStateRunSource(t *testing.T) {
 		},
 	}
 
-	c.CLI.RunMockErrors([]error{
-		ErrNilJWT,
-		ErrNilJWT,
-	})
+	tests := []struct {
+		mockErrors  []error
+		mockInputs  []cli.RunMockInput
+		name        string
+		wantErr     error
+		wantResults *Result
+	}{
+		{
+			name: "errors",
+			mockErrors: []error{
+				ErrNilJWT,
+				ErrNilJWT,
+			},
+			mockInputs: []cli.RunMockInput{
+				{Exec: "checkA"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
+			},
+			wantErr: ErrNilJWT,
+			wantResults: &Result{
+				Err: "error changing id b: error running commands: received an empty JWT, this is probably a bug: ",
+			},
+		},
+		{
+			name: "no_error",
+			mockErrors: []error{
+				ErrNilJWT,
+			},
+			mockInputs: []cli.RunMockInput{
+				{Exec: "checkA"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
+			},
+			wantResults: &Result{
+				Changed: []string{
+					"b",
+				},
+			},
+		},
+		{
+			name:        "no_diff",
+			wantResults: &Result{},
+		},
+	}
 
-	assert.HasErr(t, s.runSource(ctx, "1"), ErrNilJWT)
-	assert.Equal(t, c.CLI.RunMockInputs(), []cli.RunMockInput{
-		{Exec: " checkA"},
-		{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: " changeA"},
-	})
-	assert.HasErr(t, s.runSource(ctx, "1"), nil)
-	assert.Equal(t, c.CLI.RunMockInputs(), []cli.RunMockInput{
-		{Exec: " checkA"},
-	})
-	assert.HasErr(t, s.runSource(ctx, "1"), nil)
-	assert.Equal(t, c.CLI.RunMockInputs(), nil)
-	c.Sources["1"].RunAlwaysCheck = true
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			c.CLI.RunMockErrors(tc.mockErrors)
 
-	assert.HasErr(t, s.runSource(ctx, "1"), nil)
-	assert.Equal(t, c.CLI.RunMockInputs(), []cli.RunMockInput{
-		{Exec: " checkA"},
-	})
+			r, err := s.runSource(ctx, "1")
+			assert.HasErr(t, err, tc.wantErr)
+			assert.Equal(t, c.CLI.RunMockInputs(), tc.mockInputs)
+			assert.Equal(t, r, tc.wantResults)
+		})
+	}
 
 	j3, _ := os.ReadFile("testdata/1.jwt")
 	assert.Equal(t, string(j3), j2)

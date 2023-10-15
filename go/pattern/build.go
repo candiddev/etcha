@@ -26,7 +26,7 @@ func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination s
 	}
 
 	if len(p.Build) > 0 {
-		out, err := p.Build.Run(ctx, c.CLI, nil, p.Exec, commands.ModeChange)
+		out, err := p.Build.Run(ctx, c.CLI, nil, p.BuildExec, commands.ModeChange)
 		if err != nil {
 			f.Close()
 			os.Remove(destination + ".tmp") //nolint:errcheck

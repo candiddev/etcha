@@ -13,6 +13,13 @@ import (
 
 func push(ctx context.Context, args []string, c *config.Config) errs.Err {
 	r, err := run.Push(ctx, c, args[2], args[1])
+	if r == nil && err != nil {
+		return err
+	}
+
+	if r == nil {
+		return nil
+	}
 
 	if len(r.Changed) != 0 {
 		logger.Info(ctx, fmt.Sprintf("Changed: %s", strings.Join(r.Changed, ", ")))

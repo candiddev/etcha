@@ -9,7 +9,7 @@ import (
 	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/assert"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/get"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/jwt"
@@ -21,17 +21,18 @@ func TestParseJWT(t *testing.T) {
 	logger.UseTestLogger(t)
 
 	ctx := context.Background()
-	prv, pub, _ := crypto.NewEd25519()
+	prv, pub, _ := cryptolib.NewKeysSign()
 
 	p := Pattern{}
 
 	tests := map[string]struct {
-		key     crypto.Ed25519PublicKey
+		key     cryptolib.KeyVerify
 		wantErr error
 		wantOut string
 	}{
 		"missing keys": {
-			wantErr: jwt.ErrParsingToken,
+			wantErr: jwt.ErrParseNoPublicKeys,
+			wantOut: "hello",
 		},
 		"good": {
 			key:     pub,
@@ -43,14 +44,14 @@ func TestParseJWT(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			c := config.Default()
-			c.JWT.PrivateKey = prv
+			c.Build.SigningKey = prv
 
 			content, _ := p.Sign(ctx, c, "hello", nil)
 
-			if tc.key != "" {
+			if !tc.key.IsNil() {
 				c.Sources = map[string]*config.Source{
 					"etcha": {
-						JWTPublicKeys: crypto.Ed25519PublicKeys{
+						VerifyKeys: cryptolib.KeysVerify{
 							tc.key,
 						},
 					},
@@ -64,7 +65,7 @@ func TestParseJWT(t *testing.T) {
 	}
 
 	c := config.Default()
-	c.JWT.PrivateKey = prv
+	c.Build.SigningKey = prv
 
 	jwt1, _ := p.Sign(ctx, c, "1", nil)
 	jwt2, _ := p.Sign(ctx, c, "2", nil)
@@ -81,21 +82,21 @@ func TestParseJWT(t *testing.T) {
 	c.Run.StateDir = "testdata/cache"
 	c.Sources = map[string]*config.Source{
 		"1": {
-			JWTPublicKeys: crypto.Ed25519PublicKeys{
-				pub,
-			},
 			PullPaths: []string{
 				"1.jwt",
 				"/1.jwt",
 				ts.URL() + "/test.jwt",
 			},
-		},
-		"2": {
-			JWTPublicKeys: crypto.Ed25519PublicKeys{
+			VerifyKeys: cryptolib.KeysVerify{
 				pub,
 			},
+		},
+		"2": {
 			PullPaths: []string{
 				"testdata/2.jwt",
+			},
+			VerifyKeys: cryptolib.KeysVerify{
+				pub,
 			},
 		},
 		"3": {
@@ -154,10 +155,10 @@ func TestJWTPattern(t *testing.T) {
 
 	ctx := context.Background()
 	c := config.Default()
-	c.Exec.Override = true
+	c.Exec.AllowOverride = true
 	c.Sources = map[string]*config.Source{
 		"etcha": {
-			Exec: commands.Exec{
+			Exec: &commands.Exec{
 				Command: "hello",
 			},
 		},
@@ -197,8 +198,8 @@ func TestJWTPattern(t *testing.T) {
 
 	p, err = j.Pattern(ctx, c, "etcha")
 	assert.HasErr(t, err, nil)
-	assert.Equal(t, p.Exec.Command, "hello")
-	assert.Equal(t, p.Exec.Command, "hello")
+	assert.Equal(t, p.RunExec.Command, "hello")
+	assert.Equal(t, p.RunExec.Command, "hello")
 	assert.Equal(t, p.JWT, "raw")
 	assert.Equal(t, p.Run[0].ID, "id")
 	assert.Equal(t, p.RunEnv, types.EnvVars{

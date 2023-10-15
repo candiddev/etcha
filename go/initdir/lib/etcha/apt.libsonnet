@@ -1,7 +1,9 @@
-function(chroot='', package, recommends=false)
+// Install package, optionally ignoring recommends.
+
+function(package, recommends=false)
   {
-    change: (if chroot != '' then 'chroot ' else '' + 'apt-get install ') + (if recommends then '' else '--no-install-recommends ' + '-o DPkg::Options::="--force-confnew" -y %s' % package),
-    check: (if chroot != '' then 'chroot ' else '') + 'dpkg -l %s' % package,
+    change: 'apt-get install ' + (if recommends then '' else '--no-install-recommends ' + '-o DPkg::Options::="--force-confnew" -y %s' % package),
+    check: 'dpkg -l %s' % package,
     id: 'apt %s' % package,
-    remove: (if chroot != '' then 'chroot ' else '') + 'apt-get remove -y --purge %s' % package,
+    remove: 'apt-get remove -y --purge %s' % package,
   }

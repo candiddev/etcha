@@ -8,7 +8,7 @@ import (
 	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/assert"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
 )
@@ -20,10 +20,10 @@ func TestPatternBuildSign(t *testing.T) {
 	c := config.Default()
 	c.CLI.RunMock()
 
-	prv, pub, _ := crypto.NewEd25519()
+	prv, pub, _ := cryptolib.NewKeysSign()
 
 	p := Pattern{
-		Audience: "a",
+		Audience: []string{"a"},
 		Build: commands.Commands{
 			{
 				Always: true,
@@ -35,7 +35,7 @@ func TestPatternBuildSign(t *testing.T) {
 				},
 			},
 		},
-		Exec: commands.Exec{
+		BuildExec: commands.Exec{
 			Command: "test",
 		},
 		Imports: &jsonnet.Imports{
@@ -49,7 +49,7 @@ func TestPatternBuildSign(t *testing.T) {
 	tests := map[string]struct {
 		destination string
 		mockErrors  []error
-		privateKey  crypto.Ed25519PrivateKey
+		signingKey  cryptolib.KeySign
 		wantErr     error
 	}{
 		"bad_destination": {
@@ -69,7 +69,7 @@ func TestPatternBuildSign(t *testing.T) {
 		},
 		"good": {
 			destination: "test.jwt",
-			privateKey:  prv,
+			signingKey:  prv,
 		},
 	}
 
@@ -78,8 +78,8 @@ func TestPatternBuildSign(t *testing.T) {
 			c.CLI.RunMockInputs()
 			c.CLI.RunMockErrors(tc.mockErrors)
 			c.CLI.RunMockOutputs([]string{"world"})
-			c.JWT.PrivateKey = tc.privateKey
-			c.JWT.PublicKeys = crypto.Ed25519PublicKeys{
+			c.Build.SigningKey = tc.signingKey
+			c.Run.VerifyKeys = cryptolib.KeysVerify{
 				pub,
 			}
 			assert.HasErr(t, p.BuildSign(ctx, c, tc.destination), tc.wantErr)

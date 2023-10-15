@@ -27,11 +27,11 @@ type Outputs []*Output
 // Event is a list of IDs and a name.
 type Event struct {
 	Name    string
-	Outputs []*Output
+	Outputs []Output
 }
 
 // Events is multiple events.
-type Events []*Event
+type Events []Event
 
 // CheckFail returns a list of IDs that have failed check.
 func (o Outputs) CheckFail() []string {
@@ -61,11 +61,13 @@ func (o Outputs) Changed() []string {
 
 // Events returns a sorted list of events that were fired.
 func (o Outputs) Events() Events {
-	em := map[string][]*Output{}
+	em := map[string][]Output{}
 
 	for _, u := range o {
-		for _, e := range u.Events {
-			em[e] = append(em[e], u)
+		if u != nil {
+			for _, e := range u.Events {
+				em[e] = append(em[e], *u)
+			}
 		}
 	}
 
@@ -77,10 +79,10 @@ func (o Outputs) Events() Events {
 
 	sort.Strings(names)
 
-	ev := []*Event{}
+	ev := []Event{}
 
 	for _, s := range names {
-		ev = append(ev, &Event{
+		ev = append(ev, Event{
 			Name:    s,
 			Outputs: em[s],
 		})

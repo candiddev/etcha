@@ -17,7 +17,6 @@ const (
 // Test runs Commands in Test mode.
 func (cmds Commands) Test(ctx context.Context, c cli.Config, exec Exec, runEnv types.EnvVars) types.Results {
 	r := types.Results{}
-	exec.Test = true
 
 	// Run everything
 	outChange, _ := cmds.Run(ctx, c, runEnv, exec, ModeChange)

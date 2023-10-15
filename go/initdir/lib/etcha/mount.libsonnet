@@ -1,3 +1,5 @@
+// Mount src to dst using args.
+
 function(args='', dst, src)
   local vars = {
     args: args,

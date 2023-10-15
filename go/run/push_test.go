@@ -6,11 +6,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/shared/go/assert"
 	"github.com/candiddev/shared/go/cli"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
@@ -21,13 +22,15 @@ func TestPush(t *testing.T) {
 
 	ctx := context.Background()
 	c := config.Default()
+	c.Exec.AllowOverride = true
 	c.CLI.RunMock()
 
-	s := newState(c)
-	ts := httptest.NewServer(s.newMux(ctx))
+	s, _ := newState(ctx, c)
+	m, _ := s.newMux(ctx)
+	ts := httptest.NewServer(m)
 
-	prv1, pub1, _ := crypto.NewEd25519()
-	prv2, _, _ := crypto.NewEd25519()
+	prv1, pub1, _ := cryptolib.NewKeysSign()
+	prv2, _, _ := cryptolib.NewKeysSign()
 
 	os.MkdirAll("testdata/state", 0700)
 
@@ -62,7 +65,10 @@ func TestPush(t *testing.T) {
 	c.Sources = map[string]*config.Source{
 		"etcha": {
 			AllowPush: true,
-			JWTPublicKeys: crypto.Ed25519PublicKeys{
+			Exec: &commands.Exec{
+				Command: "",
+			},
+			VerifyKeys: cryptolib.KeysVerify{
 				pub1,
 			},
 		},
@@ -74,57 +80,62 @@ func TestPush(t *testing.T) {
 		mockErrors  []error
 		name        string
 		path        string
-		privateKey  crypto.Ed25519PrivateKey
+		signingKey  cryptolib.KeySign
 		wantErr     error
 		wantInputs  []cli.RunMockInput
-		wantResult  *PushResult
+		wantResult  *Result
 	}{
 		{
-			name:    "bad_path",
-			path:    "testdata/not.jsonnet",
-			wantErr: jsonnet.ErrImport,
+			name:       "bad_path",
+			path:       "testdata/not.jsonnet",
+			wantErr:    jsonnet.ErrImport,
+			wantResult: &Result{},
 		},
 		{
-			name:    "bad_sign",
-			path:    "testdata/good1.jsonnet",
-			wantErr: pattern.ErrPatternMissingKey,
+			name:       "bad_sign",
+			path:       "testdata/good1.jsonnet",
+			wantErr:    pattern.ErrPatternMissingKey,
+			wantResult: &Result{},
 		},
 		{
 			name:        "no_source",
 			destination: ts.URL + "/etcha/v1/push/nowhere",
-			privateKey:  prv2,
+			signingKey:  prv2,
 			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
+			wantResult:  &Result{},
 		},
 		{
 			name:        "denied_source",
 			destination: ts.URL + "/etcha/v1/push/denied",
-			privateKey:  prv2,
+			signingKey:  prv2,
 			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
+			wantResult:  &Result{},
 		},
 		{
 			name:        "bad_private_key",
 			destination: ts.URL + "/etcha/v1/push/etcha",
-			privateKey:  prv2,
+			signingKey:  prv2,
 			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
+			wantResult:  &Result{},
 		},
 		{
 			name:        "error_exec",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
-				ErrNoPublicKeys,
-				ErrNoPublicKeys,
+				ErrNoVerifyKeys,
+				ErrNoVerifyKeys,
 			},
-			privateKey: prv1,
+			signingKey: prv1,
 			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
-				{Exec: " check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: " change1"},
+				{Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "change1"},
 			},
-			wantResult: &PushResult{
-				Err: "error changing id 1: error running commands: error running commands: no public keys specified: ",
+			wantResult: &Result{
+				Err: "error changing id 1: error running commands: error running commands: no verify keys specified: ",
 			},
 			wantErr: errs.ErrReceiver,
 		},
@@ -132,15 +143,15 @@ func TestPush(t *testing.T) {
 			name:        "good",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
-				ErrNoPublicKeys,
+				ErrNoVerifyKeys,
 			},
-			privateKey: prv1,
+			signingKey: prv1,
 			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
-				{Exec: " check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: " change1"},
+				{Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "change1"},
 			},
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Changed: []string{"1"},
 			},
 		},
@@ -148,27 +159,27 @@ func TestPush(t *testing.T) {
 			name:        "good-check",
 			destination: ts.URL + "/etcha/v1/push/etcha?check",
 			mockErrors: []error{
-				ErrNoPublicKeys,
+				ErrNoVerifyKeys,
 			},
-			privateKey: prv1,
+			signingKey: prv1,
 			path:       "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
-				{Exec: " check2"},
+				{Exec: "check2"},
 			},
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Changed: []string{"2"},
 			},
 		},
 		{
 			name:        "good-2",
 			destination: ts.URL + "/etcha/v1/push/etcha",
-			privateKey:  prv1,
+			signingKey:  prv1,
 			path:        "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
-				{Exec: " check2"},
-				{Environment: []string{"_CHECK=0", "_CHECK_OUT="}, Exec: " remove1"},
+				{Exec: "check2"},
+				{Environment: []string{"_CHECK=0", "_CHECK_OUT="}, Exec: "remove1"},
 			},
-			wantResult: &PushResult{
+			wantResult: &Result{
 				Removed: []string{"1"},
 			},
 		},
@@ -176,7 +187,7 @@ func TestPush(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			c.JWT.PrivateKey = tc.privateKey
+			c.Build.SigningKey = tc.signingKey
 			c.CLI.RunMockErrors(tc.mockErrors)
 
 			r, err := Push(ctx, c, tc.destination, tc.path)

@@ -1,3 +1,5 @@
+// Manage a symlink at dst pointing to src.
+
 function(dst, src)
   {
     change: 'ln -sf %s %s' % [src, dst],

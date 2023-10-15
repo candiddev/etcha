@@ -19,7 +19,7 @@ func TestLint(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 	c.CLI.RunMock()
-	c.Linters = map[string]*commands.Exec{
+	c.Build.Linters = map[string]*commands.Exec{
 		"test": {
 			Command: "test",
 		},

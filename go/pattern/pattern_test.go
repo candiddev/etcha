@@ -2,6 +2,7 @@ package pattern
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/assert"
 	"github.com/candiddev/shared/go/cli"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
 	"github.com/candiddev/shared/go/types"
@@ -23,24 +24,25 @@ func TestParsePatternFromImports(t *testing.T) {
 	c.Exec.Command = "0"
 	c.Sources = map[string]*config.Source{
 		"1": {
-			Exec: commands.Exec{
-				Command:  "1",
-				Override: true,
+			Exec: &commands.Exec{
+				AllowOverride: true,
+				Command:       "1",
 			},
 		},
 		"2": {
-			Exec: commands.Exec{
+			Exec: &commands.Exec{
 				Command: "2",
 			},
 		},
 	}
 
 	tests := map[string]struct {
-		file            string
-		override        bool
-		source          string
-		wantErr         bool
-		wantExecCommand string
+		file                 string
+		override             bool
+		source               string
+		wantErr              bool
+		wantBuildExecCommand string
+		wantRunExecCommand   string
 	}{
 		"bad_render": {
 			wantErr: true,
@@ -81,45 +83,54 @@ func TestParsePatternFromImports(t *testing.T) {
 					}
 				]
 			}`,
-			override:        true,
-			source:          "2",
-			wantExecCommand: "2",
+			override:             true,
+			source:               "2",
+			wantBuildExecCommand: "2",
+			wantRunExecCommand:   "2",
 		},
 		"pattern_override": {
 			file: `{
-				exec: {
+				buildExec: {
 					command: "3",
 				},
 				run: [
 					{
 						id: "a"
 					}
-				]
+				],
+				runExec: {
+					command: "4",
+				},
 			}`,
-			override:        true,
-			source:          "1",
-			wantExecCommand: "3",
+			override:             true,
+			source:               "1",
+			wantBuildExecCommand: "3",
+			wantRunExecCommand:   "4",
 		},
 		"no_override": {
 			file: `{
-				exec: {
+				buildExec: {
 					command: "3",
 				},
 				run: [
 					{
 						id: "a"
 					}
-				]
+				],
+				runExec: {
+					command: "4",
+				},
 			}`,
-			override:        false,
-			source:          "1",
-			wantExecCommand: "0",
+			override:             false,
+			source:               "1",
+			wantBuildExecCommand: "0",
+			wantRunExecCommand:   "0",
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			c.Exec.Override = tc.override
+			c.Exec.AllowOverride = tc.override
 			p, err := ParsePatternFromImports(ctx, c, tc.source, &jsonnet.Imports{
 				Entrypoint: "/main.jsonnet",
 				Files: map[string]string{
@@ -128,7 +139,8 @@ func TestParsePatternFromImports(t *testing.T) {
 			})
 			assert.Equal(t, err != nil, tc.wantErr)
 			if !tc.wantErr {
-				assert.Equal(t, p.Exec.Command, tc.wantExecCommand)
+				assert.Equal(t, p.BuildExec.Command, tc.wantBuildExecCommand)
+				assert.Equal(t, p.RunExec.Command, tc.wantRunExecCommand)
 				assert.Equal(t, len(p.Run), 1)
 			}
 		})
@@ -141,10 +153,10 @@ func TestPatternSign(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 
-	prv, pub, _ := crypto.NewEd25519()
+	prv, pub, _ := cryptolib.NewKeysSign()
 
 	p := Pattern{
-		Audience:     "audience!",
+		Audience:     []string{"audience!"},
 		ExpiresInSec: 59,
 		Imports: &jsonnet.Imports{
 			Entrypoint: "/main.jsonnet",
@@ -168,8 +180,8 @@ func TestPatternSign(t *testing.T) {
 	assert.Equal(t, j, "")
 
 	cli.BuildVersion = "v2023.10.02"
-	c.JWT.PrivateKey = prv
-	c.JWT.PublicKeys = crypto.Ed25519PublicKeys{
+	c.Build.SigningKey = prv
+	c.Run.VerifyKeys = cryptolib.KeysVerify{
 		pub,
 	}
 
@@ -179,12 +191,56 @@ func TestPatternSign(t *testing.T) {
 
 	jw, err := ParseJWT(ctx, c, j, "")
 	assert.HasErr(t, err, nil)
-	assert.Equal(t, jw.Audience[0], p.Audience)
+	assert.Equal(t, jw.Audience, p.Audience)
 	assert.Equal(t, jw.EtchaBuildManifest, "build")
 	assert.Equal(t, jw.EtchaPattern, p.Imports)
 	assert.Equal(t, jw.EtchaRunEnv, map[string]string{"hello": "world", "world": "hello"})
 	assert.Equal(t, jw.EtchaVersion, "v2023.10.02")
-	assert.Equal(t, jw.ExpiresAt.Time.Before(time.Now().Add(1*time.Minute)), true)
+	assert.Equal(t, time.Unix(jw.ExpiresAt, 0).Before(time.Now().Add(1*time.Minute)), true)
 	assert.Equal(t, jw.Issuer, p.Issuer)
 	assert.Equal(t, jw.Subject, p.Subject)
+
+	c.CLI.RunMock()
+	c.CLI.RunMockErrors([]error{
+		ErrBuildEmpty,
+	})
+	c.CLI.RunMockOutputs([]string{
+		"",
+		strings.Split(jw.Raw, ".")[0],
+		strings.Split(jw.Raw, ".")[2],
+	})
+
+	c.Exec.AllowOverride = true
+	c.Build.SigningKey = cryptolib.KeySign{}
+	c.Build.SigningCommandsExec = &commands.Exec{
+		Command: "hello",
+	}
+	c.Build.SigningCommands = append(commands.Commands{
+		{
+			Always: true,
+			Change: "changeA",
+			ID:     "a",
+			OnChange: []string{
+				"etcha:jwt",
+			},
+		},
+	}, c.Build.SigningCommands...)
+	c.CLI.RunMockErrors([]error{
+		nil,
+		ErrBuildEmpty,
+	})
+	c.CLI.RunMockOutputs([]string{
+		jw.Raw,
+		"",
+		strings.Split(jw.Raw, ".")[0],
+		strings.Split(jw.Raw, ".")[2],
+	})
+
+	out, err := p.Sign(ctx, c, "", nil)
+	assert.HasErr(t, err, nil)
+
+	in := c.CLI.RunMockInputs()
+	assert.Equal(t, len(in), 1)
+	assert.Equal(t, in[0].Exec, "hello changeA")
+	assert.Equal(t, out, jw.Raw)
 }

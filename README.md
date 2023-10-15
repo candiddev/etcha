@@ -1,6 +1,6 @@
 # Etcha
 
-> Decentralized configuration management for distributed applications.
+> Infinite scale configuration management for distributed applications.
 
 [![Integration](https://github.com/candiddev/etcha/actions/workflows/integration.yaml/badge.svg?branch=main)](https://github.com/candiddev/etcha/actions/workflows/integration.yaml)
 
@@ -18,7 +18,7 @@ Visit https://etcha.dev for more information.
 
 ## License
 
-The code in this repository is licensed under personal, non-production [source-available license](./LICENSE.md).  Visit https://etcha.dev/pricing/ to purchase license exemptions.
+The code in this repository is licensed under a personal, non-production [source-available license](./LICENSE.md).  Visit https://etcha.dev/pricing/ for additional licensing options.
 
 ## Development
 

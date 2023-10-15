@@ -7,64 +7,76 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
-	"time"
 
 	"github.com/candiddev/etcha/go/commands"
-	"github.com/candiddev/etcha/go/handlers"
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/config"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/jwt"
 	"github.com/candiddev/shared/go/logger"
+	"github.com/candiddev/shared/go/types"
 )
 
 var ErrParseJWT = errors.New("error parsing jwt")
 
 // Config contains main application configurations.
 type Config struct {
-	CLI      cli.Config                `json:"cli"`
-	Exec     commands.Exec             `json:"exec"`
-	Handlers handlers.Handlers         `json:"handlers"`
-	Linters  map[string]*commands.Exec `json:"linters"`
-	JWT      JWT                       `json:"jwt"`
-	Run      Run                       `json:"run"`
-	Sources  map[string]*Source        `json:"sources"`
-	Vars     map[string]any            `json:"vars"`
+	Build   Build              `json:"build"`
+	CLI     cli.Config         `json:"cli"`
+	Exec    commands.Exec      `json:"exec"`
+	Run     Run                `json:"run"`
+	Sources map[string]*Source `json:"sources"`
+	Test    bool               `json:"test"`
+	Vars    map[string]any     `json:"vars"`
 }
 
-// JWT configures top-level keys for Etcha.
-type JWT struct {
-	PrivateKey crypto.Ed25519PrivateKey `json:"privateKey"`
-	PublicKeys crypto.Ed25519PublicKeys `json:"publicKeys"`
+// Build configures Etcha's build behavior.
+type Build struct {
+	Linters             map[string]*commands.Exec `json:"linters"`
+	PushTLSSkipVerify   bool                      `json:"pushTLSSkipVerify"`
+	SigningCommands     commands.Commands         `json:"signingCommands"`
+	SigningCommandsExec *commands.Exec            `json:"signingExec,omitempty"`
+	SigningKey          cryptolib.KeySign         `json:"signingKey"`
 }
 
 // Run configures Etcha's runtime behavior.
 type Run struct {
-	ListenAddress           string `json:"listenDddress"`
-	PushTLSSkipVerify       bool   `json:"pushTLSSkipVerify"`
-	RandomizedStartDelaySec int    `json:"randomizedStartDelaySec"`
-	RateLimiterRate         string `json:"rateLimiterRate"`
-	StateDir                string `json:"stateDir"`
-	SystemMetricsSecret     string `json:"systemMetricsSecret"`
-	SystemPprofSecret       string `json:"systemPprofSecret"`
-	TLSCertificateBase64    string `json:"tlsCertificateBase64"`
-	TLSCertificatePath      string `json:"tlsCertificatePath"`
-	TLSKeyBase64            string `json:"tlsKeyBase64"`
-	TLSKeyPath              string `json:"tlsKeyPath"`
+	ListenAddress           string               `json:"listenAddress"`
+	RandomizedStartDelaySec int                  `json:"randomizedStartDelaySec"`
+	RateLimiterRate         string               `json:"rateLimiterRate"`
+	StateDir                string               `json:"stateDir"`
+	SystemMetricsSecret     string               `json:"systemMetricsSecret"`
+	SystemPprofSecret       string               `json:"systemPprofSecret"`
+	TLSCertificateBase64    string               `json:"tlsCertificateBase64"`
+	TLSCertificatePath      string               `json:"tlsCertificatePath"`
+	TLSKeyBase64            string               `json:"tlsKeyBase64"`
+	TLSKeyPath              string               `json:"tlsKeyPath"`
+	VerifyCommands          commands.Commands    `json:"verifyCommands"`
+	VerifyExec              *commands.Exec       `json:"verifyExec,omitempty"`
+	VerifyKeys              cryptolib.KeysVerify `json:"verifyKeys"`
 }
 
 // Source contains configurations for a source.
 type Source struct {
-	AllowPush         bool                     `json:"push"`
-	CheckOnly         bool                     `json:"checkOnly"`
-	Exec              commands.Exec            `json:"exec"`
-	JWTPublicKeys     crypto.Ed25519PublicKeys `json:"jwtPublicKeys"`
-	PullIgnoreVersion bool                     `json:"pullIgnoreVersion"`
-	PullPaths         []string                 `json:"pullPaths"`
-	RunAlwaysCheck    bool                     `json:"runAlwaysCheck"`
-	RunFrequency      int                      `json:"runFrequency"`
+	AllowPush         bool                 `json:"allowPush"`
+	CheckOnly         bool                 `json:"checkOnly"`
+	EventsReceive     []string             `json:"eventsReceive"`
+	EventsReceiveExit bool                 `json:"eventsReceiveExit"`
+	EventsSend        regexp.Regexp        `json:"eventsSend"`
+	Exec              *commands.Exec       `json:"exec,omitempty"`
+	NoRemove          bool                 `json:"noRemove"`
+	PullIgnoreVersion bool                 `json:"pullIgnoreVersion"`
+	PullPaths         []string             `json:"pullPaths"`
+	RunAll            bool                 `json:"runAll"`
+	RunFrequencySec   int                  `json:"runFrequencySec"`
+	TriggerOnly       bool                 `json:"triggerOnly"`
+	VerifyCommands    commands.Commands    `json:"verifyCommands"`
+	VerifyExec        *commands.Exec       `json:"verifyExec,omitempty"`
+	VerifyKeys        cryptolib.KeysVerify `json:"verifyKeys"`
+	WebhookPaths      []string             `json:"webhookPaths"`
 }
 
 func (c *Config) CLIConfig() *cli.Config {
@@ -73,36 +85,31 @@ func (c *Config) CLIConfig() *cli.Config {
 
 func Default() *Config {
 	return &Config{
-		Exec: commands.Exec{
-			Command:  "/usr/bin/bash",
-			Flags:    "-e -o pipefail -c",
-			Override: true,
-			WorkDir:  os.TempDir(),
-		},
-		Linters: map[string]*commands.Exec{
-			"shellcheck": {
-				ContainerImage: "koalaman/shellcheck",
-				Flags:          "-s bash -e 2154 -",
+		Build: Build{
+			Linters: map[string]*commands.Exec{
+				"shellcheck": {
+					Command:        "-s bash -e 2154 -",
+					ContainerImage: "koalaman/shellcheck",
+				},
 			},
 		},
+		Exec: commands.Exec{
+			AllowOverride: true,
+			Command:       "/usr/bin/bash -e -o pipefail -c",
+			WorkDir:       "etcha",
+		},
+		Sources: map[string]*Source{},
 		Run: Run{
 			ListenAddress:   ":4000",
 			RateLimiterRate: "10-M",
 			StateDir:        "etcha",
 		},
-		Sources: map[string]*Source{
-			"test": {
-				Exec: commands.Exec{
-					Override: true,
-				},
-			},
-		},
 		Vars: map[string]any{},
 	}
 }
 
-func (c *Config) Parse(ctx context.Context, configArgs, paths string) errs.Err {
-	if err := config.Parse(ctx, c, "etcha", "", configArgs, paths); err != nil {
+func (c *Config) Parse(ctx context.Context, configArgs []string, paths string) errs.Err {
+	if err := config.Parse(ctx, c, configArgs, "etcha", "", paths); err != nil {
 		return logger.Error(ctx, err)
 	}
 
@@ -115,41 +122,77 @@ func (c *Config) Parse(ctx context.Context, configArgs, paths string) errs.Err {
 		c.Run.StateDir = filepath.Join(wd, c.Run.StateDir)
 	}
 
-	if err := os.MkdirAll(c.Run.StateDir, 0750); err != nil {
-		return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("couldn't create %s: %w", c.Run.StateDir, err)))
-	}
-
 	return logger.Error(ctx, nil)
 }
 
 // ParseJWT parses a JWT token into a customClaims.
-func (c *Config) ParseJWT(customClaims jwt.CustomClaims, token string, publicKeys crypto.Ed25519PublicKeys) (key crypto.Ed25519PublicKey, expiresAt time.Time, err error) {
-	for _, k := range append(c.JWT.PublicKeys, publicKeys...) {
-		expiresAt, err = jwt.VerifyJWT(k, customClaims, token)
-		if err == nil {
-			key = k
+func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, token string, source string) (key cryptolib.KeyVerify, err error) {
+	var payloadErr error
 
-			break
+	keys := c.Run.VerifyKeys
+	ve := c.Exec.Override(c.Run.VerifyExec)
+	vc := c.Run.VerifyCommands
+
+	if s, ok := c.Sources[source]; ok && s != nil {
+		keys = append(keys, s.VerifyKeys...)
+		ve = ve.Override(s.VerifyExec)
+
+		if len(s.VerifyCommands) > 0 {
+			vc = s.VerifyCommands
 		}
 	}
 
-	if key == "" {
-		err = jwt.ErrParsingToken
+	var t *jwt.Token
+
+	if len(vc) > 0 {
+		out, e := vc.Run(ctx, c.CLI, types.EnvVars{
+			"ETCHA_JWT": token,
+		}, ve, commands.ModeChange)
+		if e != nil {
+			return key, e
+		}
+
+		token = ""
+
+		for _, event := range out.Events() {
+			if event.Name == "token" && len(event.Outputs) > 0 {
+				token = event.Outputs[0].Change.String()
+
+				break
+			}
+		}
+
+		if token == "" {
+			return key, cryptolib.ErrVerify
+		}
+
+		// The above hopefully validated the token.
+		t, _, _ = jwt.Parse(token, nil)
+	} else {
+		t, key, err = jwt.Parse(token, keys)
 	}
 
-	return key, expiresAt, err
+	if t != nil {
+		payloadErr = t.ParsePayload(customClaims, "", "", "")
+	}
+
+	if err == nil && payloadErr != nil {
+		err = payloadErr
+	}
+
+	return key, err
 }
 
 // ParseJWTFile reads a JWT file path and parses the token into customClaims.
-func (c *Config) ParseJWTFile(ctx context.Context, customClaims jwt.CustomClaims, path string, publicKeys crypto.Ed25519PublicKeys) (key crypto.Ed25519PublicKey, expiresAt time.Time, err errs.Err) {
+func (c *Config) ParseJWTFile(ctx context.Context, customClaims jwt.CustomClaims, path, source string) (key cryptolib.KeyVerify, err errs.Err) {
 	s, e := os.ReadFile(path)
 	if e != nil {
-		return "", time.Time{}, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrParseJWT, e))
+		return key, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrParseJWT, e))
 	}
 
-	if key, expiresAt, e = c.ParseJWT(customClaims, string(s), publicKeys); e != nil {
-		return key, expiresAt, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing JWT %s", path), e))
+	if key, e = c.ParseJWT(ctx, customClaims, string(s), source); e != nil {
+		return key, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing JWT %s", path), e))
 	}
 
-	return key, expiresAt, logger.Error(ctx, nil)
+	return key, logger.Error(ctx, nil)
 }

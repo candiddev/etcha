@@ -2,13 +2,16 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/shared/go/assert"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cli"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/jwt"
 	"github.com/candiddev/shared/go/logger"
@@ -25,33 +28,38 @@ func (j *j) GetRegisteredClaims() *jwt.RegisteredClaims {
 	return &j.RegisteredClaims
 }
 
+func (*j) Valid() error {
+	return nil
+}
+
 func TestConfigParse(t *testing.T) {
 	logger.UseTestLogger(t)
+
+	_, pub1, _ := cryptolib.NewKeysSign()
+	_, pub2, _ := cryptolib.NewKeysSign()
 
 	os.Unsetenv("ETCHA_RUN_DIR")
 
 	c := Default()
 	ctx := context.Background()
 
-	os.WriteFile("config.jsonnet", []byte(`{
-  jwt: {
-    publicKeys: [
-      'a',
-      'b',
-    ],
-  },
+	os.WriteFile("config.jsonnet", []byte(fmt.Sprintf(`{
   run: {
     stateDir: 'run',
+    verifyKeys: [
+      '%s',
+      '%s',
+    ],
   },
-}`), 0600)
+}`, pub1, pub2)), 0600)
 
 	wd, _ := os.Getwd()
 
-	assert.Equal(t, c.Parse(ctx, "", "/notreal") != nil, true)
-	assert.Equal(t, c.Parse(ctx, "", "config.jsonnet") == nil, true)
-	assert.Equal(t, c.JWT.PublicKeys, crypto.Ed25519PublicKeys{
-		"a",
-		"b",
+	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}, "/notreal") != nil, true)
+	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}, "config.jsonnet") == nil, true)
+	assert.Equal(t, c.Run.VerifyKeys, cryptolib.KeysVerify{
+		pub1,
+		pub2,
 	})
 	assert.Equal(t, c.Run.StateDir, filepath.Join(wd, "run"))
 
@@ -60,44 +68,99 @@ func TestConfigParse(t *testing.T) {
 }
 
 func TestParseJWTFile(t *testing.T) {
+	logger.UseTestLogger(t)
+
 	os.MkdirAll("testdata", 0700)
 
-	prv1, pub1, _ := crypto.NewEd25519()
-	_, pub2, _ := crypto.NewEd25519()
-	prv3, _, _ := crypto.NewEd25519()
+	prv1, _, _ := cryptolib.NewKeysSign()
+	_, pub2, _ := cryptolib.NewKeysSign()
+	prv3, _, _ := cryptolib.NewKeysSign()
 
 	c := Default()
-	c.JWT.PublicKeys = crypto.Ed25519PublicKeys{
+	c.CLI.RunMock()
+	c.Run.VerifyExec = &commands.Exec{
+		AllowOverride: true,
+	}
+	c.Run.VerifyKeys = cryptolib.KeysVerify{
 		pub2,
 	}
 
-	jwt1, _ := jwt.SignJWT(prv1, &j{
-		A: "prv1",
-	}, time.Time{}, "", "", "")
-	jwt3, _ := jwt.SignJWT(prv3, &j{
-		A: "prv3",
-	}, time.Time{}, "", "", "")
+	e := time.Now().Add(10 * time.Second)
 
-	os.WriteFile("testdata/jwt1.jwt", []byte(jwt1), 0600)
-	os.WriteFile("testdata/jwt3.jwt", []byte(jwt3), 0600)
+	t1, _ := jwt.New(&j{
+		A: "prv1",
+	}, e, []string{}, "", "", "")
+	t1.Sign(prv1)
+
+	t3, _ := jwt.New(&j{
+		A: "prv3",
+	}, e, []string{}, "", "", "")
+	t3.Sign(prv3)
+
+	c.CLI.RunMockErrors([]error{
+		ErrParseJWT,
+	})
+	c.CLI.RunMockOutputs([]string{
+		"",
+		t1.String(),
+	})
+
+	c.Sources["etcha"] = &Source{
+		VerifyExec: &commands.Exec{
+			Command: "hello",
+		},
+		VerifyCommands: commands.Commands{
+			{
+				Change: "getJWT",
+				Check:  "check",
+				OnChange: []string{
+					"etcha:token",
+				},
+			},
+		},
+	}
+
+	os.WriteFile("testdata/jwt1.jwt", []byte(t1.String()), 0600)
+	os.WriteFile("testdata/jwt3.jwt", []byte(t3.String()), 0600)
 
 	ctx := context.Background()
 	out := &j{}
 
-	key, _, err := c.ParseJWTFile(ctx, out, "testdata/jwt4.jwt", crypto.Ed25519PublicKeys{pub1})
+	key, err := c.ParseJWTFile(ctx, out, "testdata/jwt4.jwt", "")
 	assert.HasErr(t, err, errs.ErrReceiver)
-	assert.Equal(t, key, "")
+	assert.Equal(t, key.ID, "")
 	assert.Equal(t, out.A, "")
 
-	key, _, err = c.ParseJWTFile(ctx, out, "testdata/jwt3.jwt", crypto.Ed25519PublicKeys{pub1})
+	key, err = c.ParseJWTFile(ctx, out, "testdata/jwt3.jwt", "")
 	assert.HasErr(t, err, errs.ErrReceiver)
-	assert.Equal(t, key, "")
+	assert.Equal(t, key.ID, "")
 	assert.Equal(t, out.A, "prv3")
 
-	key, _, err = c.ParseJWTFile(ctx, out, "testdata/jwt1.jwt", crypto.Ed25519PublicKeys{pub1})
+	_, err = c.ParseJWTFile(ctx, out, "testdata/jwt1.jwt", "etcha")
 	assert.HasErr(t, err, nil)
-	assert.Equal(t, key, pub1)
 	assert.Equal(t, out.A, "prv1")
+	assert.Equal(t, c.CLI.RunMockInputs(), []cli.RunMockInput{
+		{
+			Environment: []string{"ETCHA_JWT=" + t1.String()},
+			Exec:        "hello check",
+		},
+		{
+			Environment: []string{
+				"ETCHA_JWT=" + t1.String(),
+				"_CHECK=1", "_CHECK_OUT=",
+			},
+			Exec: "hello getJWT",
+		},
+	})
+
+	_, err = c.ParseJWTFile(ctx, out, "testdata/jwt1.jwt", "etcha")
+	assert.HasErr(t, err, cryptolib.ErrVerify)
+	assert.Equal(t, c.CLI.RunMockInputs(), []cli.RunMockInput{
+		{
+			Environment: []string{"ETCHA_JWT=" + t1.String()},
+			Exec:        "hello check",
+		},
+	})
 
 	os.RemoveAll("testdata")
 }

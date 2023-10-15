@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/candiddev/etcha/go/config"
-	"github.com/candiddev/shared/go/crypto"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/get"
 	"github.com/candiddev/shared/go/jsonnet"
@@ -35,18 +34,12 @@ type JWT struct {
 }
 
 // ParseJWT renders a JWT from content.
-func ParseJWT(ctx context.Context, c *config.Config, content, source string) (*JWT, errs.Err) {
+func ParseJWT(ctx context.Context, c *config.Config, token, source string) (*JWT, errs.Err) {
 	j := JWT{
-		Raw: content,
+		Raw: token,
 	}
 
-	var keys crypto.Ed25519PublicKeys
-
-	if k := c.Sources[source]; k != nil {
-		keys = k.JWTPublicKeys
-	}
-
-	if _, _, err := c.ParseJWT(&j, content, keys); err != nil {
+	if _, err := c.ParseJWT(ctx, &j, token, source); err != nil {
 		return &j, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 
@@ -60,7 +53,7 @@ func ParseJWTFromPath(ctx context.Context, c *config.Config, configSource, path 
 	b := bytes.Buffer{}
 
 	if err := get.FileCache(ctx, path, &b, ca); err != nil {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error reading base JWT: %w", err)))
+		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error reading JWT: %w", err)))
 	}
 
 	return ParseJWT(ctx, c, b.String(), configSource)
@@ -151,4 +144,8 @@ func (j *JWT) RunEnv() []string {
 	sort.Strings(env)
 
 	return env
+}
+
+func (*JWT) Valid() error {
+	return nil
 }

@@ -28,9 +28,12 @@ func TestInit(t *testing.T) {
 	f, _ := os.ReadFile("patterns/lib_test.jsonnet")
 	os.WriteFile("init/patterns/lib_test.jsonnet", f, 0755)
 
+	d, _ := os.ReadDir("lib/etcha")
+
 	p, err := pattern.ParsePatternFromPath(ctx, c, "", "init/patterns/lib_test.jsonnet")
 	assert.HasErr(t, err, nil)
-	assert.Equal(t, len(p.Run), 14)
+	assert.Equal(t, len(p.Run), 13)
+	assert.Equal(t, len(p.Imports.Files), len(d)+2) // 2=lib_test.jsonnet, native.libsonnet
 
 	os.RemoveAll("init")
 }

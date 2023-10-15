@@ -15,7 +15,7 @@ import (
 
 // Test performs build and run testing against directory or single pattern.
 func Test(ctx context.Context, c *config.Config, path string, testBuild bool) (types.Results, errs.Err) {
-	c.Exec.Test = true
+	c.Test = true
 
 	l := types.Results{}
 
@@ -74,14 +74,14 @@ func (p *Pattern) Test(ctx context.Context, c *config.Config, testBuild bool) ty
 	}
 
 	if !testBuild {
-		l := p.Build.Test(ctx, c.CLI, p.Exec, p.RunEnv)
+		l := p.Build.Test(ctx, c.CLI, p.BuildExec, p.RunEnv)
 
 		for k, v := range l {
 			r[k] = v
 		}
 	}
 
-	l := p.Run.Test(ctx, c.CLI, p.Exec, p.RunEnv)
+	l := p.Run.Test(ctx, c.CLI, p.RunExec, p.RunEnv)
 
 	if len(l) > 0 {
 		for k, v := range l {

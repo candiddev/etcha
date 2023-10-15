@@ -32,13 +32,13 @@ func TestOutputs(t *testing.T) {
 
 	assert.Equal(t, out.Changed(), []string{"a"})
 	assert.Equal(t, out.Events(), Events{
-		&Event{
+		Event{
 			Name:    "event1",
-			Outputs: Outputs{out[0]},
+			Outputs: []Output{*out[0]},
 		},
-		&Event{
+		Event{
 			Name:    "event2",
-			Outputs: Outputs{out[0]},
+			Outputs: []Output{*out[0]},
 		},
 	})
 	assert.Equal(t, out.Failed(), []string{"b"})

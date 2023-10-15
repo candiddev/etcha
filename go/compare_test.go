@@ -10,7 +10,7 @@ import (
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/shared/go/assert"
 	"github.com/candiddev/shared/go/cli"
-	"github.com/candiddev/shared/go/crypto"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
 )
@@ -23,10 +23,10 @@ func TestCompare(t *testing.T) {
 	c := config.Default()
 	c.Run.StateDir = "testdata"
 
-	prv, pub, _ := crypto.NewEd25519()
+	prv, pub, _ := cryptolib.NewKeysSign()
 
-	c.JWT.PrivateKey = prv
-	c.JWT.PublicKeys = crypto.Ed25519PublicKeys{
+	c.Build.SigningKey = prv
+	c.Run.VerifyKeys = cryptolib.KeysVerify{
 		pub,
 	}
 

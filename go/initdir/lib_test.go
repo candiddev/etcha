@@ -10,6 +10,7 @@ import (
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/shared/go/assert"
+	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
 	"github.com/candiddev/shared/go/types"
@@ -21,6 +22,8 @@ var ctx = context.Background()
 
 func TestLib(t *testing.T) {
 	logger.UseTestLogger(t)
+	c.Parse(ctx, cli.ConfigArgs{}, "")
+	ctx = logger.SetLevel(ctx, c.CLI.LogLevel)
 
 	i := jsonnet.Imports{}
 

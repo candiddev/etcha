@@ -17,13 +17,12 @@ import (
 	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
-func (s *state) newMux(ctx context.Context) http.Handler {
+func (s *state) newMux(ctx context.Context) (http.Handler, errs.Err) {
 	r := chi.NewRouter()
 
 	rate, err := limiter.NewRateFromFormatted(s.Config.Run.RateLimiterRate)
 	if err != nil {
-		logger.Error(ctx, errs.ErrReceiver.Wrap(err)) //nolint:errcheck
-		panic(err)
+		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 
 	store := memory.NewStore()
@@ -31,30 +30,33 @@ func (s *state) newMux(ctx context.Context) http.Handler {
 	s.RateLimiter = limiter.New(store, rate, limiter.WithTrustForwardHeader(true))
 
 	r.Use(middleware.Recoverer)
+	r.Use(s.setContext)
 	r.Use(s.checkRateLimiter)
 	r.Post("/etcha/v1/push/{config}", s.postPush)
 	r.Route("/etcha/v1/system", func(r chi.Router) {
 		r.Use(s.checkSystemAuth)
-		r.Handle("/metrics", promhttp.Handler())
-		r.Handle("/pprof/goroutine", pprof.Handler("goroutine"))
-		r.Handle("/pprof/heap", pprof.Handler("heap"))
+
+		if s.Config.Run.SystemMetricsSecret != "" {
+			r.Handle("/metrics", promhttp.Handler())
+		}
+
+		if s.Config.Run.SystemPprofSecret != "" {
+			r.Handle("/pprof/goroutine", pprof.Handler("goroutine"))
+			r.Handle("/pprof/heap", pprof.Handler("heap"))
+		}
 	})
+	r.NotFound(s.WebhookHandler.ServeHTTP)
 
-	h, e := s.Config.Handlers.RegisterWebhooks(ctx, s.Config.CLI)
-	if e != nil {
-		logger.Error(ctx, e) //nolint:errcheck
-		panic(err)
-	}
-
-	r.NotFound(h.ServeHTTP)
-
-	return r
+	return r, nil
 }
 
 func (s *state) checkRateLimiter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := logger.Trace(r.Context())
-		key := s.RateLimiter.GetIPKey(r) + chi.RouteContext(ctx).RoutePattern()
+		ip := s.RateLimiter.GetIPKey(r)
+		ctx = logger.SetAttribute(ctx, "path", r.URL.Path)
+		ctx = logger.SetAttribute(ctx, "sourceAddress", ip)
+		key := ip + chi.RouteContext(ctx).RoutePattern()
 
 		limit, err := s.RateLimiter.Get(ctx, key)
 		if err != nil {
@@ -97,5 +99,15 @@ func (s *state) checkSystemAuth(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *state) setContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		ctx = logger.SetFormat(ctx, s.Config.CLI.LogFormat)
+		ctx = logger.SetLevel(ctx, s.Config.CLI.LogLevel)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

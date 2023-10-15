@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/assert"
 	"github.com/candiddev/shared/go/errs"
@@ -18,7 +19,11 @@ func TestTest(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 	c.CLI.RunMock()
-	c.Sources["test"].Exec.Command = "test"
+	c.Sources["test"] = &config.Source{
+		Exec: &commands.Exec{
+			Command: "test",
+		},
+	}
 
 	os.MkdirAll("testdata", 0700)
 	os.WriteFile("testdata/main.jsonnet", []byte(`

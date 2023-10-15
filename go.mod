@@ -9,6 +9,7 @@ replace github.com/candiddev/shared => ./shared
 require (
 	github.com/candiddev/shared v0.0.0-00010101000000-000000000000
 	github.com/go-chi/chi/v5 v5.0.10
+	github.com/itchyny/gojq v0.12.13
 	github.com/prometheus/client_golang v1.16.0
 	github.com/ulule/limiter/v3 v3.11.2
 )
@@ -17,15 +18,14 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-jsonnet v0.20.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
+	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -42,7 +42,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
-	golang.org/x/image v0.10.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect

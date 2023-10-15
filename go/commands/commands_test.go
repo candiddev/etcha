@@ -123,7 +123,7 @@ func TestCommandsRun(t *testing.T) {
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{"hello=world"},
-					Exec:        " removeG",
+					Exec:        "removeG",
 				},
 				{
 					Environment: []string{
@@ -131,7 +131,7 @@ func TestCommandsRun(t *testing.T) {
 						"g_REMOVE_OUT=output1",
 						"hello=world",
 					},
-					Exec: " removeA",
+					Exec: "removeA",
 				},
 			},
 			wantOutputs: Outputs{
@@ -165,24 +165,24 @@ func TestCommandsRun(t *testing.T) {
 			mode: ModeChange,
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: " checkA",
+					Exec: "checkA",
 				},
 				{
 					Environment: []string{"_CHECK=1", "_CHECK_OUT=a"},
-					Exec:        " changeA",
+					Exec:        "changeA",
 				},
 				{
 					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1", "_CHECK_OUT=a"},
-					Exec:        " checkC",
+					Exec:        "checkC",
 				},
 				{
 					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1", "_CHECK_OUT="},
-					Exec:        " changeE",
+					Exec:        "changeE",
 				},
 				{
 					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=0", "_CHECK_OUT=",
 						"g_CHECK=1"},
-					Exec: " changeG",
+					Exec: "changeG",
 				},
 			},
 			wantOutputs: Outputs{
@@ -230,11 +230,11 @@ func TestCommandsRun(t *testing.T) {
 			wantErr: ErrCommandsIDRequired,
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: " checkA",
+					Exec: "checkA",
 				},
 				{
 					Environment: []string{"_CHECK=1", "_CHECK_OUT="},
-					Exec:        " changeA",
+					Exec:        "changeA",
 				},
 				{
 					Environment: []string{"_CHANGE=1", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT="},
@@ -242,7 +242,7 @@ func TestCommandsRun(t *testing.T) {
 				},
 				{
 					Environment: []string{"_CHANGE=1", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT="},
-					Exec:        " changeG",
+					Exec:        "changeG",
 				},
 			},
 			wantOutputs: Outputs{
@@ -274,7 +274,7 @@ func TestCommandsRun(t *testing.T) {
 			c.RunMockOutputs(tc.mockOutputs)
 
 			out, err := tc.cmds.Run(ctx, c, tc.env, Exec{
-				Override: tc.execOverride,
+				AllowOverride: tc.execOverride,
 			}, tc.mode)
 
 			assert.HasErr(t, err, tc.wantErr)
