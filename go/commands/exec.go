@@ -24,6 +24,7 @@ type Exec struct {
 	ContainerPull       string   `json:"containerPull"`
 	ContainerUser       string   `json:"containerUser"`
 	ContainerVolumes    []string `json:"containerVolumes"`
+	ContainerWorkDir    string   `json:"containerWorkDir"`
 	Environment         []string `json:"environment"`
 	Group               string   `json:"group"`
 	User                string   `json:"user"`
@@ -80,6 +81,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		ContainerPrivileged: e.ContainerPrivileged,
 		ContainerUser:       e.ContainerUser,
 		ContainerVolumes:    e.ContainerVolumes,
+		ContainerWorkDir:    e.ContainerWorkDir,
 		Environment:         e.Environment,
 		Group:               e.Group,
 		NoErrorLog:          true,

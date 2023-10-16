@@ -71,10 +71,11 @@ func TestExecRun(t *testing.T) {
 		ContainerVolumes: []string{
 			"volume",
 		},
+		ContainerWorkDir: "work2",
 		Environment: []string{
 			"hello=world",
 		},
-		WorkDir: "work",
+		WorkDir: "work1",
 	}
 
 	out, err := e.Run(ctx, c, "script", "stdin")
@@ -84,7 +85,7 @@ func TestExecRun(t *testing.T) {
 	inputs := c.RunMockInputs()
 
 	assert.Equal(t, inputs[0].Environment, e.Environment)
-	assert.Equal(t, strings.Contains(inputs[0].Exec, "-ehello=world --entrypoint d --privileged -u f -v volume -w work e a long command script"), true)
+	assert.Equal(t, strings.Contains(inputs[0].Exec, "-ehello=world --entrypoint d --privileged -u f -v volume -w work2 e a long command script"), true)
 	assert.Equal(t, inputs[0].WorkDir, e.WorkDir)
 
 	e.ContainerImage = ""

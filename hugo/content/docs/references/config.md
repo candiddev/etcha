@@ -27,7 +27,7 @@ All configuration keys are camelCase.  Configuration values can be:
 
 **For command line values**, every configuration key can be set using `-x <a_config_key1>="a value" -x <a_config_key2>="another value"`, i.e. `-x cli_debug=true -x run_stateDir=/var/lib/etcha`.  Config values can also be set using JSON, i.e. `-x sources_test='{"allowPush": true}'`
 
-**For environment variables**, every configuration key can be set using `ETCHA_config_key_path=a value`, i.e. `HOMECHART_cli_debug=true`
+**For environment variables**, every configuration key can be set using `ETCHA_config_key_path=a value`, i.e. `ETCHA_cli_debug=true`
 
 **The configuration files** can be formatted using JSON or Jsonnet.  See [the Jsonnet reference](../jsonnet/) for more information.
 
@@ -166,6 +166,12 @@ String, the container user or UID.
 List of strings, the volumes to map into the container.
 
 **Default:** `[]`
+
+### `containerWorkDir`
+
+String, override the WorkDir of a container.
+
+**Default:** `""`
 
 ### `environment`
 

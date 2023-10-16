@@ -109,7 +109,7 @@ func Default() *Config {
 }
 
 func (c *Config) Parse(ctx context.Context, configArgs []string, paths string) errs.Err {
-	if err := config.Parse(ctx, c, configArgs, "etcha", "", paths); err != nil {
+	if err := config.Parse(ctx, c, configArgs, "ETCHA", "", paths); err != nil {
 		return logger.Error(ctx, err)
 	}
 
