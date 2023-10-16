@@ -22,7 +22,7 @@ function(contents='', expand=false, group='root', ignoreContents=false, mode='06
   ||| % vars;
 
   local change = (
-    if contents == '' then 'touch %(path)s' % vars else |||
+    if contents == '' then 'touch %(path)s\n' % vars else |||
       cat > %(path)s <<%(eof)s
       %(contents)s
       EOF

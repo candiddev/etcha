@@ -19,6 +19,7 @@ local config = n.getConfig();
     dir(mode='0644', path='%s/test' % config.run.stateDir),
     file(contents='root:*:19352:0:99999:7:::', group='daemon', ignoreContents=true, owner='daemon', path='%s/shadow' % config.run.stateDir),
     file(contents='hello', path='%s/world' % config.run.stateDir),
+    file(path='%s/touch' % config.run.stateDir),
     mount(args='-o bind', dst='%s/dst' % config.run.stateDir, src='%s/src' % config.run.stateDir),
     password(hash='notahash', path='%s/shadow' % config.run.stateDir),
     symlink(src='%s/shadow' % config.run.stateDir, dst='%s/shadowsym' % config.run.stateDir),
