@@ -16,7 +16,7 @@ flowchart TD
   user([Users])
 
   subgraph Pull Mode&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    storage(https://s3.example.com/helloworld.jwt)
+    storage(https://s3.example.com/myapp.jwt)
     servers[Servers and IoT]
     kubernetes["Kubernetes"]
   end
