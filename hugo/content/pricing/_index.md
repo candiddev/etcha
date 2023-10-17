@@ -9,12 +9,12 @@ weight: 30
 {{% blocks/section color="white" height=full %}}
 ## Pricing
 
-**Etcha** is a Source Available, fully featured platform for running distributed applications.  There are no features in a separate "enterprise" edition.
+**Etcha** is a Source Available, fully featured platform for running distributed applications.  There are no features in a separate enterprise edition.
 
 In order to ensure Etcha's sustainability, it's available **free for Personal or Non-Production use**.  For other uses, a separate license is required.
 
 Please [contact us](mailto:info@candid.dev?subject=Etcha%20Pricing) for more information regarding:
-- Solo Dev/Bootstrapped Startup Pricing
+- Solo Dev Pricing
 - Service Level Agreements (SLAs), Support Contracts, and Per-Incident Support
 - Professional Services
 - Reselling and OEM

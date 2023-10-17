@@ -12,7 +12,7 @@ import (
 )
 
 func runCommands(ctx context.Context, args []string, c *config.Config) errs.Err {
-	if args[0] == "check" || args[0] == "run-commands" || args[0] == "remove" {
+	if args[0] == "local-change" || args[0] == "local-check" || args[0] == "local-remove" {
 		source := "etcha"
 		if len(args) == 3 {
 			source = args[2]
@@ -26,9 +26,9 @@ func runCommands(ctx context.Context, args []string, c *config.Config) errs.Err 
 		m := commands.ModeChange
 
 		switch args[0] {
-		case "check":
+		case "local-check":
 			m = commands.ModeChange
-		case "remove":
+		case "local-remove":
 			m = commands.ModeRemove
 		}
 

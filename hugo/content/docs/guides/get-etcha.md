@@ -66,7 +66,7 @@ Etcha can be updated by replacing the binary with the latest version.
 
 ## Container
 
-Etcha containers are available on [GitHub](https://github.com/candiddev/etcha/pkgs/container/etcha).
+Etcha containers are available on [GitHub](https://github.com/candiddev/etcha/pkgs/container/etcha).  They include Etcha and Busybox.
 
 You can create an alias to run Etcha as a container:
 

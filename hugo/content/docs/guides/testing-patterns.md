@@ -13,7 +13,7 @@ Etcha can test Patterns to ensure they actually work.  Because of the nature of 
 You can test an entire path or specific files using [`etcha test`](../../references/cli#test).  Test will traverse directories and perform testing on all `.jsonnet` files.  Testing is performed by executing the Commands:
 
 1. Run all Commands in [**Change Mode**](../../references/commands#change-mode) (execute `check`, and if triggered, `change`).  Any `change` errors will cause testing to fail.
-2. Run all Commands in [**Check Mode**](../../references/commands#check-mode) (execute `check` only).  Any `check` errors that would normally cause a `change` to occur will cause testing to fail (repeated execution).
+2. Run all Commands in [**Check Mode**](../../references/commands#check-mode) (execute `check` only).  Any `check` errors that would normally cause a `change` to occur will cause testing to fail (check/command is not idempotent).
 3. Run all Commands in [**Remove Mode**](../../references/commands#remove-mode) (reverse order, execute `remove`).  Any `remove` errors will cause testing to fail.
 4. Run all Commands in [**Check Mode**](../../references/commands#check-mode) (execute `check` only).  Any IDs that previously failed `check`/changed during step 1 that do not fail `check` again will cause testing to fail.
 

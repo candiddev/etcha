@@ -25,16 +25,6 @@ func main() {
 				Run:   build,
 				Usage: "Build a pattern",
 			},
-			"check": {
-				ArgumentsRequired: []string{
-					"pattern path",
-				},
-				ArgumentsOptional: []string{
-					"config source, default: etcha",
-				},
-				Run:   runCommands,
-				Usage: "Check run commands in a pattern as a one-off apply",
-			},
 			"compare": {
 				ArgumentsRequired: []string{
 					"new jwt path or URL",
@@ -71,6 +61,36 @@ func main() {
 				Run:   lint,
 				Usage: "Lint a pattern or directory",
 			},
+			"local-change": {
+				ArgumentsRequired: []string{
+					"pattern path",
+				},
+				ArgumentsOptional: []string{
+					"config source, default: etcha",
+				},
+				Run:   runCommands,
+				Usage: "Run commands in a pattern locally",
+			},
+			"local-check": {
+				ArgumentsRequired: []string{
+					"pattern path",
+				},
+				ArgumentsOptional: []string{
+					"config source, default: etcha",
+				},
+				Run:   runCommands,
+				Usage: "Run check commands in a pattern locally",
+			},
+			"local-remove": {
+				ArgumentsRequired: []string{
+					"pattern path",
+				},
+				ArgumentsOptional: []string{
+					"config source, default: etcha",
+				},
+				Run:   runCommands,
+				Usage: "Run remove commands in a pattern locally",
+			},
 			"push": {
 				ArgumentsRequired: []string{
 					"pattern path",
@@ -78,26 +98,6 @@ func main() {
 				},
 				Run:   push,
 				Usage: "Push a signed pattern JWT to a destination URL",
-			},
-			"remove": {
-				ArgumentsRequired: []string{
-					"pattern path",
-				},
-				ArgumentsOptional: []string{
-					"config source, default: etcha",
-				},
-				Run:   runCommands,
-				Usage: "Remove run commands in a pattern as a one-off apply",
-			},
-			"run-commands": {
-				ArgumentsRequired: []string{
-					"pattern path",
-				},
-				ArgumentsOptional: []string{
-					"config source, default: etcha",
-				},
-				Run:   runCommands,
-				Usage: "Run commands in a pattern as a one-off apply",
 			},
 			"run-listen": {
 				Run:   runCommands,

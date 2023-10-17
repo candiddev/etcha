@@ -23,8 +23,8 @@ Forge worked really well for us, and was a key component of our imaging process.
 Forge had a few problems though:
 
 - Extremely difficult to test
-- It was painful to run using GitHub Actions
-- It was a constant struggle to make it idempotent
+- Painful to run using GitHub Actions
+- Constant struggle to make it idempotent
 - Too easy to mix build and runtime configurations
 
 ## Forge v2
@@ -43,7 +43,9 @@ We broke down a "Command" into three components:
 - `change`: The imperative work to be done
 - `remove`: What to execute to remove the work
 
-Right from the beginning we wanted our tool to be stateful-ish.When you're developing images, being able to idempotently re-run and remove things speeds up your development time _considerably_.
+Right from the beginning we wanted our tool to be stateful-ish.  When you're developing images, being able to idempotently re-run and remove things speeds up your development time _considerably_. 
+
+One key feature we added in Forge v2 was **signing the build**.  We created a rudimentary JWT that was to be included in the build.  We could use this JWT in conjunction with Secrets tooling like Vault or other federated identity providers to establish secret zero:  this server was built with this image, and here's the JWT to prove it.
 
 ## Dark Days of Go Templating
 
@@ -55,6 +57,26 @@ Go templating presented a few problems:
 - It's evaluated strictly top-down
 - Whitespace chomping always bites you in the ass
 - Bash scripts are already hard enough to read, adding Go templating just made them worse
+
+This is what it looked like (warning: **it's bad**)
+```
+{{ range $path := list "/etc/apt/preferences.d" "/etc/apt/trusted.gpg.d" "/var/cache/apt/archives/partial" "/var/lib/apt/lists" "/var/lib/dpkg" }}
+{{ template_file "../shared/dir.etc" decode_yaml `
+path: %s%s
+` $dirCache $path }}
+{{ end }}
+
+{{ template_file "../shared/file.etc" decode_yaml `
+path: %s/var/lib/dpkg/status
+` $dirCache }}
+
+{{ template_file "../shared/apt.etc" decode_yaml `
+packages:
+  - ca-certificates
+  - curl
+  - gpg
+` }}
+```
 
 We needed a real language, not just templating.
 
@@ -82,7 +104,7 @@ We were using Ansible to deploy configurations on top of these images, and the n
 
 ## JWTs and Pulls
 
-While building out JWT support for Homechart's licensing, we prototyped using JWTs as a delivery method for configurations:
+We began prototyping using JWTs as a delivery method for configurations:
 
 - Host them on object storage
 - Version them like the rest of our release artifacts
@@ -90,11 +112,11 @@ While building out JWT support for Homechart's licensing, we prototyped using JW
 
 This would give us a serverless, decentralized way to build and run our images and apps.
 
-This is around the time we started to look at changing the name from Forge to Etcha.
+This is around the time we started to look at changing the name from Forge to Etcha too.
 
 ## Etcha
 
-We released Etcha in October of 2023.  The initial version is a culmination of our work and usage of Etcha internally to run our SaaS platform.  It supports the common things we needed from Ansible, Bash, and even Terraform:
+We released Etcha in October of 2023.  The initial version is a culmination of our work and usage of Etcha internally to run our SaaS platform.  It supports the common things we needed from Ansible, Bash, Packer, and even Terraform:
 
 - Imperative scripting (and sometimes declarative, using a function to abstract the imperative bits)
 - Stateful

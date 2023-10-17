@@ -35,10 +35,6 @@ Set config key=value (can be provided multiple times)
 
 Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute build [Commands](../commands), sign a [JWT](../jwt), and output the JWT to the destination path.  Can optionally specify a [Config Source](../config#sources).
 
-### `check [pattern path] [config source, default: etcha]` {#check}
-
-Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute run [Commands](../commands) in check mode only as a one-off apply.  Can optionally specify a [Config Source](../config#sources).
-
 ### `compare [new jwt path or URL] [old jwt path or URL] [ignore version, default: no]` {#compare}
 
 Compare two [JWTs](../jwt) to see if they have the same etchaBuildManfiest, etchaPattern, and etchaVersion (can optionally ignore version mismatch).
@@ -72,24 +68,28 @@ Create folders, files, and libraries for developing [Patterns](../patterns).  Su
 
 ### `jq [jq query options]` {#jq}
 
-Query JSON from stdin using jq.  Supports standard JQ queries, and the -r flag to render raw values.
+Query JSON from stdin using jq.  Supports standard JQ queries, and the `-r` flag to render raw values.
 
 ### `lint [path] [check formatting, default: no]` {#lint}
 
 Lint all `.jsonnet` and `.libsonnet` files in the path, checking the syntax and optionally the formatting of the files.  Can also use external linters to provide more validation. See 
 [Linting Patterns](../../guides/linting-patterns) for more information.
 
+### `local-change [pattern path] [config source, default: etcha]` {#run-change}
+
+Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all [Commands](../commands) in change mode locally.  Can optionally specify a [Config Source](../config#sources).
+
+### `local-check [pattern path] [config source, default: etcha]` {#run-check}
+
+Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all check [Commands](../commands) locally.  Can optionally specify a [Config Source](../config#sources).
+
+### `local-remove [pattern path] [config source, default: etcha]` {#run-remove}
+
+Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all remove [Commands](../commands) locally.  Can optionally specify a [Config Source](../config#sources).
+
 ### `push [pattern path] [destination URL]` {#push}
 
 Build and sign the [Pattern](../patterns) from path and push it to the destination URL.
-
-### `remove [pattern path] [config source, default: etcha]` {#remove}
-
-Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all remove [Commands](../commands) as a one-off apply.  Can optionally specify a [Config Source](../config#sources).
-
-### `run-commands [pattern path] [config source, default: etcha]` {#run-commands}
-
-Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all [Commands](../commands) as a one-off apply.  Can optionally specify a [Config Source](../config#sources).
 
 ### `run-listen` {#run-listen}
 

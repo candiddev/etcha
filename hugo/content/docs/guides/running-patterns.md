@@ -70,9 +70,9 @@ Etcha will always perform the following during the run phase:
 
 Etcha can run Patterns via one-off applies using the [CLI](../../references/cli).  These runs will always be local to the current Etcha instance.  They're performed using the following CLI commands:
 
-- [`etcha check [pattern path]`](../../references/cli#check), executes the `run` in [**Check Mode**](../../references/commands#check-mode).
-- [`etcha remove [pattern path]`](../../references/cli#check), executes the `run` in [**Remove Mode**](../../references/commands#remove-mode).
-- [`etcha run-commands [pattern path]`](../../references/cli#check), executes the `run` in [**Change Mode**](../../references/commands#change-mode).
+- [`etcha local-change [pattern path]`](../../references/cli#local-change), executes the `run` in [**Change Mode**](../../references/commands#change-mode).
+- [`etcha local-check [pattern path]`](../../references/cli#local-check), executes the `run` in [**Check Mode**](../../references/commands#check-mode).
+- [`etcha local-remove [pattern path]`](../../references/cli#local-remove), executes the `run` in [**Remove Mode**](../../references/commands#remove-mode).
 
 ## Remote Run
 
@@ -100,7 +100,7 @@ WantedBy=multi-user.target
 
 By default, Etcha will generate a self-signed certificate and listen on tcp/4000.  You can specify a certificate and different listen ports in the [`run`](../../references/config#run) configuration.
 
-When Etcha is ran in listening mode, and is configured to have web services available like push or monitoring, rate limiting is enforced on all endpoints.
+When Etcha is ran in listening mode, and is configured to have web services available like push or monitoring, [rate limiting](../../references/config#rateLimitRate) is enforced on all endpoints.
 
 ### Verifying JWTs and Patterns
 

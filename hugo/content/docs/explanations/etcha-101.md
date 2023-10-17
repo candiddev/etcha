@@ -80,7 +80,7 @@ local restart = function(name)
 }
 ```
 
-With Jsonnet, we can use real programming language features like functions, variables, and imports to describe on Patterns and Commands succinctly.  Additionally, we can do neat things like lint our Patterns, Commands, and other libraries.
+With Jsonnet, we can use real programming language features like functions, variables, and imports to describe Patterns and Commands succinctly.  Additionally, we can do neat things like lint our Patterns, Commands, and other libraries.
 
 ## Building JWTs
 
@@ -92,7 +92,7 @@ Building a JWT will cause Etcha to run the `build` configurations as part of the
 
 Once we have built our JWT, which contains our Patterns, we configure our Etcha instances to **Push** or **Pull** the JWT.  This is done through **Sources** in the remote Etcha's configuration file.
 
-- **If a source is configured to allow pushes**, the local Etcha command connects to a remote Etcha instance and pushes the JWT.
+- **If a source is configured to allow pushes**, the local Etcha instance can connect to a remote Etcha instance and pushes the JWT.
 
 - **If a source is configured to pull**, the remote Etcha instance pulls down a JWT from its local disk, or a web server/object storage location.
 
@@ -118,7 +118,7 @@ flowchart TD
   jsonnet[Jsonnet]
   jwt[JWT]
   pattern[Pattern]
-  source[Etcha/Source]
+  source[Source]
   user[User]
   webhooks[Webhooks]
 

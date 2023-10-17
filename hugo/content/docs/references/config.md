@@ -29,7 +29,20 @@ All configuration keys are camelCase.  Configuration values can be:
 
 **For environment variables**, every configuration key can be set using `ETCHA_config_key_path=a value`, i.e. `ETCHA_cli_debug=true`
 
-**The configuration files** can be formatted using JSON or Jsonnet.  See [the Jsonnet reference](../jsonnet/) for more information.
+**For configuration files**, they can be formatted using JSON or Jsonnet.  See [the Jsonnet reference](../jsonnet/) for more information.  **Configuration files are rendered at startup**, allowing you to use [dynamic Jsonnet functions](../jsonnet#native-functions) to dynamically alter the config, i.e.:
+
+```
+local getRecord(type, name, fallback=null) = std.native('getRecord')(type, name, fallback);
+local verifyKey = getRecord('a', 'verify.candid.dev');
+
+{
+  run: {
+    verifyKeys: [
+      verifyKey,
+    ]
+  }
+}
+```
 
 You can view the rendered configuration by running [`etcha show-config`](../cli#show-config).
 
