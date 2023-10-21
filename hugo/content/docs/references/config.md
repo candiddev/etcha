@@ -376,6 +376,12 @@ See [Run > verifyCommands](#verifycommands).  Setting this value overrides `run.
 
 **Default:** `[]`
 
+## `vars`
+
+A map of strings and any type of value.  Can be used during rendering to get/set values.  Will be combined with the top-level rendering--the values set here will override top-level ones.  See [Patterns - Variables](../references/patterns#variables), [Building Patterns](../../guides/building-patterns), and [Running Patterns](../../running-patterns) for more information.
+
+**Default:** `{}`
+
 ### `verifyExec`
 
 See [Run > verifyExec](#verifyexec).  Setting this value overrides `run.verifyExec` if `run.verifyExec` allows overrides.
@@ -402,6 +408,6 @@ Boolean, set to `true` when Etcha is running [`lint`](../cli#lint) or [`test`](.
 
 ## `vars`
 
-A map of strings and any type of value.  Can be used during rendering to get/set values.  See [Building Patterns](../../guides/building-patterns) and [Running Patterns](../../running-patterns) for more information.
+A map of strings and any type of value.  Can be used during rendering to get/set values.  See [Patterns - Variables](../references/patterns#variables), [Building Patterns](../../guides/building-patterns), and [Running Patterns](../../running-patterns) for more information.
 
 **Default:** `{}`

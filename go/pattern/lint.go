@@ -14,8 +14,6 @@ import (
 
 // Lint will check a jsonnet paths, the format of the files, and optionally check the scripts of a pattern.
 func Lint(ctx context.Context, c *config.Config, path string, checkFormat bool) (types.Results, errs.Err) {
-	c.Test = true
-
 	r, i, err := jsonnet.Lint(ctx, c, path, checkFormat)
 	if err != nil {
 		return nil, logger.Error(ctx, err)
@@ -27,7 +25,7 @@ func Lint(ctx context.Context, c *config.Config, path string, checkFormat bool) 
 				continue
 			}
 
-			p, err := ParsePatternFromImports(ctx, c, "", im)
+			p, err := ParsePatternFromImports(ctx, c, "test", im)
 			if err != nil {
 				return r, err
 			}

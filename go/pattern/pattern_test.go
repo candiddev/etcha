@@ -28,6 +28,9 @@ func TestParsePatternFromImports(t *testing.T) {
 				AllowOverride: true,
 				Command:       "1",
 			},
+			Vars: map[string]any{
+				"hello": "person",
+			},
 		},
 		"2": {
 			Exec: &commands.Exec{
@@ -36,6 +39,30 @@ func TestParsePatternFromImports(t *testing.T) {
 		},
 	}
 
+	c.Vars = map[string]any{
+		"hello": "world",
+		"int":   1,
+		"bool":  true,
+	}
+
+	cValues := `
+local config = std.native('getConfig')();
+
+{
+	run: [
+		{
+			id: '1',
+		}
+	],
+	runEnv: {
+		bool: '%s' % config.bool,
+		int: '%s' % config.int,
+		string: config.hello,
+		test: '%s' % std.get(config, 'test', 'false'),
+	}
+}
+`
+
 	tests := map[string]struct {
 		file                 string
 		override             bool
@@ -43,6 +70,7 @@ func TestParsePatternFromImports(t *testing.T) {
 		wantErr              bool
 		wantBuildExecCommand string
 		wantRunExecCommand   string
+		wantRunEnv           types.EnvVars
 	}{
 		"bad_render": {
 			wantErr: true,
@@ -126,6 +154,30 @@ func TestParsePatternFromImports(t *testing.T) {
 			wantBuildExecCommand: "0",
 			wantRunExecCommand:   "0",
 		},
+		"config values": {
+			file:                 cValues,
+			source:               "1",
+			wantBuildExecCommand: "0",
+			wantRunExecCommand:   "0",
+			wantRunEnv: types.EnvVars{
+				"bool":   "true",
+				"int":    "1",
+				"string": "person",
+				"test":   "false",
+			},
+		},
+		"test": {
+			file:                 cValues,
+			source:               "test",
+			wantBuildExecCommand: "0",
+			wantRunExecCommand:   "0",
+			wantRunEnv: types.EnvVars{
+				"bool":   "true",
+				"int":    "1",
+				"string": "world",
+				"test":   "true",
+			},
+		},
 	}
 
 	for name, tc := range tests {
@@ -142,6 +194,10 @@ func TestParsePatternFromImports(t *testing.T) {
 				assert.Equal(t, p.BuildExec.Command, tc.wantBuildExecCommand)
 				assert.Equal(t, p.RunExec.Command, tc.wantRunExecCommand)
 				assert.Equal(t, len(p.Run), 1)
+
+				if tc.wantRunEnv != nil {
+					assert.Equal(t, p.RunEnv, tc.wantRunEnv)
+				}
 			}
 		})
 	}

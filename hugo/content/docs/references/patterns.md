@@ -64,3 +64,34 @@ String, the Subject to set in the [JWT `sub` property](../jwt#sub).
 ## Rendering
 
 Patterns are rendered from Jsonnet everytime they are ran.  That means all of the Jsonnet functions, lookups, and environment variables are all executed/evaluated on the current instance that is running the Pattern.
+
+### Variables
+
+The native Jsonnet function, [`getConfig() object`], can be used to retrieve the combined `vars` for the `source`.  Given a configuration like this:
+
+```json
+{
+  "sources": {
+    "source1": {
+      "vars": {
+        "var1": false,
+        "var2": "value"
+      }
+    }
+  },
+  "vars": {
+    "var1": true,
+    "var2": "original"
+  }
+}
+```
+
+Running `getConfig()` within a Pattern for the source `source1` will render a Jsonnet object like this:
+
+```json
+{
+  "var1": false,
+  "var2": "value",
+  "var3": "original"
+}
+```

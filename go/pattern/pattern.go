@@ -48,14 +48,37 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 	p := Pattern{
 		Imports: imports,
 	}
-	r := jsonnet.NewRender(ctx, c)
+
+	vars := map[string]any{}
+
+	for k, v := range c.Vars {
+		vars[k] = v
+	}
+
+	s := c.Sources[configSource]
+
+	if s != nil {
+		for k, v := range s.Vars {
+			vars[k] = v
+		}
+	}
+
+	vars["source"] = configSource
+
+	if configSource == "test" {
+		vars["test"] = true
+	} else {
+		vars["test"] = false
+	}
+
+	r := jsonnet.NewRender(ctx, vars)
 	r.Import(imports)
 
 	if err := r.Render(ctx, &p); err != nil {
 		return nil, logger.Error(ctx, err)
 	}
 
-	if s, ok := c.Sources[configSource]; ok && s != nil {
+	if s != nil {
 		p.BuildExec = c.Exec.Override(s.Exec, &p.BuildExec)
 		p.RunExec = c.Exec.Override(s.Exec, &p.RunExec)
 	} else if !c.Exec.AllowOverride {

@@ -29,7 +29,6 @@ type Config struct {
 	Exec    commands.Exec      `json:"exec"`
 	Run     Run                `json:"run"`
 	Sources map[string]*Source `json:"sources"`
-	Test    bool               `json:"test"`
 	Vars    map[string]any     `json:"vars"`
 }
 
@@ -76,6 +75,7 @@ type Source struct {
 	VerifyCommands    commands.Commands    `json:"verifyCommands"`
 	VerifyExec        *commands.Exec       `json:"verifyExec,omitempty"`
 	VerifyKeys        cryptolib.KeysVerify `json:"verifyKeys"`
+	Vars              map[string]any       `json:"vars"`
 	WebhookPaths      []string             `json:"webhookPaths"`
 }
 

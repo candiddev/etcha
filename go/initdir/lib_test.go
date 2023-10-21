@@ -58,10 +58,10 @@ func TestLib(t *testing.T) {
 	p, err := pattern.ParsePatternFromImports(ctx, c, "", &i)
 	assert.HasErr(t, err, nil)
 
-	os.Mkdir("etcha", 0700)
+	os.Mkdir("testdata", 0700)
 
 	res := p.Test(ctx, c, false)
 	assert.Equal(t, res, types.Results{})
 
-	os.RemoveAll("etcha")
+	os.RemoveAll("testdata")
 }

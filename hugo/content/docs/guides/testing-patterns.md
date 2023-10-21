@@ -25,7 +25,7 @@ Testing is performed under the [`source`](../../references/config#sources) "`tes
 
 ## Test Mode
 
-Linting and Testing both set a flag within the config called [`test`](../../references/config#test) to `true`.  You can retrieve this value within Jsonnet and adjust your Pattern files to render differently during test mode, i.e.:
+Linting and Testing both set a flag within [vars passed to the Pattern](../../references/pattern#vars), `test`, to `true`.  You can retrieve this value within Jsonnet and adjust your Pattern files to render differently during test mode, i.e.:
 
 ```
 // lib/mylib.libsonnet

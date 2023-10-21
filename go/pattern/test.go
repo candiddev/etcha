@@ -15,8 +15,6 @@ import (
 
 // Test performs build and run testing against directory or single pattern.
 func Test(ctx context.Context, c *config.Config, path string, testBuild bool) (types.Results, errs.Err) {
-	c.Test = true
-
 	l := types.Results{}
 
 	f, e := os.Stat(path)
