@@ -21,6 +21,8 @@ var cmdA = &Command{
 	OnChange: []string{
 		"e",
 		"etcha:hello",
+		"etcha:stderr",
+		"etcha:stdout",
 	},
 	OnFail: []string{
 		"f",
@@ -82,6 +84,8 @@ func TestCommandsDiff(t *testing.T) {
 			OnChange: []string{
 				"e",
 				"etcha:hello",
+				"etcha:stderr",
+				"etcha:stdout",
 			},
 			OnFail: []string{
 				"f",
@@ -108,6 +112,7 @@ func TestCommandsRun(t *testing.T) {
 		mode         Mode
 		wantErr      error
 		wantInputs   []cli.RunMockInput
+		wantOut      string
 		wantOutputs  Outputs
 	}{
 		"remove": {
@@ -134,6 +139,7 @@ func TestCommandsRun(t *testing.T) {
 					Exec: "removeA",
 				},
 			},
+			wantOut: "INFO  commands/command.go:63\nRemoving g...\nINFO  commands/command.go:63\nRemoving a...\n",
 			wantOutputs: Outputs{
 				&Output{
 					ID:      "g",
@@ -185,6 +191,7 @@ func TestCommandsRun(t *testing.T) {
 					Exec: "changeG",
 				},
 			},
+			wantOut: "INFO  commands/command.go:131\nChanging a...\naaINFO  commands/command.go:131\nTriggering e via a...\nINFO  commands/command.go:131\nAlways changing g...\n",
 			wantOutputs: Outputs{
 				&Output{
 					Change:    "a",
@@ -193,7 +200,7 @@ func TestCommandsRun(t *testing.T) {
 					CheckFail: true,
 					Checked:   true,
 					ID:        "a",
-					Events:    []string{"hello"},
+					Events:    []string{"hello", "stderr", "stdout"},
 				},
 				&Output{
 					Checked: true,
@@ -268,6 +275,7 @@ func TestCommandsRun(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			logger.SetStd()
 			c := cli.Config{}
 			c.RunMock()
 			c.RunMockErrors(tc.mockErrs)
@@ -280,6 +288,10 @@ func TestCommandsRun(t *testing.T) {
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, out, tc.wantOutputs)
 			assert.Equal(t, c.RunMockInputs(), tc.wantInputs)
+
+			if tc.wantErr == nil {
+				assert.Equal(t, logger.ReadStd(), tc.wantOut)
+			}
 		})
 	}
 }

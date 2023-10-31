@@ -90,11 +90,13 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 			return out, newEnv, nil
 		}
 
+		ch := fmt.Sprintf("Changing %s...", cmd.ID)
+
 		switch {
 		case cmd.Always:
-			logger.Info(ctx, fmt.Sprintf("Always changing %s...", cmd.ID))
+			ch = fmt.Sprintf("Always changing %s...", cmd.ID)
 		case len(cmd.ChangedBy) > 0:
-			logger.Info(ctx, fmt.Sprintf("Triggering %s via %s...", cmd.ID, strings.Join(cmd.ChangedBy, ", ")))
+			ch = fmt.Sprintf("Triggering %s via %s...", cmd.ID, strings.Join(cmd.ChangedBy, ", "))
 		default:
 			out.Checked = true
 
@@ -126,7 +128,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		ctx = metrics.SetCommandMode(ctx, metrics.CommandModeChange)
 		out.Changed = true
 
-		logger.Info(ctx, fmt.Sprintf("Changing %s...", cmd.ID))
+		logger.Info(ctx, ch)
 
 		cfg.Environment = append(cfgEnv, newEnv.GetEnv()...) //nolint:gocritic
 

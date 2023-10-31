@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -101,6 +102,17 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 	var r Result
 
 	if !src.TriggerOnly {
+		l := s.PatternLocks[source]
+		if l == nil {
+			s.PatternLocks[source] = &sync.Mutex{}
+			l = s.PatternLocks[source]
+		}
+
+		if !src.RunMulti {
+			l.Lock()
+			defer l.Unlock()
+		}
+
 		o, err = p.DiffRun(ctx, s.Config, pOld, src.CheckOnly || check, src.NoRemove, src.RunAll)
 		if err != nil {
 			metrics.CollectSources(ctx, true)
@@ -111,40 +123,47 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 			}, logger.Error(ctx, err)
 		}
 
+		cID, cOut := o.Changed()
+		rID, rOut := o.Removed()
+
 		r = Result{
-			Changed: o.Changed(),
-			Removed: o.Removed(),
+			ChangedIDs:     cID,
+			ChangedOutputs: cOut,
+			RemovedIDs:     rID,
+			RemovedOutputs: rOut,
 		}
 
 		metrics.CollectSources(ctx, false)
-		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeChange), len(r.Changed))
-		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeRemove), len(r.Removed))
+		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeChange), len(r.ChangedIDs))
+		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeRemove), len(r.RemovedIDs))
 
 		if check {
-			r.Changed = o.CheckFail()
+			r.ChangedIDs = o.CheckFail()
 
 			return &r, logger.Error(ctx, nil)
 		}
 	}
 
-	jp := filepath.Join(s.Config.Run.StateDir, source+".jwt")
+	if !src.NoRestore {
+		jp := filepath.Join(s.Config.Run.StateDir, source+".jwt")
 
-	if err := os.WriteFile(jp+".tmp", []byte(j.Raw), 0644); err != nil { //nolint:gosec
-		metrics.CollectSources(ctx, true)
+		if err := os.WriteFile(jp+".tmp", []byte(j.Raw), 0644); err != nil { //nolint:gosec
+			metrics.CollectSources(ctx, true)
 
-		return &Result{
-			Err:  err.Error(),
-			Exit: s.handleEvents(ctx, o, src),
-		}, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
-	}
+			return &Result{
+				Err:  err.Error(),
+				Exit: s.handleEvents(ctx, o, src),
+			}, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+		}
 
-	if err := os.Rename(jp+".tmp", jp); err != nil {
-		metrics.CollectSources(ctx, true)
+		if err := os.Rename(jp+".tmp", jp); err != nil {
+			metrics.CollectSources(ctx, true)
 
-		return &Result{
-			Err:  err.Error(),
-			Exit: s.handleEvents(ctx, o, src),
-		}, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+			return &Result{
+				Err:  err.Error(),
+				Exit: s.handleEvents(ctx, o, src),
+			}, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+		}
 	}
 
 	metrics.CollectSources(ctx, false)

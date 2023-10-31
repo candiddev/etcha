@@ -87,7 +87,11 @@ Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all
 
 Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all remove [Commands](../commands) locally.  Can optionally specify a [Config Source](../config#sources).
 
-### `push [pattern path] [destination URL]` {#push}
+### `push-command [command] [destination URL]` {#push-command}
+
+Push an ad-hoc command to a destination URL.  See [Running Commands](../../guides/running-commands) for more information.
+
+### `push-pattern [pattern path] [destination URL]` {#push-pattern}
 
 Build and sign the [Pattern](../patterns) from path and push it to the destination URL.
 

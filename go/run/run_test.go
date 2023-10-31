@@ -114,6 +114,7 @@ func TestStateDiffExec(t *testing.T) {
 		j           *pattern.JWT
 		mockErrors  []error
 		name        string
+		noRestore   bool
 		runAll      bool
 		triggerOnly bool
 		wantErr     error
@@ -185,7 +186,7 @@ func TestStateDiffExec(t *testing.T) {
 				{Environment: []string{"hello=world"}, Exec: "checkA"},
 			},
 			wantResult: &Result{
-				Changed: []string{"a"},
+				ChangedIDs: []string{"a"},
 			},
 		},
 		{
@@ -208,7 +209,8 @@ func TestStateDiffExec(t *testing.T) {
 			},
 			wantJWT: "hello",
 			wantResult: &Result{
-				Changed: []string{"a"},
+				ChangedIDs:     []string{"a"},
+				ChangedOutputs: []string{""},
 			},
 		},
 		{
@@ -258,11 +260,32 @@ func TestStateDiffExec(t *testing.T) {
 			wantJWT:     "anew2",
 			wantResult:  &Result{},
 		},
+		{
+			name: "good_noRestore",
+			j: &pattern.JWT{
+				EtchaPattern: &jsonnet.Imports{
+					Entrypoint: "/main.jsonnet",
+					Files: map[string]string{
+						"/main.jsonnet": `{run:[{change:"changeB",check:"checkB",id:"a",remove:"removeB"}]}`,
+					},
+				},
+				Raw: "anew3",
+			},
+			noRestore: true,
+			wantJWT:   "anew2",
+			wantInputs: []cli.RunMockInput{
+				{
+					Exec: "checkB",
+				},
+			},
+			wantResult: &Result{},
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			s.Config.CLI.RunMockErrors(tc.mockErrors)
+			s.Config.Sources["etcha"].NoRestore = tc.noRestore
 			s.Config.Sources["etcha"].RunAll = tc.runAll
 			s.Config.Sources["etcha"].TriggerOnly = tc.triggerOnly
 
@@ -408,11 +431,11 @@ func TestStateRunSource(t *testing.T) {
 			},
 			mockInputs: []cli.RunMockInput{
 				{Exec: "checkA"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "changeA"},
 			},
 			wantErr: ErrNilJWT,
 			wantResults: &Result{
-				Err: "error changing id b: error running commands: received an empty JWT, this is probably a bug: ",
+				Err: "error changing id b: error running commands: received an empty JWT, this is probably a bug: b",
 			},
 		},
 		{
@@ -422,12 +445,13 @@ func TestStateRunSource(t *testing.T) {
 			},
 			mockInputs: []cli.RunMockInput{
 				{Exec: "checkA"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "changeA"},
 			},
 			wantResults: &Result{
-				Changed: []string{
+				ChangedIDs: []string{
 					"b",
 				},
+				ChangedOutputs: []string{"b"},
 			},
 		},
 		{
@@ -439,6 +463,7 @@ func TestStateRunSource(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			c.CLI.RunMockErrors(tc.mockErrors)
+			c.CLI.RunMockOutputs([]string{"a", "b", "c", "d", "e"})
 
 			r, err := s.runSource(ctx, "1")
 			assert.HasErr(t, err, tc.wantErr)

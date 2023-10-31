@@ -92,6 +92,7 @@ func TestParseJWT(t *testing.T) {
 			},
 		},
 		"2": {
+			NoRestore: true,
 			PullPaths: []string{
 				"testdata/2.jwt",
 			},
@@ -117,7 +118,7 @@ func TestParseJWT(t *testing.T) {
 	// ParseJWTsFromDir
 	c.Run.StateDir = "testdata"
 	js := ParseJWTsFromDir(ctx, c)
-	assert.Equal(t, len(js), 2)
+	assert.Equal(t, len(js), 1)
 
 	os.RemoveAll("testdata")
 }

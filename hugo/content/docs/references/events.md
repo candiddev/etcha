@@ -42,6 +42,14 @@ Firing this event during [`signingCommands`](../config#signingcommands) will set
 
 Firing any event with this prefix during a `build` will add the output of the [Command's `change`](../commands#change) to the [JWT's `etchaRunEnv` property](../jwt#etcharunenv).
 
+### stderr
+
+Firing this event will log the output of the [Command's `change`](../commands#change) to stderr.
+
+### stdout
+
+Firing this event will log the output of the [Command's `change`](../commands#change) to stdout.
+
 ### token
 
 Firing this event during [`verifyCommands`](../config#verifycommands) will have Etcha use the output of the [Command's `change`](../commands#change) for the JWT Token.  Etcha will also **not verify** the token, as it assumes the verify commands have passed.

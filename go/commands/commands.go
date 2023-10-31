@@ -124,7 +124,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 						cout = append(cout, out)
 
 						if out.Change, e = cfg.Run(ctx, c, cmds[j].Change, ""); e != nil {
-							logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(err.Errors()...), out.Change.String()) //nolint:errcheck
+							logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(e.Errors()...), out.Change.String()) //nolint:errcheck
 						}
 					}
 				}
@@ -136,6 +136,13 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 		if m == ModeChange && out.Changed {
 			for _, id := range cmd.OnChange {
 				if strings.HasPrefix(id, "etcha:") {
+					switch id {
+					case "etcha:stderr":
+						fmt.Fprint(logger.Stderr, out.Change) //nolint:forbidigo
+					case "etcha:stdout":
+						fmt.Fprint(logger.Stdout, out.Change) //nolint:forbidigo
+					}
+
 					out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
 
 					continue

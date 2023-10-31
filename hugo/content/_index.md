@@ -4,7 +4,7 @@ title: Etcha
 ---
 
 {{% blocks/section color="white" height=full %}}
-<h1>Infinite Scale Configuration Management</br>For Distributed Platforms</h1>
+<h1><b>Infinite Scale Configuration Management</b></h1>
 <h2>Etcha creates serverless build and runtime configurations for your servers and apps.</h2>
 
 ```mermaid

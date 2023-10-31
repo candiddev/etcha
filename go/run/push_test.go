@@ -76,6 +76,7 @@ func TestPush(t *testing.T) {
 	}
 
 	tests := []struct {
+		command     string
 		destination string
 		mockErrors  []error
 		name        string
@@ -132,10 +133,10 @@ func TestPush(t *testing.T) {
 			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "change1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "change1"},
 			},
 			wantResult: &Result{
-				Err: "error changing id 1: error running commands: error running commands: no verify keys specified: ",
+				Err: "error changing id 1: error running commands: error running commands: no verify keys specified: b",
 			},
 			wantErr: errs.ErrReceiver,
 		},
@@ -149,10 +150,11 @@ func TestPush(t *testing.T) {
 			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "change1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "change1"},
 			},
 			wantResult: &Result{
-				Changed: []string{"1"},
+				ChangedIDs:     []string{"1"},
+				ChangedOutputs: []string{"b"},
 			},
 		},
 		{
@@ -167,7 +169,7 @@ func TestPush(t *testing.T) {
 				{Exec: "check2"},
 			},
 			wantResult: &Result{
-				Changed: []string{"2"},
+				ChangedIDs: []string{"2"},
 			},
 		},
 		{
@@ -177,10 +179,27 @@ func TestPush(t *testing.T) {
 			path:        "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check2"},
-				{Environment: []string{"_CHECK=0", "_CHECK_OUT="}, Exec: "remove1"},
+				{Environment: []string{"_CHECK=0", "_CHECK_OUT=a"}, Exec: "remove1"},
 			},
 			wantResult: &Result{
-				Removed: []string{"1"},
+				RemovedIDs:     []string{"1"},
+				RemovedOutputs: []string{"b"},
+			},
+		},
+		{
+			name:        "good-command",
+			command:     "ls",
+			destination: ts.URL + "/etcha/v1/push/etcha",
+			signingKey:  prv1,
+			wantInputs: []cli.RunMockInput{
+				{Environment: []string{"_CHECK=1"}, Exec: "/usr/bin/ls"},
+				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1"}, Exec: "remove2"},
+			},
+			wantResult: &Result{
+				ChangedIDs:     []string{"etcha push"},
+				ChangedOutputs: []string{"a"},
+				RemovedIDs:     []string{"2"},
+				RemovedOutputs: []string{"b"},
 			},
 		},
 	}
@@ -189,8 +208,9 @@ func TestPush(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c.Build.SigningKey = tc.signingKey
 			c.CLI.RunMockErrors(tc.mockErrors)
+			c.CLI.RunMockOutputs([]string{"a", "b", "c", "d", "e"})
 
-			r, err := Push(ctx, c, tc.destination, tc.path)
+			r, err := Push(ctx, c, tc.destination, tc.command, tc.path)
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, r, tc.wantResult)
 			assert.Equal(t, c.CLI.RunMockInputs(), tc.wantInputs)

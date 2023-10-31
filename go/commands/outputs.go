@@ -47,16 +47,15 @@ func (o Outputs) CheckFail() []string {
 }
 
 // Changed returns a list of IDs that have Changed.
-func (o Outputs) Changed() []string {
-	var out []string
-
+func (o Outputs) Changed() (ids, outputs []string) {
 	for _, u := range o {
 		if u.Changed {
-			out = append(out, u.ID)
+			ids = append(ids, u.ID)
+			outputs = append(outputs, u.Change.String())
 		}
 	}
 
-	return out
+	return ids, outputs
 }
 
 // Events returns a sorted list of events that were fired.
@@ -104,15 +103,14 @@ func (o Outputs) Failed() []string {
 	return out
 }
 
-// Removed returns a list of IDs that have Removed.
-func (o Outputs) Removed() []string {
-	var out []string
-
+// Removed returns a list of IDs and their outputs that have Removed.
+func (o Outputs) Removed() (ids, outputs []string) {
 	for _, u := range o {
 		if u.Removed {
-			out = append(out, u.ID)
+			ids = append(ids, u.ID)
+			outputs = append(outputs, u.Remove.String())
 		}
 	}
 
-	return out
+	return ids, outputs
 }

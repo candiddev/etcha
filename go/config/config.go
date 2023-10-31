@@ -67,10 +67,12 @@ type Source struct {
 	EventsSend        regexp.Regexp        `json:"eventsSend"`
 	Exec              *commands.Exec       `json:"exec,omitempty"`
 	NoRemove          bool                 `json:"noRemove"`
+	NoRestore         bool                 `json:"noRestore"`
 	PullIgnoreVersion bool                 `json:"pullIgnoreVersion"`
 	PullPaths         []string             `json:"pullPaths"`
 	RunAll            bool                 `json:"runAll"`
 	RunFrequencySec   int                  `json:"runFrequencySec"`
+	RunMulti          bool                 `json:"runMulti"`
 	TriggerOnly       bool                 `json:"triggerOnly"`
 	VerifyCommands    commands.Commands    `json:"verifyCommands"`
 	VerifyExec        *commands.Exec       `json:"verifyExec,omitempty"`
@@ -96,13 +98,11 @@ func Default() *Config {
 		Exec: commands.Exec{
 			AllowOverride: true,
 			Command:       "/usr/bin/bash -e -o pipefail -c",
-			WorkDir:       "etcha",
 		},
 		Sources: map[string]*Source{},
 		Run: Run{
 			ListenAddress:   ":4000",
 			RateLimiterRate: "10-M",
-			StateDir:        "etcha",
 		},
 		Vars: map[string]any{},
 	}

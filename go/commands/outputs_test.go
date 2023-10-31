@@ -30,7 +30,10 @@ func TestOutputs(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, out.Changed(), []string{"a"})
+	ids, outputs := out.Changed()
+
+	assert.Equal(t, ids, []string{"a"})
+	assert.Equal(t, outputs, []string{"change"})
 	assert.Equal(t, out.Events(), Events{
 		Event{
 			Name:    "event1",
@@ -42,5 +45,9 @@ func TestOutputs(t *testing.T) {
 		},
 	})
 	assert.Equal(t, out.Failed(), []string{"b"})
-	assert.Equal(t, out.Removed(), []string{"a", "b"})
+
+	ids, outputs = out.Removed()
+
+	assert.Equal(t, ids, []string{"a", "b"})
+	assert.Equal(t, outputs, []string{"remove", "remove"})
 }

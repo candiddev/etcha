@@ -14,6 +14,7 @@ import (
 	"github.com/candiddev/etcha/go/metrics"
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/shared/go/errs"
+	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
 	"github.com/go-chi/chi/v5"
 )
@@ -26,21 +27,36 @@ var ErrPushSourceMismatch = errors.New("push didn't match any sources")
 
 // Result is a list of changed and removed IDs.
 type Result struct {
-	Changed []string `json:"changed"`
-	Err     string   `json:"err"`
-	Exit    bool     `json:"exit"`
-	Removed []string `json:"removed"`
+	ChangedIDs     []string `json:"changedIDs"`
+	ChangedOutputs []string `json:"changedOutputs"`
+	Err            string   `json:"err"`
+	Exit           bool     `json:"exit"`
+	RemovedIDs     []string `json:"removedIDs"`
+	RemovedOutputs []string `json:"removedOutputs"`
 }
 
 // Push sends content to the dest.
-func Push(ctx context.Context, c *config.Config, dest, path string) (r *Result, err errs.Err) {
-	logger.Info(ctx, fmt.Sprintf("Pushing config to %s...", dest))
+func Push(ctx context.Context, c *config.Config, dest, cmd, path string) (r *Result, err errs.Err) {
+	logger.Debug(ctx, fmt.Sprintf("Pushing config to %s...", dest))
 
 	r = &Result{}
 
-	p, err := pattern.ParsePatternFromPath(ctx, c, "", path)
-	if err != nil {
-		return r, logger.Error(ctx, err)
+	var p *pattern.Pattern
+
+	if path == "" {
+		p = &pattern.Pattern{
+			Imports: &jsonnet.Imports{
+				Entrypoint: "/main.jsonnet",
+				Files: map[string]string{
+					"/main.jsonnet": fmt.Sprintf(`{run:[{always: true, change: "%s", id: "etcha push"}]}`, cmd),
+				},
+			},
+		}
+	} else {
+		p, err = pattern.ParsePatternFromPath(ctx, c, "", path)
+		if err != nil {
+			return r, logger.Error(ctx, err)
+		}
 	}
 
 	jwt, err := p.Sign(ctx, c, "", nil)

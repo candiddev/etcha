@@ -84,6 +84,10 @@ func ParseJWTsFromDir(ctx context.Context, c *config.Config) map[string]*JWT {
 	j := map[string]*JWT{}
 
 	for k := range c.Sources {
+		if c.Sources[k].NoRestore {
+			continue
+		}
+
 		path := filepath.Join(c.Run.StateDir, k+".jwt")
 
 		if jw, err := ParseJWTFromPath(ctx, c, k, path); err == nil && jw != nil {

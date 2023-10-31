@@ -91,7 +91,15 @@ func main() {
 				Run:   runCommands,
 				Usage: "Run remove commands in a pattern locally",
 			},
-			"push": {
+			"push-command": {
+				ArgumentsRequired: []string{
+					"command",
+					"destination URL",
+				},
+				Run:   push,
+				Usage: "Push an ad-hoc command to a destination URL",
+			},
+			"push-path": {
 				ArgumentsRequired: []string{
 					"pattern path",
 					"destination URL",

@@ -64,7 +64,7 @@ A map of strings and [Exec](#exec) configurations for linters.  These linters ar
 
 ### `pushTLSSkipVerify`
 
-Boolean, skip TLS verification when running [`etcha push`](../cli#push).
+Boolean, skip TLS verification when running [`etcha push-command`](../cli#push-command) or [`etcha push-pattern`](../cli#push-pattern).
 
 **Default:** `false`
 
@@ -114,7 +114,6 @@ The main `exec` configuration.  Can be overridden by other configurations.  The 
 {
   "allowOverride": true,
   "command": "/usr/bin/bash -e -o pipefail -c",
-  "workDir": "etcha"
 }
 ```
 
@@ -230,11 +229,11 @@ String, the maximum number of requests to allow from an IP address before rate l
 
 **Default:** `"10-M"`
 
-### `stateDir` (required)
+### `stateDir` (recommended)
 
-String, path to a writeable directory where Etcha can store patterns for future diffing.  Used during [etcha run-listen](../cli#run-listen) and [etcha run-once](../cli#run-once).
+String, path to a writeable directory where Etcha can store patterns for future diffing.  Used during [etcha run-listen](../cli#run-listen) and [etcha run-once](../cli#run-once).  Defaults to current working directory if unset.
 
-**Default:** `"etcha"`
+**Default:** `""`
 
 ### `systemMetricsSecret` (recommended)
 
@@ -294,7 +293,7 @@ List of [cryptographic verify keys](../cryptography) to use when verifying JWTs.
 
 Sources is a map of source names to source configurations.  See [Running Patterns](../../guides/running-patterns) for more information.
 
-**Default:**: `{}`
+**Default:** `{}`
 
 ### `allowPush`
 
@@ -338,6 +337,10 @@ Boolean, never remove [Commands](../commands) for a [Pattern](../patterns) [sour
 
 **Default:** `false`
 
+### `noRestore`
+
+Boolean, prevents Etcha from saving/restoring the JWTs for this `source`.  Useful for preventing `push-commands` from re-running at startup.
+
 ### `pullIgnoreVersion`
 
 Boolean, don't consider `etchaVersion` property differences in [JWTs](../jwt) to require a new pull.
@@ -364,9 +367,15 @@ Integer, the number of seconds between pulling and running the source pattern.  
 
 **Default:** `0`
 
+### `runMulti`
+
+Boolean, allows for multiple runs to of the source to happen at the same time.  By default, multiple runs will queue.  Some scenarios where this might occur include repeated pushes, especially with [`runAll`](#runAll), or pulls with too low of a [`runFrequencySec`](#runfrequencysec).  Use with caution.
+
+**Default:** `false`
+
 ### `triggerOnly`
 
-Boolean, when `true`, never run a Pattern unless it's trigged via [Events or Webhooks](../../guides/running-patterns).
+Boolean, when `true`, never run a Pattern unless it's triggered via [Events or Webhooks](../../guides/running-patterns).
 
 **Default:** `false`
 
