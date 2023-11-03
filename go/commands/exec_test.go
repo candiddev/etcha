@@ -49,7 +49,7 @@ func TestExecOverride(t *testing.T) {
 			e := Exec{
 				AllowOverride: true,
 			}
-			assert.Equal(t, e.Override(tc.input...), tc.want)
+			assert.Equal(t, e.Override(tc.input...), &tc.want)
 		})
 	}
 }

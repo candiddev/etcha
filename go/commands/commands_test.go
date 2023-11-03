@@ -281,7 +281,7 @@ func TestCommandsRun(t *testing.T) {
 			c.RunMockErrors(tc.mockErrs)
 			c.RunMockOutputs(tc.mockOutputs)
 
-			out, err := tc.cmds.Run(ctx, c, tc.env, Exec{
+			out, err := tc.cmds.Run(ctx, c, tc.env, &Exec{
 				AllowOverride: tc.execOverride,
 			}, tc.mode)
 

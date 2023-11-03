@@ -44,7 +44,7 @@ func TestStateHandleEvents(t *testing.T) {
 	s, _ := newState(ctx, c)
 
 	s.Patterns.Set("1", &pattern.Pattern{
-		RunExec: commands.Exec{
+		RunExec: &commands.Exec{
 			Command: "exec1",
 		},
 		Run: commands.Commands{
@@ -56,7 +56,7 @@ func TestStateHandleEvents(t *testing.T) {
 		},
 	})
 	s.Patterns.Set("2", &pattern.Pattern{
-		RunExec: commands.Exec{
+		RunExec: &commands.Exec{
 			Command: "exec2",
 		},
 		Run: commands.Commands{

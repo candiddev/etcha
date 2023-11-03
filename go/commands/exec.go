@@ -32,7 +32,7 @@ type Exec struct {
 }
 
 // Override will return the absolute Exec from an ordered list of Execs.
-func (e Exec) Override(o ...*Exec) Exec {
+func (e Exec) Override(o ...*Exec) *Exec {
 	out := e
 
 	if e.AllowOverride {
@@ -45,7 +45,7 @@ func (e Exec) Override(o ...*Exec) Exec {
 		}
 	}
 
-	return out
+	return &out
 }
 
 // Run will run a script using the Exec.

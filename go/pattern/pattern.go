@@ -26,13 +26,13 @@ var (
 type Pattern struct {
 	Audience     []string          `json:"audience"`
 	Build        commands.Commands `json:"build"`
-	BuildExec    commands.Exec     `json:"buildExec,omitempty"`
+	BuildExec    *commands.Exec    `json:"buildExec,omitempty"`
 	ExpiresInSec int               `json:"expiresInSec"`
 	ID           string            `json:"id"`
 	Issuer       string            `json:"issuer"`
 	Run          commands.Commands `json:"run"`
 	RunEnv       types.EnvVars     `json:"runEnv"`
-	RunExec      commands.Exec     `json:"runExec,omitempty"`
+	RunExec      *commands.Exec    `json:"runExec,omitempty"`
 	Subject      string            `json:"subject"`
 
 	Imports *jsonnet.Imports `json:"-"`
@@ -79,11 +79,11 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 	}
 
 	if s != nil {
-		p.BuildExec = c.Exec.Override(s.Exec, &p.BuildExec)
-		p.RunExec = c.Exec.Override(s.Exec, &p.RunExec)
-	} else if !c.Exec.AllowOverride {
-		p.BuildExec = c.Exec
-		p.RunExec = c.Exec
+		p.BuildExec = c.Exec.Override(s.Exec, p.BuildExec)
+		p.RunExec = c.Exec.Override(s.Exec, p.RunExec)
+	} else {
+		p.BuildExec = c.Exec.Override(p.BuildExec)
+		p.RunExec = c.Exec.Override(p.RunExec)
 	}
 
 	if p.RunEnv == nil {

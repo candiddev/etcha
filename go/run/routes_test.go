@@ -105,7 +105,7 @@ func TestHandlers(t *testing.T) {
 		Run: commands.Commands{},
 	})
 	s.Patterns.Set("3", &pattern.Pattern{
-		RunExec: commands.Exec{
+		RunExec: &commands.Exec{
 			Command: "hello",
 		},
 		Run: commands.Commands{

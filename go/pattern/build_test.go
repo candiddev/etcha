@@ -35,7 +35,7 @@ func TestPatternBuildSign(t *testing.T) {
 				},
 			},
 		},
-		BuildExec: commands.Exec{
+		BuildExec: &commands.Exec{
 			Command: "test",
 		},
 		Imports: &jsonnet.Imports{

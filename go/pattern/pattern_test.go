@@ -154,6 +154,19 @@ local config = std.native('getConfig')();
 			wantBuildExecCommand: "0",
 			wantRunExecCommand:   "0",
 		},
+		"override_nothing": {
+			file: `{
+				run: [
+					{
+						id: "a"
+					}
+				],
+			}`,
+			override:             true,
+			source:               "1",
+			wantBuildExecCommand: "1",
+			wantRunExecCommand:   "1",
+		},
 		"config values": {
 			file:                 cValues,
 			source:               "1",

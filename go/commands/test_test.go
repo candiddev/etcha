@@ -61,7 +61,7 @@ func TestTest(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			c.RunMockErrors(tc)
-			assert.Equal(t, cmds.Test(ctx, c, Exec{}, types.EnvVars{}), types.Results{
+			assert.Equal(t, cmds.Test(ctx, c, &Exec{}, types.EnvVars{}), types.Results{
 				"a": []string{name},
 			})
 		})

@@ -63,8 +63,13 @@ func (cmds Commands) Diff(old Commands) (change Commands, remove Commands) {
 }
 
 // Run the commands, either as change (default) or remove, and optionally as check only.
-func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, exec Exec, m Mode) (out Outputs, err errs.Err) { //nolint:gocognit
+func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, exe *Exec, m Mode) (out Outputs, err errs.Err) { //nolint:gocognit
 	cout := Outputs{}
+
+	var exec Exec
+	if exe != nil {
+		exec = *exe
+	}
 
 	if m == ModeRemove {
 		c := Commands{}

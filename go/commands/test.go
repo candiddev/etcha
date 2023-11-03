@@ -15,7 +15,7 @@ const (
 )
 
 // Test runs Commands in Test mode.
-func (cmds Commands) Test(ctx context.Context, c cli.Config, exec Exec, runEnv types.EnvVars) types.Results {
+func (cmds Commands) Test(ctx context.Context, c cli.Config, exec *Exec, runEnv types.EnvVars) types.Results {
 	r := types.Results{}
 
 	// Run everything
