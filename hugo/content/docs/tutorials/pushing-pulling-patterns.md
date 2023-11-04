@@ -117,7 +117,7 @@ We should see a bunch of [metrics](../../guides/monitoring).  Nothing interestin
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    push patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
+    push-pattern patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
 INFO  etcha/go/run/push.go:36
 Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
 ERROR etcha/go/run/push.go:63
@@ -128,7 +128,7 @@ Etcha couldn't verify the remote instance certificate.  That's OK, we can specif
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIE6dSkW4jnn3tx119BKw8+zOmhJyzTOsBlWcjqaHxMcX:ZcxoeWfSRt \
-    -x build_pushTLSSkipVerify=true push patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
+    -x build_pushTLSSkipVerify=true push-pattern patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
 INFO  etcha/go/run/push.go:36
 Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
 ERROR etcha/go/run/push.go:69
@@ -139,7 +139,7 @@ What happened?  Well, we used the wrong `signingKey`--the remote Etcha instance 
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
+    -x build_pushTLSSkipVerify=true push-pattern patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
 INFO  etcha/go/run/push.go:36
 Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
 INFO  candiddev/etcha/go/push.go:21
@@ -177,7 +177,7 @@ Lets push the file:
 
 ```bash
  $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push patterns/newfile.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
+    -x build_pushTLSSkipVerify=true push-pattern patterns/newfile.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
 INFO  etcha/go/run/push.go:36
 Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
 INFO  candiddev/etcha/go/push.go:21
@@ -197,7 +197,7 @@ etcha  lib  newfile  patterns  README.md
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push patterns/newfile.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
+    -x build_pushTLSSkipVerify=true push-pattern patterns/newfile.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
 INFO  etcha/go/run/push.go:36
 Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
 INFO  etcha/go/run/push.go:79

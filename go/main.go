@@ -97,9 +97,9 @@ func main() {
 					"destination URL",
 				},
 				Run:   push,
-				Usage: "Push an ad-hoc command to a destination URL",
+				Usage: "Push a signed command to a destination URL",
 			},
-			"push-path": {
+			"push-pattern": {
 				ArgumentsRequired: []string{
 					"pattern path",
 					"destination URL",
