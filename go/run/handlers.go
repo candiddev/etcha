@@ -62,7 +62,7 @@ func (s *state) handleEvents(ctx context.Context, o commands.Outputs, source *co
 					"ETCHA_EVENT_OUTPUT":   event.Outputs[i].Change.String(),
 					"ETCHA_SOURCE_NAME":    source,
 					"ETCHA_SOURCE_TRIGGER": "event",
-				}, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), commands.ModeChange)
+				}, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), false, false)
 
 				logger.Error(ctx, err) //nolint:errcheck
 			}
@@ -147,7 +147,7 @@ func (s *state) initHandlers(ctx context.Context) errs.Err { //nolint:gocognit
 					"ETCHA_WEBHOOK_METHOD":  r.Method,
 					"ETCHA_WEBHOOK_PATH":    r.URL.Path,
 					"ETCHA_WEBHOOK_QUERY":   r.URL.Query().Encode(),
-				}, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), commands.ModeChange)
+				}, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), false, false)
 				if err == nil {
 					for _, event := range out.Events() {
 						if event.Name == "webhook_body" && len(event.Outputs) > 0 {

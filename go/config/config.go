@@ -147,7 +147,7 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, to
 	if len(vc) > 0 {
 		out, e := vc.Run(ctx, c.CLI, types.EnvVars{
 			"ETCHA_JWT": token,
-		}, ve, commands.ModeChange)
+		}, ve, false, false)
 		if e != nil {
 			return key, e
 		}

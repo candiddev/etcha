@@ -8,17 +8,18 @@ import (
 
 // Output is the output from running commands.
 type Output struct {
-	Change     cli.CmdOutput
-	Changed    bool
-	ChangeFail bool
-	Check      cli.CmdOutput
-	Checked    bool
-	CheckFail  bool
-	Events     []string
-	ID         string
-	Remove     cli.CmdOutput
-	Removed    bool
-	RemoveFail bool
+	Change          cli.CmdOutput
+	Changed         bool
+	ChangeFail      bool
+	Check           cli.CmdOutput
+	Checked         bool
+	CheckFailChange bool
+	CheckFailRemove bool
+	Events          []string
+	ID              string
+	Remove          cli.CmdOutput
+	Removed         bool
+	RemoveFail      bool
 }
 
 // Outputs is a list of Command IDs and the associated outputs from a run.
@@ -34,11 +35,11 @@ type Event struct {
 type Events []Event
 
 // CheckFail returns a list of IDs that have failed check.
-func (o Outputs) CheckFail() []string {
+func (o Outputs) CheckFail(remove bool) []string {
 	var out []string
 
 	for _, u := range o {
-		if u.CheckFail {
+		if (remove && u.CheckFailRemove) || (!remove && u.CheckFailChange) {
 			out = append(out, u.ID)
 		}
 	}

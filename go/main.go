@@ -71,16 +71,6 @@ func main() {
 				Run:   runCommands,
 				Usage: "Run commands in a pattern locally",
 			},
-			"local-check": {
-				ArgumentsRequired: []string{
-					"pattern path",
-				},
-				ArgumentsOptional: []string{
-					"config source, default: etcha",
-				},
-				Run:   runCommands,
-				Usage: "Run check commands in a pattern locally",
-			},
 			"local-remove": {
 				ArgumentsRequired: []string{
 					"pattern path",

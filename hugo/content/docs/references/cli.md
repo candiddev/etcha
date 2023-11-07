@@ -79,10 +79,6 @@ Lint all `.jsonnet` and `.libsonnet` files in the path, checking the syntax and 
 
 Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all [Commands](../commands) in change mode locally.  Can optionally specify a [Config Source](../config#sources).
 
-### `local-check [pattern path] [config source, default: etcha]` {#run-check}
-
-Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all check [Commands](../commands) locally.  Can optionally specify a [Config Source](../config#sources).
-
 ### `local-remove [pattern path] [config source, default: etcha]` {#run-remove}
 
 Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute all remove [Commands](../commands) locally.  Can optionally specify a [Config Source](../config#sources).

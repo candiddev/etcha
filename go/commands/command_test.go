@@ -14,77 +14,195 @@ func TestCommandRun(t *testing.T) {
 
 	tests := map[string]struct {
 		cmd          Command
+		check        bool
 		env          types.EnvVars
 		execOverride bool
 		mockErrs     []error
-		mode         Mode
+		remove       bool
 		wantErr      error
 		wantEnv      types.EnvVars
 		wantInputs   []cli.RunMockInput
 		wantOutput   Output
 	}{
-		"remove_error": {
+		"remove_check_error": {
+			check: true,
 			cmd: Command{
-				EnvPrefix: "a",
-				Exec: &Exec{
-					Command: "c",
-				},
-				ID:     "a",
-				Remove: "remove",
-			},
-			execOverride: true,
-			mockErrs: []error{
-				ErrCommandsSelfTarget,
-			},
-			mode: ModeRemove,
-			wantEnv: types.EnvVars{
-				"a_REMOVE":     "1",
-				"a_REMOVE_OUT": "output",
-			},
-			wantInputs: []cli.RunMockInput{
-				{
-					Exec: "c remove",
-				},
-			},
-			wantOutput: Output{
-				ID:         "a",
-				Remove:     "output",
-				Removed:    true,
-				RemoveFail: true,
-			},
-			wantErr: ErrCommandsSelfTarget,
-		},
-		"remove": {
-			cmd: Command{
+				Check:     "check",
 				EnvPrefix: "a",
 				ID:        "a",
 				Remove:    "remove",
 			},
-			env:  types.EnvVars{"hello": "world"},
-			mode: ModeRemove,
+			mockErrs: []error{
+				ErrCommandsSelfTarget,
+			},
+			remove: true,
 			wantEnv: types.EnvVars{
-				"a_REMOVE":     "0",
-				"a_REMOVE_OUT": "output",
-				"hello":        "world",
+				"a_CHECK":     "0",
+				"a_CHECK_OUT": "output",
 			},
 			wantInputs: []cli.RunMockInput{
 				{
-					Environment: []string{"hello=world"},
+					Exec: "check",
+				},
+			},
+			wantOutput: Output{
+				Check:   "output",
+				Checked: true,
+				ID:      "a",
+			},
+		},
+		"remove_no_remove": {
+			cmd: Command{
+				Check:     "check",
+				EnvPrefix: "a",
+				ID:        "a",
+			},
+			mockErrs: []error{
+				ErrCommandsIDRequired,
+			},
+			remove: true,
+			wantEnv: types.EnvVars{
+				"a_CHECK":     "0",
+				"a_CHECK_OUT": "output",
+			},
+			wantInputs: []cli.RunMockInput{
+				{
+					Exec: "check",
+				},
+			},
+			wantOutput: Output{
+				Check:   "output",
+				Checked: true,
+				ID:      "a",
+			},
+		},
+		"remove_errors": {
+			cmd: Command{
+				Check:     "check",
+				EnvPrefix: "a",
+				ID:        "a",
+				Remove:    "remove",
+			},
+			mockErrs: []error{
+				nil,
+				ErrCommandsIDRequired,
+			},
+			remove: true,
+			wantEnv: types.EnvVars{
+				"a_CHECK":      "1",
+				"a_CHECK_OUT":  "output",
+				"a_REMOVE":     "1",
+				"a_REMOVE_OUT": "output2",
+			},
+			wantErr: ErrCommandsIDRequired,
+			wantInputs: []cli.RunMockInput{
+				{
+					Exec: "check",
+				},
+				{
+					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
 					Exec:        "remove",
 				},
 			},
 			wantOutput: Output{
-				ID:      "a",
-				Remove:  cli.CmdOutput("output"),
-				Removed: true,
+				Check:           "output",
+				Checked:         true,
+				CheckFailRemove: true,
+				ID:              "a",
+				Remove:          "output2",
+				Removed:         true,
+				RemoveFail:      true,
+			},
+		},
+		"remove_removed": {
+			cmd: Command{
+				Check:     "check",
+				EnvPrefix: "a",
+				ID:        "a",
+				Remove:    "remove",
+			},
+			remove: true,
+			wantEnv: types.EnvVars{
+				"a_CHECK":      "1",
+				"a_CHECK_OUT":  "output",
+				"a_REMOVE":     "0",
+				"a_REMOVE_OUT": "output2",
+			},
+			wantInputs: []cli.RunMockInput{
+				{
+					Exec: "check",
+				},
+				{
+					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
+					Exec:        "remove",
+				},
+			},
+			wantOutput: Output{
+				Check:           "output",
+				Checked:         true,
+				CheckFailRemove: true,
+				ID:              "a",
+				Remove:          "output2",
+				Removed:         true,
+			},
+		},
+		"remove_always": {
+			cmd: Command{
+				Always: true,
+				ID:     "a",
+				Remove: "remove",
+			},
+			remove: true,
+			wantEnv: types.EnvVars{
+				"_CHECK":      "1",
+				"_REMOVE":     "0",
+				"_REMOVE_OUT": "output",
+			},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{"_CHECK=1"},
+					Exec:        "remove",
+				},
+			},
+			wantOutput: Output{
+				CheckFailRemove: true,
+				ID:              "a",
+				Remove:          "output",
+				Removed:         true,
+			},
+		},
+		"remove_removeBy": {
+			cmd: Command{
+				Always:    true,
+				ID:        "a",
+				Remove:    "remove",
+				RemovedBy: []string{"b"},
+			},
+			remove: true,
+			wantEnv: types.EnvVars{
+				"_CHECK":      "1",
+				"_REMOVE":     "0",
+				"_REMOVE_OUT": "output",
+			},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{"_CHECK=1"},
+					Exec:        "remove",
+				},
+			},
+			wantOutput: Output{
+				ID:              "a",
+				CheckFailRemove: true,
+				Remove:          "output",
+				Removed:         true,
 			},
 		},
 		"skip": {
+			check: true,
 			cmd: Command{
 				ID:     "a",
 				Remove: "remove",
 			},
-			mode: ModeCheck,
 			wantEnv: types.EnvVars{
 				"_CHECK": "0",
 			},
@@ -98,7 +216,6 @@ func TestCommandRun(t *testing.T) {
 				EnvPrefix: "a",
 				ID:        "a",
 			},
-			mode: ModeChange,
 			wantEnv: types.EnvVars{
 				"a_CHECK":     "0",
 				"a_CHECK_OUT": "output",
@@ -115,6 +232,7 @@ func TestCommandRun(t *testing.T) {
 			},
 		},
 		"check_error_check_only": {
+			check: true,
 			cmd: Command{
 				Change:    "change",
 				Check:     "check",
@@ -124,7 +242,6 @@ func TestCommandRun(t *testing.T) {
 			mockErrs: []error{
 				ErrCommandsSelfTarget,
 			},
-			mode: ModeCheck,
 			wantEnv: types.EnvVars{
 				"a_CHECK":     "1",
 				"a_CHECK_OUT": "output",
@@ -135,10 +252,10 @@ func TestCommandRun(t *testing.T) {
 				},
 			},
 			wantOutput: Output{
-				Check:     "output",
-				Checked:   true,
-				CheckFail: true,
-				ID:        "a",
+				Check:           "output",
+				Checked:         true,
+				CheckFailChange: true,
+				ID:              "a",
 			},
 		},
 		"check_error_no_change": {
@@ -150,7 +267,6 @@ func TestCommandRun(t *testing.T) {
 			mockErrs: []error{
 				ErrCommandsSelfTarget,
 			},
-			mode: ModeChange,
 			wantEnv: types.EnvVars{
 				"a_CHECK":     "1",
 				"a_CHECK_OUT": "output",
@@ -161,10 +277,10 @@ func TestCommandRun(t *testing.T) {
 				},
 			},
 			wantOutput: Output{
-				Check:     "output",
-				Checked:   true,
-				CheckFail: true,
-				ID:        "a",
+				Check:           "output",
+				Checked:         true,
+				CheckFailChange: true,
+				ID:              "a",
 			},
 		},
 		"check_error_change_error": {
@@ -178,7 +294,6 @@ func TestCommandRun(t *testing.T) {
 				ErrCommandsSelfTarget,
 				ErrCommandsIDRequired,
 			},
-			mode: ModeChange,
 			wantEnv: types.EnvVars{
 				"a_CHANGE":     "1",
 				"a_CHANGE_OUT": "output2",
@@ -196,13 +311,13 @@ func TestCommandRun(t *testing.T) {
 				},
 			},
 			wantOutput: Output{
-				Change:     "output2",
-				Changed:    true,
-				ChangeFail: true,
-				Check:      "output",
-				Checked:    true,
-				CheckFail:  true,
-				ID:         "a",
+				Change:          "output2",
+				Changed:         true,
+				ChangeFail:      true,
+				Check:           "output",
+				Checked:         true,
+				CheckFailChange: true,
+				ID:              "a",
 			},
 		},
 		"check_error_change": {
@@ -215,7 +330,6 @@ func TestCommandRun(t *testing.T) {
 			mockErrs: []error{
 				ErrCommandsSelfTarget,
 			},
-			mode: ModeChange,
 			wantEnv: types.EnvVars{
 				"a_CHANGE":     "0",
 				"a_CHANGE_OUT": "output2",
@@ -232,12 +346,61 @@ func TestCommandRun(t *testing.T) {
 				},
 			},
 			wantOutput: Output{
-				Change:    "output2",
-				Changed:   true,
-				Check:     "output",
-				Checked:   true,
-				CheckFail: true,
+				Change:          "output2",
+				Changed:         true,
+				Check:           "output",
+				Checked:         true,
+				CheckFailChange: true,
+				ID:              "a",
+			},
+		},
+		"change_always": {
+			cmd: Command{
+				Always: true,
+				Change: "change",
+				ID:     "a",
+			},
+			wantEnv: types.EnvVars{
+				"_CHECK":      "1",
+				"_CHANGE":     "0",
+				"_CHANGE_OUT": "output",
+			},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{"_CHECK=1"},
+					Exec:        "change",
+				},
+			},
+			wantOutput: Output{
+				CheckFailChange: true,
+				Change:          "output",
+				Changed:         true,
+				ID:              "a",
+			},
+		},
+		"change_changedBy": {
+			cmd: Command{
+				Always:    true,
+				Change:    "change",
+				ChangedBy: []string{"b"},
 				ID:        "a",
+			},
+			wantEnv: types.EnvVars{
+				"_CHECK":      "1",
+				"_CHANGE":     "0",
+				"_CHANGE_OUT": "output",
+			},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{"_CHECK=1"},
+					Exec:        "change",
+				},
+			},
+			wantOutput: Output{
+				Change:          "output",
+				Changed:         true,
+				ID:              "a",
+				CheckFailChange: true,
 			},
 		},
 	}
@@ -251,7 +414,7 @@ func TestCommandRun(t *testing.T) {
 
 			out, env, err := tc.cmd.Run(ctx, c, tc.env, Exec{
 				AllowOverride: tc.execOverride,
-			}, tc.mode)
+			}, tc.check, tc.remove)
 
 			assert.Equal(t, out, &tc.wantOutput)
 			assert.Equal(t, env, tc.wantEnv)

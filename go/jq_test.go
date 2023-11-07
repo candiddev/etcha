@@ -70,7 +70,7 @@ func TestJQ(t *testing.T) {
 				"oops",
 			},
 			wantErr: errJQ,
-			wantOut: "ERROR go/jq.go:56\nerror querying JSON: function not defined: oops/0\n",
+			wantOut: "ERROR error querying JSON: function not defined: oops/0\n",
 		},
 	}
 

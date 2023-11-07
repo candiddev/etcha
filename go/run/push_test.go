@@ -167,9 +167,11 @@ func TestPush(t *testing.T) {
 			path:       "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check2"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "check1"},
 			},
 			wantResult: &Result{
 				ChangedIDs: []string{"2"},
+				RemovedIDs: []string{"1"},
 			},
 		},
 		{
@@ -179,11 +181,12 @@ func TestPush(t *testing.T) {
 			path:        "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check2"},
-				{Environment: []string{"_CHECK=0", "_CHECK_OUT=a"}, Exec: "remove1"},
+				{Environment: []string{"_CHECK=0", "_CHECK_OUT=a"}, Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=b"}, Exec: "remove1"},
 			},
 			wantResult: &Result{
 				RemovedIDs:     []string{"1"},
-				RemovedOutputs: []string{"b"},
+				RemovedOutputs: []string{"c"},
 			},
 		},
 		{
@@ -193,13 +196,17 @@ func TestPush(t *testing.T) {
 			signingKey:  prv1,
 			wantInputs: []cli.RunMockInput{
 				{Environment: []string{"_CHECK=1"}, Exec: "/usr/bin/ls"},
-				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1"}, Exec: "remove2"},
+				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1"}, Exec: "check2"},
+				{
+					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1", "_CHECK_OUT=b"},
+					Exec:        "remove2",
+				},
 			},
 			wantResult: &Result{
 				ChangedIDs:     []string{"etcha push"},
 				ChangedOutputs: []string{"a"},
 				RemovedIDs:     []string{"2"},
-				RemovedOutputs: []string{"b"},
+				RemovedOutputs: []string{"c"},
 			},
 		},
 	}

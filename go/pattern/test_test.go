@@ -51,6 +51,15 @@ func TestTest(t *testing.T) {
 		ErrBuildEmpty,
 		ErrBuildEmpty,
 		ErrBuildEmpty,
+		nil,
+		nil,
+		ErrBuildEmpty,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		ErrBuildEmpty,
 	})
 
 	r, err := Test(ctx, c, "/asdfasdjzcbjzxkbjxcb", true)

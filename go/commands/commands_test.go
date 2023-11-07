@@ -28,6 +28,12 @@ var cmdA = &Command{
 		"f",
 		"etcha:fail",
 	},
+	OnRemove: []string{
+		"e",
+		"etcha:hello",
+		"etcha:stderr",
+		"etcha:stdout",
+	},
 }
 var cmdB = &Command{
 	Change: "changeB",
@@ -91,6 +97,12 @@ func TestCommandsDiff(t *testing.T) {
 				"f",
 				"etcha:fail",
 			},
+			OnRemove: []string{
+				"e",
+				"etcha:hello",
+				"etcha:stderr",
+				"etcha:stdout",
+			},
 		},
 		&b,
 		&g,
@@ -104,12 +116,13 @@ func TestCommandsRun(t *testing.T) {
 	logger.UseTestLogger(t)
 
 	tests := map[string]struct {
+		check        bool
 		cmds         Commands
 		env          types.EnvVars
 		execOverride bool
 		mockErrs     []error
 		mockOutputs  []string
-		mode         Mode
+		remove       bool
 		wantErr      error
 		wantInputs   []cli.RunMockInput
 		wantOut      string
@@ -123,15 +136,27 @@ func TestCommandsRun(t *testing.T) {
 			env: types.EnvVars{
 				"hello": "world",
 			},
-			mockOutputs: []string{"output1", "output2"},
-			mode:        ModeRemove,
+			mockOutputs: []string{"output1", "", "output2"},
+			remove:      true,
 			wantInputs: []cli.RunMockInput{
 				{
-					Environment: []string{"hello=world"},
+					Environment: []string{"g_CHECK=1", "hello=world"},
 					Exec:        "removeG",
 				},
 				{
 					Environment: []string{
+						"g_CHECK=1",
+						"g_REMOVE=0",
+						"g_REMOVE_OUT=output1",
+						"hello=world",
+					},
+					Exec: "checkA",
+				},
+				{
+					Environment: []string{
+						"_CHECK=1",
+						"_CHECK_OUT=",
+						"g_CHECK=1",
 						"g_REMOVE=0",
 						"g_REMOVE_OUT=output1",
 						"hello=world",
@@ -139,17 +164,21 @@ func TestCommandsRun(t *testing.T) {
 					Exec: "removeA",
 				},
 			},
-			wantOut: "INFO  commands/command.go:63\nRemoving g...\nINFO  commands/command.go:63\nRemoving a...\n",
+			wantOut: "INFO  Always removing g...\nINFO  Removing a...\noutput2output2",
 			wantOutputs: Outputs{
 				&Output{
-					ID:      "g",
-					Remove:  "output1",
-					Removed: true,
+					ID:              "g",
+					CheckFailRemove: true,
+					Remove:          "output1",
+					Removed:         true,
 				},
 				&Output{
-					ID:      "a",
-					Remove:  "output2",
-					Removed: true,
+					ID:              "a",
+					Checked:         true,
+					CheckFailRemove: true,
+					Events:          []string{"hello", "stderr", "stdout"},
+					Remove:          "output2",
+					Removed:         true,
 				},
 			},
 		},
@@ -168,7 +197,6 @@ func TestCommandsRun(t *testing.T) {
 				"a",
 				"a",
 			},
-			mode: ModeChange,
 			wantInputs: []cli.RunMockInput{
 				{
 					Exec: "checkA",
@@ -191,32 +219,33 @@ func TestCommandsRun(t *testing.T) {
 					Exec: "changeG",
 				},
 			},
-			wantOut: "INFO  commands/command.go:131\nChanging a...\naaINFO  commands/command.go:131\nTriggering e via a...\nINFO  commands/command.go:131\nAlways changing g...\n",
+			wantOut: "INFO  Changing a...\naaINFO  Triggering e via a...\nINFO  Always changing g...\n",
 			wantOutputs: Outputs{
 				&Output{
-					Change:    "a",
-					Changed:   true,
-					Check:     "a",
-					CheckFail: true,
-					Checked:   true,
-					ID:        "a",
-					Events:    []string{"hello", "stderr", "stdout"},
+					Change:          "a",
+					Changed:         true,
+					Check:           "a",
+					CheckFailChange: true,
+					Checked:         true,
+					ID:              "a",
+					Events:          []string{"hello", "stderr", "stdout"},
 				},
 				&Output{
 					Checked: true,
 					ID:      "c",
 				},
 				&Output{
-					Changed: true,
-					Checked: false,
-					ID:      "e",
+					Changed:         true,
+					CheckFailChange: true,
+					ID:              "e",
 				},
 				&Output{
 					ID: "f",
 				},
 				&Output{
-					Changed: true,
-					ID:      "g",
+					CheckFailChange: true,
+					Changed:         true,
+					ID:              "g",
 				},
 			},
 		},
@@ -233,7 +262,6 @@ func TestCommandsRun(t *testing.T) {
 				ErrCommandsEmpty,
 				ErrCommandsIDRequired,
 			},
-			mode:    ModeChange,
 			wantErr: ErrCommandsIDRequired,
 			wantInputs: []cli.RunMockInput{
 				{
@@ -254,12 +282,12 @@ func TestCommandsRun(t *testing.T) {
 			},
 			wantOutputs: Outputs{
 				&Output{
-					Changed:    true,
-					ChangeFail: true,
-					CheckFail:  true,
-					Checked:    true,
-					Events:     []string{"fail"},
-					ID:         "a",
+					Changed:         true,
+					ChangeFail:      true,
+					CheckFailChange: true,
+					Checked:         true,
+					Events:          []string{"fail"},
+					ID:              "a",
 				},
 				&Output{
 					Changed: true,
@@ -283,7 +311,7 @@ func TestCommandsRun(t *testing.T) {
 
 			out, err := tc.cmds.Run(ctx, c, tc.env, &Exec{
 				AllowOverride: tc.execOverride,
-			}, tc.mode)
+			}, tc.check, tc.remove)
 
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, out, tc.wantOutputs)

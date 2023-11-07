@@ -32,28 +32,45 @@ func TestTest(t *testing.T) {
 			ErrCommandsEmpty, // check
 			ErrCommandsEmpty, // change
 			nil,              // check
+			nil,              // check
 			nil,              // remove
+			ErrCommandsEmpty, // check
 			ErrCommandsEmpty, // check
 		},
 		testCheckChange: {
 			ErrCommandsEmpty, // check
 			nil,              // change
 			ErrCommandsEmpty, // check
+			nil,              // check
 			nil,              // remove
+			ErrCommandsEmpty, // check
 			ErrCommandsEmpty, // check
 		},
 		testRemoveError: {
 			ErrCommandsEmpty, // check
 			nil,              // change
 			nil,              // check
+			nil,              // check
 			ErrCommandsEmpty, // remove
+			ErrCommandsEmpty, // check
 			ErrCommandsEmpty, // check
 		},
 		testCheckRemove: {
 			ErrCommandsEmpty, // check
 			nil,              // change
 			nil,              // check
+			nil,              // check
 			nil,              // remove
+			nil,              // check
+			ErrCommandsEmpty, // check
+		},
+		testCheck: {
+			ErrCommandsEmpty, // check
+			nil,              // change
+			nil,              // check
+			nil,              // check
+			nil,              // remove
+			ErrCommandsEmpty, // check
 			nil,              // check
 		},
 	}

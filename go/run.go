@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/etcha/go/pattern"
 	"github.com/candiddev/etcha/go/run"
@@ -23,16 +22,12 @@ func runCommands(ctx context.Context, args []string, c *config.Config) errs.Err 
 			return err
 		}
 
-		m := commands.ModeChange
-
-		switch args[0] {
-		case "local-check":
-			m = commands.ModeChange
-		case "local-remove":
-			m = commands.ModeRemove
+		check := false
+		if s := c.Sources[source]; s != nil {
+			check = s.CheckOnly
 		}
 
-		_, err = p.Run.Run(ctx, c.CLI, p.RunEnv, p.RunExec, m)
+		_, err = p.Run.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, args[0] == "local-remove")
 
 		return err
 	}

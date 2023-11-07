@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
@@ -26,7 +25,7 @@ func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination s
 	}
 
 	if len(p.Build) > 0 {
-		out, err := p.Build.Run(ctx, c.CLI, nil, p.BuildExec, commands.ModeChange)
+		out, err := p.Build.Run(ctx, c.CLI, nil, p.BuildExec, false, false)
 		if err != nil {
 			f.Close()
 			os.Remove(destination + ".tmp") //nolint:errcheck

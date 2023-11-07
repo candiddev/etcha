@@ -97,7 +97,7 @@ A Command is ran within three different operating modes:
 
 ### Change (default) {#change-mode}
 
-The default, will always run [`check`](#check) if specified, and run [`change`](#change) if [`always`](#always) is true, `check` is non-zero, or the [`id`](#id) is [`changed by`](#onChange) another command.
+The default, will always run [`check`](#check) if specified, and run [`change`](#change) if [`always`](#always) is true, `check` is non-zero, or the [`id`](#id) is [`changed by`](#on) another command.
 
 For push and pull, Etcha by default diff Patterns and run checks and changes for Commands that have a different [`change`](#change) or [`check`](#check) value, as well as the `change` value of any Command with [`always`](#always) set to `true`.
 
@@ -107,9 +107,9 @@ Will always run [`check`](#check) if specified only.  [Sources](../config#source
 
 ### Remove {#remove-mode}
 
-Will run [`remove`](#remove) for all commands in reverse order.   Can be ran directly on patterns using [`etcha remove`](../cli#remove).
+Will always run [`check`](#check) if specified, and run [`remove`](#remove) if [`always`](#always) is true, `check` is zero, or the [`id`](#id) is [`removed by`](#on) another command.
 
-For push and pull, Etcha by default diff Patterns and run remove for Commands successfully applied that are no longer in the latest Pattern.
+For push and pull, Etcha by default diff Patterns and run checks and removes for Commands that are no longer present in the new Pattern.
 
 ## Properties
 
@@ -123,7 +123,7 @@ String, the commands or executable to run during [Change Mode](#change-mode).  C
 
 ### `check`
 
-String, the commands or executable to run during [Change Mode](#change-mode) or [Check Mode](#check-mode).  Can be multiple lines.  Will be appended to `exec.command`.  Should return 0 if nothing needs to be changed, otherwise [`change`](#change) will be ran in [Change Mode](#change-mode).  If omitted, [`change`](#change) will never run unless [`always`](#always) is `true` or [`id`](#id) is changed by another Command via [`onChange`](#onChange)
+String, the commands or executable to run during [Change Mode](#change-mode) or [Check Mode](#check-mode).  Can be multiple lines.  Will be appended to `exec.command`.  If this returns 0, [`remove`](#remove) will be ran in [Remove Mode](#remove-mode).  If this does not return 0, [`change`](#change) will be ran in [Change Mode](#change-mode).  If omitted, [`change`](#change) or [`remove`](#remove) will never run unless [`always`](#always) is `true` or [`id`](#id) is changed by another Command via [`onChange`](#onChange) or removed by another Command via [`onRemove`](#onRemove)
 
 ### `envPrefix`
 
@@ -137,9 +137,9 @@ See [`exec`](../config#exec).  Specifies a custom exec configuration for this co
 
 An ID for the Command.  Must be specified.  Can overlap with other Commands.
 
-### `onChange` and `onFail`
+### `onChange`, `onFail`, `onRemove` {#on}
 
-A list of other Command [`id`s](#id) to run, or a list of [Events](../events) to trigger, if this Command changes or fails.  Event names must be prefixed with `etcha:`.  Cannot specify the current command ID (can't target self).  Targets must exist and occur after the current Command in the Command list or there will be an error during compilation.
+A list of other Command [`id`s](#id) to run, or a list of [Events](../events) to trigger, if this Command changes, removes or fails.  Event names must be prefixed with `etcha:`.  Cannot specify the current command ID (can't target self).  For onChange, targets must exist and occur after the current Command in the Command list (onRemove is the opposite, must occur before), or there will be an error during compilation.
 
 ### `remove`
 

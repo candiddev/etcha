@@ -138,7 +138,8 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeRemove), len(r.RemovedIDs))
 
 		if check {
-			r.ChangedIDs = o.CheckFail()
+			r.ChangedIDs = o.CheckFail(false)
+			r.RemovedIDs = o.CheckFail(true)
 
 			return &r, logger.Error(ctx, nil)
 		}
@@ -236,12 +237,7 @@ func (s *state) loadExecJWTs(ctx context.Context) {
 		if err == nil {
 			logger.Info(ctx, fmt.Sprintf("Loading existing config for %s...", n))
 
-			m := commands.ModeChange
-			if s.Config.Sources[n].CheckOnly {
-				m = commands.ModeCheck
-			}
-
-			if _, err := p.Run.Run(ctx, s.Config.CLI, p.RunEnv, p.RunExec, m); err == nil {
+			if _, err := p.Run.Run(ctx, s.Config.CLI, p.RunEnv, p.RunExec, s.Config.Sources[n].CheckOnly, false); err == nil {
 				s.JWTs.Set(n, j)
 				s.Patterns.Set(n, p)
 			} else {

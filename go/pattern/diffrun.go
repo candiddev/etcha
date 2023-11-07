@@ -42,27 +42,20 @@ func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, c
 		return o, nil
 	}
 
-	m := commands.ModeChange
-	if check {
-		m = commands.ModeCheck
-	}
-
 	var err errs.Err
 
-	o, err = change.Run(ctx, c.CLI, p.RunEnv, p.RunExec, m)
+	o, err = change.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, false)
 
 	if err != nil {
 		return o, logger.Error(ctx, err)
 	}
 
-	if !check {
-		removeOut, err := remove.Run(ctx, c.CLI, p.RunEnv, p.RunExec, commands.ModeRemove)
+	removeOut, err := remove.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, true)
 
-		o = append(o, removeOut...)
+	o = append(o, removeOut...)
 
-		if err != nil {
-			return o, logger.Error(ctx, err)
-		}
+	if err != nil {
+		return o, logger.Error(ctx, err)
 	}
 
 	return o, logger.Error(ctx, nil)

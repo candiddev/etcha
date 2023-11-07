@@ -63,7 +63,7 @@ func (cmds Commands) Diff(old Commands) (change Commands, remove Commands) {
 }
 
 // Run the commands, either as change (default) or remove, and optionally as check only.
-func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, exe *Exec, m Mode) (out Outputs, err errs.Err) { //nolint:gocognit
+func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, exe *Exec, check bool, remove bool) (out Outputs, err errs.Err) { //nolint:gocognit,gocyclo,revive
 	cout := Outputs{}
 
 	var exec Exec
@@ -71,7 +71,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 		exec = *exe
 	}
 
-	if m == ModeRemove {
+	if remove {
 		c := Commands{}
 
 		for i := range cmds {
@@ -84,11 +84,11 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 	for i, cmd := range cmds {
 		var out *Output
 
-		out, env, err = cmd.Run(ctx, c, env, exec, m)
+		out, env, err = cmd.Run(ctx, c, env, exec, check, remove)
 		cout = append(cout, out)
 
 		if err != nil {
-			if m == ModeChange {
+			if !check && !remove {
 				// Parse events
 				for k := range cmd.OnFail {
 					if strings.HasPrefix(cmd.OnFail[k], "etcha:") {
@@ -138,24 +138,49 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 			return cout, logger.Error(ctx, err)
 		}
 
-		if m == ModeChange && out.Changed {
-			for _, id := range cmd.OnChange {
-				if strings.HasPrefix(id, "etcha:") {
-					switch id {
-					case "etcha:stderr":
-						fmt.Fprint(logger.Stderr, out.Change) //nolint:forbidigo
-					case "etcha:stdout":
-						fmt.Fprint(logger.Stdout, out.Change) //nolint:forbidigo
+		if !check {
+			if !remove && out.Changed {
+				for _, id := range cmd.OnChange {
+					if strings.HasPrefix(id, "etcha:") {
+						switch id {
+						case "etcha:stderr":
+							fmt.Fprint(logger.Stderr, out.Change) //nolint:forbidigo
+						case "etcha:stdout":
+							fmt.Fprint(logger.Stdout, out.Change) //nolint:forbidigo
+						}
+
+						out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
+
+						continue
 					}
 
-					out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
-
-					continue
+					for i := range cmds {
+						if cmds[i].ID == id {
+							cmds[i].ChangedBy = append(cmds[i].ChangedBy, cmd.ID)
+						}
+					}
 				}
+			}
 
-				for i := range cmds {
-					if cmds[i].ID == id {
-						cmds[i].ChangedBy = append(cmds[i].ChangedBy, cmd.ID)
+			if remove && out.Removed {
+				for _, id := range cmd.OnRemove {
+					if strings.HasPrefix(id, "etcha:") {
+						switch id {
+						case "etcha:stderr":
+							fmt.Fprint(logger.Stderr, out.Remove) //nolint:forbidigo
+						case "etcha:stdout":
+							fmt.Fprint(logger.Stdout, out.Remove) //nolint:forbidigo
+						}
+
+						out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
+
+						continue
+					}
+
+					for i := range cmds {
+						if cmds[i].ID == id {
+							cmds[i].RemovedBy = append(cmds[i].RemovedBy, cmd.ID)
+						}
 					}
 				}
 			}
@@ -210,9 +235,13 @@ func (cmds Commands) Validate(ctx context.Context) errs.Err { //nolint:gocognit
 
 		target := "onChange"
 
-		for _, id := range append(cmd.OnChange, append([]string{"fail"}, cmd.OnFail...)...) {
+		for _, id := range append(append(cmd.OnChange, append([]string{"fail"}, cmd.OnFail...)...), append([]string{"remove"}, cmd.OnRemove...)...) {
 			if id == "fail" {
 				target = "onFail"
+
+				continue
+			} else if id == "remove" {
+				target = "onRemove" //nolint:goconst
 
 				continue
 			}
@@ -229,7 +258,7 @@ func (cmds Commands) Validate(ctx context.Context) errs.Err { //nolint:gocognit
 
 			for j, cmd := range cmds {
 				if cmd.ID == id {
-					if j < i {
+					if (j < i && target != "onRemove") || (i > j && target == "onRemove") {
 						r[cmd.ID] = append(r[cmd.ID], fmt.Sprintf("%s target %s has been ran already", target, id))
 					}
 
