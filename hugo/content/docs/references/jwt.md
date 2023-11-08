@@ -114,7 +114,7 @@ Etcha adds the following claims to JWTs:
 
 ##### `etchaBuildManifest`
 
-String, for [Commands](../commands) that produce the event `build_manifest`, the output of executing [`change`](../commands#change) is concated into this property.  This property is primarily used for cache busting/forcing a JWT to be downloaded during a run diff, but it could contain useful data around secure supply chain or patch versions.
+String, for [Commands](../commands) that produce the event [`buildManifest`](../events#buildManifest), the output of executing [`change`](../commands#change) is concated into this property.  This property is primarily used for cache busting/forcing a JWT to be downloaded during a run diff, but it could contain useful data around secure supply chain or patch versions.
 
 ##### `etchaPattern`
 
@@ -145,8 +145,9 @@ When this JWT is pulled or pushed, Etcha will [render the Pattern](../patterns#r
 
 ##### `etchaRunEnv`
 
-A map of string keys and values containing environment variables.  These environment variables will be added to the existing `runEnv` keys in [Patterns](../patterns#runenv) with the prefix `etcha_run_`, i.e. `{"key":"value"}` becomes `etcha_run_key=value`.  All values will be added to the [Commands Environment Variables](../commands#environment-variables) during a Pattern run.
+A map of [Environment Variables](../commands#environment-variables) that will be added to [Commands](../commands) when the Patter is run.
 
+The keys must be valid Environment Variable names.  `etcha_run_` will be prepended to the key names.
 
 ##### `etchaVersion`
 

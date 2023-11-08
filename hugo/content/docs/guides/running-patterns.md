@@ -29,8 +29,8 @@ local restart = function(name)
       change: 'make %s' % app_name,
       id: 'build %s' % app_name,
       onChange: [
-        'etcha:build_manifest',
-        'etcha:run_env_myapp',
+        'etcha:buildManifest',
+        'etcha:runEnv_myapp',
       ]
     },
   ],
@@ -259,7 +259,7 @@ Events are handled in the order they were sent from the Commands, and Sources ar
 
 [Sources](#sources) can be configured to receive **Webhooks**.  Each Source can define [`webhookPaths`](../../references/config#webhookpaths) that Etcha will listen for requests on.  The requests can use any HTTP method, like `GET` or `POST`.  Etcha will accept the request, convert it into base64, add it and other request values into various [Environment Variables](../../references/commands#environment-variables), and execute the associated Pattern's `run` Commands.
 
-These `Commands` must emit the [`webhook_body`](../../references/event#webhook-body) Event, which will be sent back to the Webhook client.  If no `webhook_body` is received from any source, or a Source is not found associated with the Webhook path, Etcha will send a 404.
+These `Commands` must emit the [`webhookBody`](../../references/event#webhookbody) Event, which will be sent back to the Webhook client.  If no `webhookBody` is received from any source, or a Source is not found associated with the Webhook path, Etcha will send a 404.
 
 Sources will handle Webhooks alphabetically:
 
@@ -278,4 +278,4 @@ Sources will handle Webhooks alphabetically:
 }
 ```
 
-In this example, `pattern1` will receive the Webhook for `/mypath` first.  If it does not receive a `webhook_body`, it will send the Webhook to `pattern2`.  Events created by Commands ran when handling a Webhook **will not trigger Sources**.
+In this example, `pattern1` will receive the Webhook for `/mypath` first.  If it does not receive a `webhookBody`, it will send the Webhook to `pattern2`.  Events created by Commands ran when handling a Webhook **will not trigger Sources**.

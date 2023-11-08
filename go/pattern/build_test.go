@@ -30,8 +30,8 @@ func TestPatternBuildSign(t *testing.T) {
 				Change: "a",
 				ID:     "a",
 				OnChange: []string{
-					"etcha:build_manifest",
-					"etcha:run_env_hello",
+					"etcha:buildManifest",
+					"etcha:runEnv_hello",
 				},
 			},
 		},

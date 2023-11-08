@@ -100,8 +100,8 @@ local restart = function(name)
       change: 'make %s' % app_name,
       id: 'build %s' % app_name,
       onChange: [
-        'etcha:build_manifest',
-        'etcha:run_env_myapp',
+        'etcha:buildManifest',
+        'etcha:runEnv_myapp',
       ]
     },
   ],
@@ -125,7 +125,7 @@ We'll run [`etcha -c config.jsonnet build patterns/myapp.jsonnet myapp.jwt myapp
 1. Import the Pattern Jsonnet file, `myapp.jsonnet`, and any other files it imports
 2. Render the Pattern Jsonnet file
 3. Run all of the [Commands](../../references/commands) in `build` in **Change Mode**.  Optionally using the [`Source`](../../references/config#sources) configuration [`exec`](../../references/config#exec), `myapp`, specified by the last parameter.
-4. Collect metadata from these Commands to populate the [JWT](../../references/jwt), like [`build_manifest`](../../references/events#build_manifest) and [`run_env_*`](../../references/events#build_manifest).  In our Pattern, the build command `build %s` will fire these events, and these values will contain the stdout of the `change` execution.
+4. Collect metadata from these Commands to populate the [JWT](../../references/jwt), like [`buildManifest`](../../references/events#buildManifest) and [`runEnv_`](../../references/events#runEnv).  In our Pattern, the build command `build %s` will fire these events, and these values will contain the stdout of the `change` execution.
 5. Create a JWT containing the _raw Pattern Jsonnet files_ collected in step 1, the metadata collected in step 4, and any JWT values set in our Pattern.
 6. Sign the JWT using [`signingKey`](#signingkey) or [`signingCommands`](#signing-commands)
 7. Save the JWT file to `myapp.jwt`, the parameter after the path to the Pattern.

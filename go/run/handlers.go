@@ -150,13 +150,13 @@ func (s *state) initHandlers(ctx context.Context) errs.Err { //nolint:gocognit
 				}, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), false, false)
 				if err == nil {
 					for _, event := range out.Events() {
-						if event.Name == "webhook_body" && len(event.Outputs) > 0 {
+						if event.Name == "webhookBody" && len(event.Outputs) > 0 {
 							resBody = string(event.Outputs[0].Change)
 
 							continue
 						}
 
-						if event.Name == "webhook_content_type" && len(event.Outputs) > 0 {
+						if event.Name == "webhookContentType" && len(event.Outputs) > 0 {
 							resCT = string(event.Outputs[0].Change)
 
 							continue

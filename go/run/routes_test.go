@@ -114,7 +114,7 @@ func TestHandlers(t *testing.T) {
 				Change: "a",
 				ID:     "a",
 				OnChange: []string{
-					"etcha:webhook_body",
+					"etcha:webhookBody",
 				},
 			},
 			{
@@ -122,7 +122,7 @@ func TestHandlers(t *testing.T) {
 				Change: "b",
 				ID:     "b",
 				OnChange: []string{
-					"etcha:webhook_content_type",
+					"etcha:webhookContentType",
 				},
 			},
 		},

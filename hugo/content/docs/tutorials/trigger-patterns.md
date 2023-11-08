@@ -44,7 +44,7 @@ We need to use a custom network so our Etcha containers can communicate with eac
       change: 'if [[ ${ETCHA_SOURCE_TRIGGER} == "event" ]]; then env > env; else env; fi',
       id: 'write env',
       onChange: [
-        'etcha:webhook_body',
+        'etcha:webhookBody',
       ],
       remove: 'rm env',
     },
@@ -55,7 +55,7 @@ We need to use a custom network so our Etcha containers can communicate with eac
 }
 ```
 
-This Pattern will output the environment to a file `env` when the Pattern is ran via `event`, otherwise it will send it stdout and the event `webhook_body`.
+This Pattern will output the environment to a file `env` when the Pattern is ran via `event`, otherwise it will send it stdout and the event `webhookBody`.
 
 5. Create another new file under `patterns` called `trigger.jsonnet`.  Add in this content:
 

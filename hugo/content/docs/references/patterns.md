@@ -51,7 +51,7 @@ A map of [Environment Variables](../commands#environment-variables) that will be
 
 The keys must be valid Environment Variable names.  `etcha_run_` will be prepended to the key names.
 
-Additional environment variables will be added to this property  from the JWT during a run via build commands that fire the [`run_env_`](../events#run_env_) event.
+Additional environment variables will be added to this property from the JWT during a run via build commands that fire the [`runEnv_`](../events#runEnv_) event.
 
 ### `runExec`
 

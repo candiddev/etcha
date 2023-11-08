@@ -24,7 +24,7 @@ local n = import '../lib/etcha/native.libsonnet';
       change: 'cat /work/helloworld',
       id: 'read file',
       onChange: [
-        'etcha:build_manifest',
+        'etcha:buildManifest',
       ],
     },
   ],

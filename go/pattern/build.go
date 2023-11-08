@@ -34,7 +34,7 @@ func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination s
 		}
 
 		for _, event := range out.Events() {
-			if event.Name == "build_manifest" {
+			if event.Name == "buildManifest" {
 				for _, output := range event.Outputs {
 					buildManifest += output.Change.String()
 				}
@@ -42,7 +42,7 @@ func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination s
 				continue
 			}
 
-			if s := strings.Split(event.Name, "run_env_"); len(s) == 2 {
+			if s := strings.Split(event.Name, "runEnv_"); len(s) == 2 {
 				for _, output := range event.Outputs {
 					runEnv[s[1]] = output.Change.String()
 				}
