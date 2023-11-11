@@ -409,14 +409,19 @@ List of HTTP paths to listen for webhooks.  See [Running Patterns](../../guides/
 
 **Default:** `[]`
 
-## `test`
-
-Boolean, set to `true` when Etcha is running [`lint`](../cli#lint) or [`test`](../cli#test).  Can also be set manually.  Useful for manipulating the rendering of [Patterns](../patterns) and [Commands](../commands) for testing.  See [Linting Patterns](../../guides/linting-patterns) and [Testing Patterns](../../guides/testing-patterns) for more information.
-
-**Default:** `false`
-
 ## `vars`
 
 A map of strings and any type of value.  Can be used during rendering to get/set values.  See [Patterns - Variables](../references/patterns#variables), [Building Patterns](../../guides/building-patterns), and [Running Patterns](../../running-patterns) for more information.
 
 **Default:** `{}`
+
+During a Pattern [`build`](../../guides/building-patterns), the following additional `vars` will be set: 
+
+- `dstDir`: String, the directory of the output JWT file.
+- `dstPath`: String, the path of the output JWT file.
+- `srcDir`: String, the directory of the Pattern being built.
+- `srcPath`: String, the path of the Pattern being built.
+
+During a Pattern [`test`](../../guides/testing-patterns), the following additional `vars` will be set:
+
+- `test`: Boolean, will be `true`

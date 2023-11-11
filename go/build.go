@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/etcha/go/pattern"
@@ -16,6 +17,9 @@ func build(ctx context.Context, args []string, c *config.Config) errs.Err {
 	if len(args) == 4 {
 		configSource = args[3]
 	}
+
+	c.Vars["buildDir"] = filepath.Dir(source)
+	c.Vars["buildPath"] = source
 
 	p, err := pattern.ParsePatternFromPath(ctx, c, configSource, source)
 	if err != nil {

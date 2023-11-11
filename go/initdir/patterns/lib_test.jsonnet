@@ -2,12 +2,12 @@ local apt = import '../lib/etcha/apt.libsonnet';
 local aptKey = import '../lib/etcha/aptKey.libsonnet';
 local copy = import '../lib/etcha/copy.libsonnet';
 local dir = import '../lib/etcha/dir.libsonnet';
+local etchaInstall = import '../lib/etcha/etchaInstall.libsonnet';
 local file = import '../lib/etcha/file.libsonnet';
 local mount = import '../lib/etcha/mount.libsonnet';
 local password = import '../lib/etcha/password.libsonnet';
 local symlink = import '../lib/etcha/symlink.libsonnet';
 local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
-
 {
   run: [
     apt(package='fonts-fantasque-sans'),
@@ -15,6 +15,8 @@ local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
     copy(src='https://candid.dev/sitemap.xml', dst='testdata/sitemap.xml'),
     copy(src='testdata/sitemap.xml', dst='testdata/sitemap2.xml'),
     dir(mode='0644', path='testdata/test'),
+    etchaInstall(cacheDir='testdata/test', dst='testdata/etcha'),
+    etchaInstall(dst='testdata/etcha1'),
     file(contents='root:*:19352:0:99999:7:::', group='daemon', ignoreContents=true, owner='daemon', path='testdata/shadow'),
     file(contents='hello', path='testdata/world'),
     file(path='testdata/touch'),
