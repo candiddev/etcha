@@ -33,11 +33,15 @@ This variable will be set for Commands in [`eventReceive`](../config#eventReceiv
 
 ### `ETCHA_JWT`
 
-This variable will be set for [`verifyCommands`]("../config#verifyCommands).  It contains the JWT that needs to be verified.
+This variable will be set for [`verifyCommands`](../config#verifyCommands).  It contains the JWT that needs to be verified.
 
 ### `ETCHA_PAYLOAD`
 
-This variable will be set for [`signCommands`]("../config#signCommands).  It contains the base64 JWT payload that needs to be signed.
+This variable will be set for [`signCommands`](../config#signCommands).  It contains the base64 JWT payload that needs to be signed.
+
+### `ETCHA_RUN_`
+
+This variable will be set for any values specified in [`runEnv`](../patterns#runenv).  `ETCHA_RUN_` will be prepended to the key.
 
 ### `ETCHA_SOURCE_NAME`
 

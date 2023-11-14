@@ -218,5 +218,5 @@ func TestJWTRunEnv(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, j.RunEnv(), []string{"etcha_run_a=b", "etcha_run_c=d", "etcha_run_e=f"})
+	assert.Equal(t, j.RunEnv(), []string{"ETCHA_RUN_a=b", "ETCHA_RUN_c=d", "ETCHA_RUN_e=f"})
 }

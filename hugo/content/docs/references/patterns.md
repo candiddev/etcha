@@ -49,7 +49,7 @@ A list of [Commands](../commands) to execute when a Pattern is push, pulled, man
 
 A map of [Environment Variables](../commands#environment-variables) that will be added to [Commands](../commands) when the Patter is run.
 
-The keys must be valid Environment Variable names.  `etcha_run_` will be prepended to the key names.
+The keys must be valid Environment Variable names.  [`ETCHA_RUN_`](../commands#etcha_run_) will be prepended to the key names.
 
 Additional environment variables will be added to this property from the JWT during a run via build commands that fire the [`runEnv_`](../events#runEnv_) event.
 

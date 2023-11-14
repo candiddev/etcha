@@ -147,7 +147,7 @@ When this JWT is pulled or pushed, Etcha will [render the Pattern](../patterns#r
 
 A map of [Environment Variables](../commands#environment-variables) that will be added to [Commands](../commands) when the Patter is run.
 
-The keys must be valid Environment Variable names.  `etcha_run_` will be prepended to the key names.
+The keys must be valid Environment Variable names.  [`ETCHA_RUN_`](../commands#etcha_run_) will be prepended to the key names.
 
 ##### `etchaVersion`
 

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/errs"
@@ -142,7 +141,7 @@ func (j *JWT) RunEnv() []string {
 	env := []string{}
 
 	for k, v := range j.EtchaRunEnv {
-		env = append(env, strings.ToLower("etcha_run_"+k)+"="+v)
+		env = append(env, "ETCHA_RUN_"+k+"="+v)
 	}
 
 	sort.Strings(env)
