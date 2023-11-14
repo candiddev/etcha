@@ -219,7 +219,7 @@ func TestCommandsRun(t *testing.T) {
 					Exec: "changeG",
 				},
 			},
-			wantOut: "INFO  Changing a...\naaINFO  Triggering e via a...\nINFO  Always changing g...\n",
+			wantOut: "INFO  Changing a...\na\na\nINFO  Triggering e via a...\nINFO  Always changing g...\n",
 			wantOutputs: Outputs{
 				&Output{
 					Change:          "a",

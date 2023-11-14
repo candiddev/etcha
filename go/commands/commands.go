@@ -144,9 +144,9 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 					if strings.HasPrefix(id, "etcha:") {
 						switch id {
 						case "etcha:stderr":
-							fmt.Fprint(logger.Stderr, out.Change) //nolint:forbidigo
+							fmt.Fprintln(logger.Stderr, out.Change) //nolint:forbidigo
 						case "etcha:stdout":
-							fmt.Fprint(logger.Stdout, out.Change) //nolint:forbidigo
+							fmt.Fprintln(logger.Stdout, out.Change) //nolint:forbidigo
 						}
 
 						out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
