@@ -157,7 +157,7 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 			"ETCHA_PAYLOAD": t.PayloadBase64,
 		}
 
-		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, e, c.Exec.Override(c.Build.SigningCommandsExec), false, false)
+		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, e, c.Exec.Override(c.Build.SigningExec), false, false)
 		if err != nil {
 			return "", logger.Error(ctx, err)
 		}

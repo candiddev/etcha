@@ -74,7 +74,7 @@ List of [Commands](../commands) to run when signing a JWT instead of using a [`s
 
 **Default:** `[]`
 
-### `signingCommandsExec`
+### `signingExec`
 
 [Exec](#exec) configuration for running [`signingCommands`](#signingcommands).
 
@@ -277,7 +277,7 @@ List of [Commands](../commands) to run when verifying a JWT instead of using [`v
 
 **Default:** `[]`
 
-### `verifyCommandsExec`
+### `verifyExec`
 
 [Exec](#exec) configuration for running [`verifyCommands`](#verifycommands).
 

@@ -34,11 +34,11 @@ type Config struct {
 
 // Build configures Etcha's build behavior.
 type Build struct {
-	Linters             map[string]*commands.Exec `json:"linters"`
-	PushTLSSkipVerify   bool                      `json:"pushTLSSkipVerify"`
-	SigningCommands     commands.Commands         `json:"signingCommands"`
-	SigningCommandsExec *commands.Exec            `json:"signingExec,omitempty"`
-	SigningKey          cryptolib.KeySign         `json:"signingKey"`
+	Linters           map[string]*commands.Exec `json:"linters"`
+	PushTLSSkipVerify bool                      `json:"pushTLSSkipVerify"`
+	SigningCommands   commands.Commands         `json:"signingCommands"`
+	SigningExec       *commands.Exec            `json:"signingExec,omitempty"`
+	SigningKey        cryptolib.KeySign         `json:"signingKey"`
 }
 
 // Run configures Etcha's runtime behavior.

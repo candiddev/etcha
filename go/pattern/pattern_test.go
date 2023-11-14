@@ -281,7 +281,7 @@ func TestPatternSign(t *testing.T) {
 
 	c.Exec.AllowOverride = true
 	c.Build.SigningKey = cryptolib.KeySign{}
-	c.Build.SigningCommandsExec = &commands.Exec{
+	c.Build.SigningExec = &commands.Exec{
 		Command: "hello",
 	}
 	c.Build.SigningCommands = append(commands.Commands{
