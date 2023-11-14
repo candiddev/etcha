@@ -2,22 +2,22 @@
 
 local file = import './file.libsonnet';
 
-function(contents, dir='/etc/systemd/system', enable=true, name, reload=true, restart=true)
-  local systemd = file(contents=contents, path='%s/%s' % [dir, name]) + {
-    onChange: (
-      if reload then [
-        'systemctl daemon-reload %s' % name,
-      ] else []
-    ) + (
-      if restart then [
-        'systemctl restart %s' % name,
-      ] else []
-    ),
-  };
+function(contents='', dir='/etc/systemd/system', enable=true, name, reload=true, restart=true)
+  local systemd = if contents == '' then [] else [
+    file(contents=contents, path='%s/%s' % [dir, name]) + {
+      onChange: (
+        if reload then [
+          'systemctl daemon-reload %s' % name,
+        ] else []
+      ) + (
+        if restart then [
+          'systemctl restart %s' % name,
+        ] else []
+      ),
+    },
+  ];
 
-  [
-    systemd,
-  ] + (
+  systemd + (
     if reload then [
       {
         id: 'systemctl daemon-reload %s' % name,
@@ -27,7 +27,7 @@ function(contents, dir='/etc/systemd/system', enable=true, name, reload=true, re
   ) + (
     if enable then [
       {
-        change: 'systemctl enable %s' % name,
+        change: 'systemctl enable --now %s' % name,
         check: 'systemctl is-enabled %s' % name,
         id: 'systemctl enable %s' % name,
         remove: 'systemctl disable --now %s' % name,
