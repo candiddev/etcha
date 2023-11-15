@@ -26,6 +26,7 @@ type Exec struct {
 	ContainerVolumes    []string `json:"containerVolumes"`
 	ContainerWorkDir    string   `json:"containerWorkDir"`
 	Environment         []string `json:"environment"`
+	EnvironmentInherit  bool     `json:"environmentInherit"`
 	Group               string   `json:"group"`
 	User                string   `json:"user"`
 	WorkDir             string   `json:"workDir"`
@@ -83,6 +84,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		ContainerVolumes:    e.ContainerVolumes,
 		ContainerWorkDir:    e.ContainerWorkDir,
 		Environment:         e.Environment,
+		EnvironmentInherit:  e.EnvironmentInherit,
 		Group:               e.Group,
 		NoErrorLog:          true,
 		Stdin:               stdin,

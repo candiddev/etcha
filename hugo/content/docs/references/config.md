@@ -191,6 +191,12 @@ List of strings in the format `ENVIRONMENT=value`, will set these as environment
 
 **Default:** `[]`
 
+### `environmentInheirt`
+
+Boolean, whether to inherit the environment of the main Etcha process.
+
+**Default:** `false`
+
 ### `group`
 
 String, the group or GID to run the commands with.  Using this is typically privileged and requires root or extra capabilities.
