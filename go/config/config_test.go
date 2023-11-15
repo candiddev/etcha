@@ -114,7 +114,7 @@ func TestParseJWTFile(t *testing.T) {
 				Change: "getJWT",
 				Check:  "check",
 				OnChange: []string{
-					"etcha:token",
+					"etcha:jwt",
 				},
 			},
 		},

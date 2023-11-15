@@ -152,7 +152,7 @@ Some organizations may need to perform verification in a more secure, restrictiv
 
 Etcha will set the [Environment Variable](../../references/commands#environment-variables) [`ETCHA_JWT`](../../references/commands#etcha_jwt) containing the base64 raw URL encoded string that needs to be verified.
 
-Our verify Commands need to verify the [JWT](../../references/jwt) contained with `ETCHA_JWT`, and then print the JWT during a Command `change` that triggers the event [`token`](../../references/events#token), like this:
+Our verify Commands need to verify the [JWT](../../references/jwt) contained with `ETCHA_JWT`, and then print the JWT during a Command `change` that triggers the event [`jwt`](../../references/events#jwt), like this:
 
 ```json
 [

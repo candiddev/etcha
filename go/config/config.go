@@ -155,7 +155,7 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, to
 		token = ""
 
 		for _, event := range out.Events() {
-			if event.Name == "token" && len(event.Outputs) > 0 {
+			if event.Name == "jwt" && len(event.Outputs) > 0 {
 				token = event.Outputs[0].Change.String()
 
 				break
