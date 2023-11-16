@@ -36,7 +36,7 @@ func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination s
 		for _, event := range out.Events() {
 			if event.Name == "buildManifest" {
 				for _, output := range event.Outputs {
-					buildManifest += output.Change.String()
+					buildManifest += output.Change.String() + "\n"
 				}
 
 				continue

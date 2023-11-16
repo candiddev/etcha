@@ -70,7 +70,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		args = s[1:]
 	}
 
-	if e.Command != "" {
+	if e.Command != "" && script != "" {
 		args = append(args, script)
 	}
 

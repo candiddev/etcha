@@ -15,7 +15,7 @@ func showCommands(ctx context.Context, args []string, c *config.Config) errs.Err
 
 	// Try JWT
 	j, err := pattern.ParseJWTFromPath(logger.SetLevel(ctx, logger.LevelNone), c, args[1], "")
-	if err != nil && j.ID == "" {
+	if err != nil && j == nil {
 		p, err = pattern.ParsePatternFromPath(ctx, c, "", args[1])
 	} else {
 		var e errs.Err

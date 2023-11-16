@@ -27,13 +27,15 @@ func Lint(ctx context.Context, c *config.Config, path string, checkFormat bool) 
 
 			p, err := ParsePatternFromImports(ctx, c, "test", im)
 			if err != nil {
-				return r, err
+				r[path] = append(r[path], err.Error())
+
+				continue
 			}
 
 			for name, linter := range c.Build.Linters {
 				if linter != nil {
 					for _, cmd := range append(p.Build, p.Run...) {
-						if out, err := linter.Run(ctx, c.CLI, cmd.Check+"\n"+cmd.Change+"\n"+cmd.Remove, ""); err != nil {
+						if out, err := linter.Run(ctx, c.CLI, "", cmd.Check+"\n"+cmd.Change+"\n"+cmd.Remove); err != nil {
 							r[path] = append(r[path], fmt.Sprintf("linter %s: %s", name, out.String()))
 						}
 					}

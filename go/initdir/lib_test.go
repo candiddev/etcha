@@ -55,12 +55,19 @@ func TestLib(t *testing.T) {
 	r.Import(&i)
 	assert.HasErr(t, r.Fmt(ctx), nil)
 
+	os.WriteFile("lib/etcha/native.libsonnet", []byte(jsonnet.Native), 0600)
+
+	res, err := pattern.Lint(ctx, c, ".", true)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, res, types.Results{})
+	os.Remove("lib/etcha/native.libsonnet")
+
 	p, err := pattern.ParsePatternFromImports(ctx, c, "", &i)
 	assert.HasErr(t, err, nil)
 
 	os.Mkdir("testdata", 0700)
 
-	res := p.Test(ctx, c, false)
+	res = p.Test(ctx, c, false)
 	assert.Equal(t, res, types.Results{})
 
 	os.RemoveAll("testdata")
