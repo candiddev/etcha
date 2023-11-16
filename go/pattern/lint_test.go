@@ -47,9 +47,9 @@ func TestLint(t *testing.T) {
 	assert.Equal(t, r, nil)
 
 	r, err = Lint(ctx, c, "testdata/bad", true)
-	assert.HasErr(t, err, commands.ErrCommandsEmpty)
+	assert.HasErr(t, err, nil)
 	assert.Equal(t, r, types.Results{
-		"testdata/bad/main.jsonnet": {"files not formatted properly"},
+		"testdata/bad/main.jsonnet": {"files not formatted properly", "received empty commands"},
 	})
 
 	c.CLI.RunMockErrors([]error{
