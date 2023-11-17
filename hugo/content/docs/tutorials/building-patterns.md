@@ -139,7 +139,8 @@ $ etcha show-pattern patterns/helloworld.jsonnet
     "containerPull": "",
     "containerUser": "",
     "containerVolumes": null,
-    "environment": null,
+    "env": null,
+    "envInherit": false,
     "group": "",
     "user": "",
     "workDir": ""

@@ -102,7 +102,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 				for j := i + 1; j < len(cmds); j++ {
 					cfg := exec.Override(cmds[j].Exec)
 
-					cfg.Environment = append(env.GetEnv(), cfg.Environment...)
+					cfg.Env = append(env.GetEnv(), cfg.Env...)
 
 					run := cmds[j].Always
 					if run {

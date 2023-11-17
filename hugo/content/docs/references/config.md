@@ -151,7 +151,7 @@ String, override the container entrypoint for the [`containerImage`](#containerI
 
 ### `containerImage`
 
-String, the container image to use.  If specified, [`command`](#command), [`environment`](#environment), and [`workDir`](#workDir) will be passed/ran in a container.
+String, the container image to use.  If specified, [`command`](#command), [`env`](#env), and [`workDir`](#workDir) will be passed/ran in a container.
 
 **Default:** `""`
 
@@ -185,13 +185,13 @@ String, override the WorkDir of a container.
 
 **Default:** `""`
 
-### `environment`
+### `env`
 
 List of strings in the format `ENVIRONMENT=value`, will set these as environment variables.
 
 **Default:** `[]`
 
-### `environmentInheirt`
+### `envInheirt`
 
 Boolean, whether to inherit the environment of the main Etcha process.
 

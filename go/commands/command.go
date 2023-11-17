@@ -32,11 +32,11 @@ type Command struct {
 // Run will run the Command script for the given Mode.
 func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars, exec Exec, check bool, remove bool) (out *Output, newEnv types.EnvVars, err errs.Err) { //nolint:revive,gocognit,gocyclo
 	cfg := exec.Override(cmd.Exec)
-	cfgEnv := cfg.Environment
+	cfgEnv := cfg.Env
 	ctx = metrics.SetCommandID(ctx, cmd.ID)
 
 	if e := oldEnv.GetEnv(); len(e) > 0 {
-		cfg.Environment = append(e, cfg.Environment...)
+		cfg.Env = append(e, cfg.Env...)
 	}
 
 	if oldEnv == nil {
@@ -123,7 +123,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 
 	logger.Info(ctx, ch)
 
-	cfg.Environment = append(cfgEnv, newEnv.GetEnv()...) //nolint:gocritic
+	cfg.Env = append(cfgEnv, newEnv.GetEnv()...) //nolint:gocritic
 
 	s := cmd.Change
 	if remove {

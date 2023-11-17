@@ -87,7 +87,7 @@ func TestPatternBuildSign(t *testing.T) {
 			if tc.wantErr == nil {
 				j, err := ParseJWTFromPath(ctx, c, "", "test.jwt")
 				assert.HasErr(t, err, nil)
-				assert.Equal(t, j.EtchaBuildManifest, "world")
+				assert.Equal(t, j.EtchaBuildManifest, "world\n")
 				assert.Equal(t, j.EtchaRunEnv, map[string]string{
 					"hello": "world",
 				})

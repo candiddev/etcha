@@ -72,7 +72,7 @@ func TestExecRun(t *testing.T) {
 			"volume",
 		},
 		ContainerWorkDir: "work2",
-		Environment: []string{
+		Env: []string{
 			"hello=world",
 		},
 		WorkDir: "work1",
@@ -84,7 +84,7 @@ func TestExecRun(t *testing.T) {
 
 	inputs := c.RunMockInputs()
 
-	assert.Equal(t, inputs[0].Environment, e.Environment)
+	assert.Equal(t, inputs[0].Environment, e.Env)
 	assert.Equal(t, strings.Contains(inputs[0].Exec, "-ehello=world --entrypoint d --privileged -u f -v volume -w work2 e a long command script"), true)
 	assert.Equal(t, inputs[0].WorkDir, e.WorkDir)
 
@@ -92,7 +92,7 @@ func TestExecRun(t *testing.T) {
 	e.Run(ctx, c, "script", "stdin")
 	inputs = c.RunMockInputs()
 
-	assert.Equal(t, inputs[0].Environment, e.Environment)
+	assert.Equal(t, inputs[0].Environment, e.Env)
 	assert.Equal(t, inputs[0].Exec, "a long command script")
 	assert.Equal(t, inputs[0].WorkDir, e.WorkDir)
 }
