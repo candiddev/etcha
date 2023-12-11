@@ -38,47 +38,47 @@ type Build struct {
 	PushTLSSkipVerify bool                      `json:"pushTLSSkipVerify"`
 	SigningCommands   commands.Commands         `json:"signingCommands"`
 	SigningExec       *commands.Exec            `json:"signingExec,omitempty"`
-	SigningKey        cryptolib.KeySign         `json:"signingKey"`
+	SigningKey        string                    `json:"signingKey"`
 }
 
 // Run configures Etcha's runtime behavior.
 type Run struct {
-	ListenAddress           string               `json:"listenAddress"`
-	RandomizedStartDelaySec int                  `json:"randomizedStartDelaySec"`
-	RateLimiterRate         string               `json:"rateLimiterRate"`
-	StateDir                string               `json:"stateDir"`
-	SystemMetricsSecret     string               `json:"systemMetricsSecret"`
-	SystemPprofSecret       string               `json:"systemPprofSecret"`
-	TLSCertificateBase64    string               `json:"tlsCertificateBase64"`
-	TLSCertificatePath      string               `json:"tlsCertificatePath"`
-	TLSKeyBase64            string               `json:"tlsKeyBase64"`
-	TLSKeyPath              string               `json:"tlsKeyPath"`
-	VerifyCommands          commands.Commands    `json:"verifyCommands"`
-	VerifyExec              *commands.Exec       `json:"verifyExec,omitempty"`
-	VerifyKeys              cryptolib.KeysVerify `json:"verifyKeys"`
+	ListenAddress           string                                      `json:"listenAddress"`
+	RandomizedStartDelaySec int                                         `json:"randomizedStartDelaySec"`
+	RateLimiterRate         string                                      `json:"rateLimiterRate"`
+	StateDir                string                                      `json:"stateDir"`
+	SystemMetricsSecret     string                                      `json:"systemMetricsSecret"`
+	SystemPprofSecret       string                                      `json:"systemPprofSecret"`
+	TLSCertificateBase64    string                                      `json:"tlsCertificateBase64"`
+	TLSCertificatePath      string                                      `json:"tlsCertificatePath"`
+	TLSKeyBase64            string                                      `json:"tlsKeyBase64"`
+	TLSKeyPath              string                                      `json:"tlsKeyPath"`
+	VerifyCommands          commands.Commands                           `json:"verifyCommands"`
+	VerifyExec              *commands.Exec                              `json:"verifyExec,omitempty"`
+	VerifyKeys              cryptolib.Keys[cryptolib.KeyProviderPublic] `json:"verifyKeys"`
 }
 
 // Source contains configurations for a source.
 type Source struct {
-	AllowPush         bool                 `json:"allowPush"`
-	CheckOnly         bool                 `json:"checkOnly"`
-	EventsReceive     []string             `json:"eventsReceive"`
-	EventsReceiveExit bool                 `json:"eventsReceiveExit"`
-	EventsSend        regexp.Regexp        `json:"eventsSend"`
-	Exec              *commands.Exec       `json:"exec,omitempty"`
-	NoRemove          bool                 `json:"noRemove"`
-	NoRestore         bool                 `json:"noRestore"`
-	PullIgnoreVersion bool                 `json:"pullIgnoreVersion"`
-	PullPaths         []string             `json:"pullPaths"`
-	RunAll            bool                 `json:"runAll"`
-	RunFrequencySec   int                  `json:"runFrequencySec"`
-	RunMulti          bool                 `json:"runMulti"`
-	TriggerOnly       bool                 `json:"triggerOnly"`
-	VerifyCommands    commands.Commands    `json:"verifyCommands"`
-	VerifyExec        *commands.Exec       `json:"verifyExec,omitempty"`
-	VerifyKeys        cryptolib.KeysVerify `json:"verifyKeys"`
-	Vars              map[string]any       `json:"vars"`
-	WebhookPaths      []string             `json:"webhookPaths"`
+	AllowPush         bool                                        `json:"allowPush"`
+	CheckOnly         bool                                        `json:"checkOnly"`
+	EventsReceive     []string                                    `json:"eventsReceive"`
+	EventsReceiveExit bool                                        `json:"eventsReceiveExit"`
+	EventsSend        regexp.Regexp                               `json:"eventsSend"`
+	Exec              *commands.Exec                              `json:"exec,omitempty"`
+	NoRemove          bool                                        `json:"noRemove"`
+	NoRestore         bool                                        `json:"noRestore"`
+	PullIgnoreVersion bool                                        `json:"pullIgnoreVersion"`
+	PullPaths         []string                                    `json:"pullPaths"`
+	RunAll            bool                                        `json:"runAll"`
+	RunFrequencySec   int                                         `json:"runFrequencySec"`
+	RunMulti          bool                                        `json:"runMulti"`
+	TriggerOnly       bool                                        `json:"triggerOnly"`
+	VerifyCommands    commands.Commands                           `json:"verifyCommands"`
+	VerifyExec        *commands.Exec                              `json:"verifyExec,omitempty"`
+	VerifyKeys        cryptolib.Keys[cryptolib.KeyProviderPublic] `json:"verifyKeys"`
+	Vars              map[string]any                              `json:"vars"`
+	WebhookPaths      []string                                    `json:"webhookPaths"`
 }
 
 func (c *Config) CLIConfig() *cli.Config {
@@ -108,8 +108,8 @@ func Default() *Config {
 	}
 }
 
-func (c *Config) Parse(ctx context.Context, configArgs []string, paths string) errs.Err {
-	if err := config.Parse(ctx, c, configArgs, "ETCHA", "", paths); err != nil {
+func (c *Config) Parse(ctx context.Context, configArgs []string) errs.Err {
+	if err := config.Parse(ctx, c, configArgs, "ETCHA", c.CLI.ConfigPath); err != nil {
 		return logger.Error(ctx, err)
 	}
 
@@ -126,7 +126,7 @@ func (c *Config) Parse(ctx context.Context, configArgs []string, paths string) e
 }
 
 // ParseJWT parses a JWT token into a customClaims.
-func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, token string, source string) (key cryptolib.KeyVerify, err error) {
+func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, token string, source string) (key cryptolib.Key[cryptolib.KeyProviderPublic], err error) {
 	var payloadErr error
 
 	keys := c.Run.VerifyKeys
@@ -184,7 +184,7 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, to
 }
 
 // ParseJWTFile reads a JWT file path and parses the token into customClaims.
-func (c *Config) ParseJWTFile(ctx context.Context, customClaims jwt.CustomClaims, path, source string) (key cryptolib.KeyVerify, err errs.Err) {
+func (c *Config) ParseJWTFile(ctx context.Context, customClaims jwt.CustomClaims, path, source string) (key cryptolib.Key[cryptolib.KeyProviderPublic], err errs.Err) {
 	s, e := os.ReadFile(path)
 	if e != nil {
 		return key, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrParseJWT, e))

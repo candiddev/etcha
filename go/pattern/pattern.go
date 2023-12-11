@@ -10,6 +10,7 @@ import (
 	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/cli"
+	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/jwt"
@@ -123,7 +124,19 @@ func ParsePatternFromPath(ctx context.Context, c *config.Config, configSource, p
 
 // Sign creates a signed JWT.
 func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest string, runEnv map[string]string) (string, errs.Err) {
-	if c.Build.SigningKey.IsNil() && len(c.Build.SigningCommands) == 0 {
+	key, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](c.Build.SigningKey)
+	if err != nil {
+		// try to decrypt the key
+		if ev, err := cryptolib.ParseEncryptedValue(c.Build.SigningKey); err == nil {
+			if s, err := ev.Decrypt(nil); err == nil {
+				if k, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](string(s)); err == nil {
+					key = k
+				}
+			}
+		}
+	}
+
+	if key.IsNil() && len(c.Build.SigningCommands) == 0 {
 		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternMissingKey))
 	}
 
@@ -171,7 +184,7 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, fmt.Errorf("no token returned from signingCommands")))
 	}
 
-	if err := t.Sign(c.Build.SigningKey); err != nil {
+	if err := t.Sign(key); err != nil {
 		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 

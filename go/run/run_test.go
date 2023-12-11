@@ -22,12 +22,12 @@ import (
 func TestRun(t *testing.T) {
 	logger.UseTestLogger(t)
 
-	_, pub, _ := cryptolib.NewKeysSign()
+	_, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 
 	ctx := context.Background()
 	c := config.Default()
 	c.CLI.RunMock()
-	c.Run.VerifyKeys = cryptolib.KeysVerify{
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub,
 	}
 	c.Run.ListenAddress = ""
@@ -323,9 +323,9 @@ func TestStateLoadExecJWTs(t *testing.T) {
 		},
 	}
 
-	prv, pub, _ := cryptolib.NewKeysSign()
-	c.Build.SigningKey = prv
-	c.Run.VerifyKeys = cryptolib.KeysVerify{
+	prv, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	c.Build.SigningKey = prv.String()
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub,
 	}
 
@@ -374,9 +374,9 @@ func TestStateRunSource(t *testing.T) {
 	c.Exec.Command = ""
 	c.Exec.WorkDir = ""
 	c.Run.StateDir = "testdata"
-	prv, pub, _ := cryptolib.NewKeysSign()
-	c.Build.SigningKey = prv
-	c.Run.VerifyKeys = cryptolib.KeysVerify{
+	prv, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	c.Build.SigningKey = prv.String()
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub,
 	}
 

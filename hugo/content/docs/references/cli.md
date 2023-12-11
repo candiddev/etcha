@@ -9,9 +9,9 @@ title: CLI
 
 Arguments must be entered before commands.
 
-### `-c [paths]`
+### `-c [paths]` {#c}
 
-Path to JSON/Jsonnet [configuration files](../config) separated by a comma.
+Path to the JSON/Jsonnet [configuration file](../config).
 
 ### `-f [format]`
 
@@ -39,24 +39,14 @@ Import [Pattern](../patterns) [Jsonnet](../jsonnet) files from path, execute bui
 
 Compare two [JWTs](../jwt) to see if they have the same etchaBuildManfiest, etchaPattern, and etchaVersion (can optionally ignore version mismatch).
 
-### `generate-keys [encrypt-asymmetric, encrypt-symmetric, sign-verify]` {#generate-keys}
+### `generate-keys <key name, optional> <encryption, default: best>` {#generate-keys}
 
 Generate cryptographic keys for use with signing and encryption.  The keys will be output as JSON:
-
-For encrypt-asymmetric and sign-verify, the format is:
 
 {{< highlight json >}}
 {
   "privateKey": <private key>,
   "publicKey": <public key>,
-}
-{{< /highlight >}}
-
-For encrypt-symmetric, the format is:
-
-{{< highlight json >}}
-{
-  "key": <key>
 }
 {{< /highlight >}}
 

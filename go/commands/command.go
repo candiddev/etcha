@@ -52,7 +52,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 	ctx = metrics.SetCommandMode(ctx, metrics.CommandModeCheck)
 
 	if cmd.Check == "" && !cmd.Always && ((!remove && len(cmd.ChangedBy) == 0) || (remove && len(cmd.RemovedBy) == 0)) {
-		newEnv[cmd.EnvPrefix+"_CHECK"] = "0"
+		newEnv[cmd.EnvPrefix+"_CHECK"] = "0" //nolint:goconst
 
 		metrics.CollectCommands(ctx, false)
 

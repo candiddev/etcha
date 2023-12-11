@@ -222,7 +222,7 @@ func TestPatternSign(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 
-	prv, pub, _ := cryptolib.NewKeysSign()
+	prv, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 
 	p := Pattern{
 		Audience:     []string{"audience!"},
@@ -249,8 +249,8 @@ func TestPatternSign(t *testing.T) {
 	assert.Equal(t, j, "")
 
 	cli.BuildVersion = "v2023.10.02"
-	c.Build.SigningKey = prv
-	c.Run.VerifyKeys = cryptolib.KeysVerify{
+	c.Build.SigningKey = prv.String()
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub,
 	}
 
@@ -279,8 +279,30 @@ func TestPatternSign(t *testing.T) {
 		strings.Split(jw.Raw, ".")[2],
 	})
 
+	cli.SetStdin("password\npassword\n")
+
+	ev, _ := cryptolib.KDFSet(cryptolib.Argon2ID, "123", []byte(prv.String()), cryptolib.EncryptionBest)
+
+	c.Build.SigningKey = ev.String()
+
+	cli.SetStdin("password")
+
+	j, err = p.Sign(ctx, c, "build", map[string]string{"hello": "world"})
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, j != "", true)
+
+	jw, err = ParseJWT(ctx, c, j, "")
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, jw.EtchaRunEnv, map[string]string{"hello": "world", "world": "hello"})
+
+	cli.SetStdin("wrong")
+
+	j, err = p.Sign(ctx, c, "build", map[string]string{"hello": "world"})
+	assert.HasErr(t, err, ErrPatternMissingKey)
+	assert.Equal(t, j, "")
+
 	c.Exec.AllowOverride = true
-	c.Build.SigningKey = cryptolib.KeySign{}
+	c.Build.SigningKey = ""
 	c.Build.SigningExec = &commands.Exec{
 		Command: "hello",
 	}

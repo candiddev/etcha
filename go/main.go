@@ -44,13 +44,6 @@ func main() {
 				Run:   initDir,
 				Usage: "Initialize a directory for pattern development",
 			},
-			"jq": {
-				ArgumentsOptional: []string{
-					"jq query options",
-				},
-				Run:   jq,
-				Usage: "Query JSON from stdin using jq.  Supports standard JQ queries, and the -r flag to render raw values.",
-			},
 			"lint": {
 				ArgumentsRequired: []string{
 					"path",

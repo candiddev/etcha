@@ -20,7 +20,7 @@ func TestPatternBuildSign(t *testing.T) {
 	c := config.Default()
 	c.CLI.RunMock()
 
-	prv, pub, _ := cryptolib.NewKeysSign()
+	prv, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 
 	p := Pattern{
 		Audience: []string{"a"},
@@ -49,7 +49,7 @@ func TestPatternBuildSign(t *testing.T) {
 	tests := map[string]struct {
 		destination string
 		mockErrors  []error
-		signingKey  cryptolib.KeySign
+		signingKey  cryptolib.Key[cryptolib.KeyProviderPrivate]
 		wantErr     error
 	}{
 		"bad_destination": {
@@ -78,8 +78,8 @@ func TestPatternBuildSign(t *testing.T) {
 			c.CLI.RunMockInputs()
 			c.CLI.RunMockErrors(tc.mockErrors)
 			c.CLI.RunMockOutputs([]string{"world"})
-			c.Build.SigningKey = tc.signingKey
-			c.Run.VerifyKeys = cryptolib.KeysVerify{
+			c.Build.SigningKey = tc.signingKey.String()
+			c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 				pub,
 			}
 			assert.HasErr(t, p.BuildSign(ctx, c, tc.destination), tc.wantErr)

@@ -35,8 +35,8 @@ func (*j) Valid() error {
 func TestConfigParse(t *testing.T) {
 	logger.UseTestLogger(t)
 
-	_, pub1, _ := cryptolib.NewKeysSign()
-	_, pub2, _ := cryptolib.NewKeysSign()
+	_, pub1, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	_, pub2, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 
 	os.Unsetenv("ETCHA_RUN_DIR")
 
@@ -55,9 +55,11 @@ func TestConfigParse(t *testing.T) {
 
 	wd, _ := os.Getwd()
 
-	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}, "/notreal") != nil, true)
-	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}, "config.jsonnet") == nil, true)
-	assert.Equal(t, c.Run.VerifyKeys, cryptolib.KeysVerify{
+	c.CLI.ConfigPath = "/notreal"
+	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}) != nil, true)
+	c.CLI.ConfigPath = "./config.jsonnet"
+	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}) == nil, true)
+	assert.Equal(t, c.Run.VerifyKeys, cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub1,
 		pub2,
 	})
@@ -72,16 +74,16 @@ func TestParseJWTFile(t *testing.T) {
 
 	os.MkdirAll("testdata", 0700)
 
-	prv1, _, _ := cryptolib.NewKeysSign()
-	_, pub2, _ := cryptolib.NewKeysSign()
-	prv3, _, _ := cryptolib.NewKeysSign()
+	prv1, _, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	_, pub2, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	prv3, _, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 
 	c := Default()
 	c.CLI.RunMock()
 	c.Run.VerifyExec = &commands.Exec{
 		AllowOverride: true,
 	}
-	c.Run.VerifyKeys = cryptolib.KeysVerify{
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub2,
 	}
 
@@ -128,7 +130,7 @@ func TestParseJWTFile(t *testing.T) {
 
 	key, err := c.ParseJWTFile(ctx, out, "testdata/jwt4.jwt", "")
 	assert.HasErr(t, err, errs.ErrReceiver)
-	assert.Equal(t, key.ID, "")
+	assert.Equal(t, key.IsNil(), true)
 	assert.Equal(t, out.A, "")
 
 	key, err = c.ParseJWTFile(ctx, out, "testdata/jwt3.jwt", "")
