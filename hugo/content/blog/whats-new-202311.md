@@ -2,7 +2,6 @@
 author: Mike
 date: 2023-11-07
 description: Release notes for Etcha v2023.11.
-draft: true
 tags:
   - release
 title: "What's New in Etcha: v2023.11"

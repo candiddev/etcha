@@ -23,10 +23,10 @@ func TestCompare(t *testing.T) {
 	c := config.Default()
 	c.Run.StateDir = "testdata"
 
-	prv, pub, _ := cryptolib.NewKeysSign()
+	prv, pub, _ := cryptolib.NewKeysEncryptAsymmetric(cryptolib.AlgorithmBest)
 
-	c.Build.SigningKey = prv
-	c.Run.VerifyKeys = cryptolib.KeysVerify{
+	c.Build.SigningKey = prv.String()
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub,
 	}
 

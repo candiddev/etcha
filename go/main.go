@@ -36,20 +36,13 @@ func main() {
 				Run:   compare,
 				Usage: "Compare two JWTs to see if they have the same etchaBuildManifest, etchaPattern, and optionally etchaVersion",
 			},
-			"generate-keys": cryptolib.GenerateKeys[*config.Config](),
+			"generate-keys": cryptolib.GenerateKeys[*config.Config]("asymmetric"),
 			"init": {
 				ArgumentsOptional: []string{
 					"directory, default: current directory",
 				},
 				Run:   initDir,
 				Usage: "Initialize a directory for pattern development",
-			},
-			"jq": {
-				ArgumentsOptional: []string{
-					"jq query options",
-				},
-				Run:   jq,
-				Usage: "Query JSON from stdin using jq.  Supports standard JQ queries, and the -r flag to render raw values.",
 			},
 			"lint": {
 				ArgumentsRequired: []string{

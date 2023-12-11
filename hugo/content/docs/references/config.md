@@ -29,7 +29,7 @@ All configuration keys are camelCase.  Configuration values can be:
 
 **For environment variables**, every configuration key can be set using `ETCHA_section_key=a value`, i.e. `ETCHA_cli_debug=true`
 
-**For configuration files**, they can be formatted using JSON or Jsonnet.  See [the Jsonnet reference](../jsonnet/) for more information.  **Configuration files are rendered at startup**, allowing you to use [dynamic Jsonnet functions](../jsonnet#native-functions) to dynamically alter the config, i.e.:
+**For configuration files**, they can be formatted using JSON or Jsonnet.  Etcha will look for `etcha.jsonnet` by default, ascending the directory tree to find it.  See [the Jsonnet reference](../jsonnet/) for more information.  **Configuration files are rendered at startup**, allowing you to use [dynamic Jsonnet functions](../jsonnet#native-functions) to dynamically alter the config, i.e.:
 
 ```
 local getRecord(type, name, fallback=null) = std.native('getRecord')(type, name, fallback);
@@ -80,13 +80,19 @@ List of [Commands](../commands) to run when signing a JWT instead of using a [`s
 
 **Default:** `{}`
 
-### `signingKey` (recommended)
+### `signingKey` (recommended) {#signingkey}
 
 String, the [cryptographic signing key](../cryptography) to use when signing JWTs.  See [Building Patterns](../../guides/building-patterns) for more information.
 
 **Default:** `""`
 
 ## `cli`
+
+### `configPath`
+
+String, path to the configuration file.  If a filename without a path is specified, Etcha will search parent directories for the filename and use the first one found.
+
+**Default:** `"etcha.jsonnet"`
 
 ### `logFormat`
 

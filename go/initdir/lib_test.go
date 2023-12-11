@@ -22,7 +22,7 @@ var ctx = context.Background()
 
 func TestLib(t *testing.T) {
 	logger.UseTestLogger(t)
-	c.Parse(ctx, cli.ConfigArgs{}, "")
+	c.Parse(ctx, cli.ConfigArgs{})
 	ctx = logger.SetLevel(ctx, c.CLI.LogLevel)
 
 	i := jsonnet.Imports{}

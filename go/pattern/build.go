@@ -19,7 +19,7 @@ func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination s
 	buildManifest := ""
 	runEnv := map[string]string{}
 
-	f, e := os.Create(destination + ".tmp")
+	f, e := os.Create(destination + ".tmp") //nolint:goconst
 	if e != nil {
 		return logger.Error(ctx, errs.ErrReceiver.Wrap(ErrBuildWriteJWT, e))
 	}

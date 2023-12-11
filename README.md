@@ -1,4 +1,4 @@
-# Etcha
+# <img alt=logo src=etcha.png width=40px> Etcha
 
 > Infinite scale configuration management for distributed applications.
 

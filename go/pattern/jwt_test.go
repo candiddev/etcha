@@ -21,12 +21,12 @@ func TestParseJWT(t *testing.T) {
 	logger.UseTestLogger(t)
 
 	ctx := context.Background()
-	prv, pub, _ := cryptolib.NewKeysSign()
+	prv, pub, _ := cryptolib.NewKeysEncryptAsymmetric(cryptolib.AlgorithmBest)
 
 	p := Pattern{}
 
 	tests := map[string]struct {
-		key     cryptolib.KeyVerify
+		key     cryptolib.Key[cryptolib.KeyProviderPublic]
 		wantErr error
 		wantOut string
 	}{
@@ -44,14 +44,14 @@ func TestParseJWT(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			c := config.Default()
-			c.Build.SigningKey = prv
+			c.Build.SigningKey = prv.String()
 
 			content, _ := p.Sign(ctx, c, "hello", nil)
 
 			if !tc.key.IsNil() {
 				c.Sources = map[string]*config.Source{
 					"etcha": {
-						VerifyKeys: cryptolib.KeysVerify{
+						VerifyKeys: cryptolib.Keys[cryptolib.KeyProviderPublic]{
 							tc.key,
 						},
 					},
@@ -65,7 +65,7 @@ func TestParseJWT(t *testing.T) {
 	}
 
 	c := config.Default()
-	c.Build.SigningKey = prv
+	c.Build.SigningKey = prv.String()
 
 	jwt1, _ := p.Sign(ctx, c, "1", nil)
 	jwt2, _ := p.Sign(ctx, c, "2", nil)
@@ -87,7 +87,7 @@ func TestParseJWT(t *testing.T) {
 				"/1.jwt",
 				ts.URL() + "/test.jwt",
 			},
-			VerifyKeys: cryptolib.KeysVerify{
+			VerifyKeys: cryptolib.Keys[cryptolib.KeyProviderPublic]{
 				pub,
 			},
 		},
@@ -96,7 +96,7 @@ func TestParseJWT(t *testing.T) {
 			PullPaths: []string{
 				"testdata/2.jwt",
 			},
-			VerifyKeys: cryptolib.KeysVerify{
+			VerifyKeys: cryptolib.Keys[cryptolib.KeyProviderPublic]{
 				pub,
 			},
 		},

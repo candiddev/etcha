@@ -29,8 +29,8 @@ func TestPush(t *testing.T) {
 	m, _ := s.newMux(ctx)
 	ts := httptest.NewServer(m)
 
-	prv1, pub1, _ := cryptolib.NewKeysSign()
-	prv2, _, _ := cryptolib.NewKeysSign()
+	prv1, pub1, _ := cryptolib.NewKeysEncryptAsymmetric(cryptolib.AlgorithmBest)
+	prv2, _, _ := cryptolib.NewKeysEncryptAsymmetric(cryptolib.AlgorithmBest)
 
 	os.MkdirAll("testdata/state", 0700)
 
@@ -68,7 +68,7 @@ func TestPush(t *testing.T) {
 			Exec: &commands.Exec{
 				Command: "",
 			},
-			VerifyKeys: cryptolib.KeysVerify{
+			VerifyKeys: cryptolib.Keys[cryptolib.KeyProviderPublic]{
 				pub1,
 			},
 		},
@@ -81,7 +81,7 @@ func TestPush(t *testing.T) {
 		mockErrors  []error
 		name        string
 		path        string
-		signingKey  cryptolib.KeySign
+		signingKey  cryptolib.Key[cryptolib.KeyProviderPrivate]
 		wantErr     error
 		wantInputs  []cli.RunMockInput
 		wantResult  *Result
@@ -213,7 +213,7 @@ func TestPush(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			c.Build.SigningKey = tc.signingKey
+			c.Build.SigningKey = tc.signingKey.String()
 			c.CLI.RunMockErrors(tc.mockErrors)
 			c.CLI.RunMockOutputs([]string{"a", "b", "c", "d", "e"})
 
