@@ -4,6 +4,9 @@
 
 [![Integration](https://github.com/candiddev/etcha/actions/workflows/integration.yaml/badge.svg?branch=main)](https://github.com/candiddev/etcha/actions/workflows/integration.yaml)
 
+[:book: Docs](https://etcha.dev/docs/)\
+[:motorway: Roadmap](https://github.com/orgs/candiddev/projects/6/views/37)
+
 Etcha is a source available command line (CLI) tool for building, testing, linting, and distributing application patterns.
 
 Etcha makes distributed applications easy:
