@@ -9,13 +9,13 @@ function(args='', dst, src)
 
   {
     change: |||
-      mkdir -p %(src)s %(dst)s
+      mkdir -p %(dst)s
       mount %(args)s %(src)s %(dst)s
     ||| % vars,
     check: 'mount | grep %s' % dst,
     id: 'mount %s' % dst,
     remove: |||
       umount %(dst)s
-      rmdir %(src)s %(dst)s
+      rmdir %(dst)s
     ||| % vars,
   }

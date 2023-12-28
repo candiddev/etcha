@@ -309,6 +309,7 @@ func TestStateLoadExecJWTs(t *testing.T) {
 	os.MkdirAll("testdata", 0700)
 
 	ctx := context.Background()
+	ctx = logger.SetFormat(ctx, logger.FormatKV)
 	c := config.Default()
 	c.CLI.RunMock()
 	c.Exec.Command = ""
@@ -320,6 +321,30 @@ func TestStateLoadExecJWTs(t *testing.T) {
 		},
 		"2": {
 			CheckOnly: true,
+			Commands: commands.Commands{
+				{
+					ID:    "d",
+					Check: "checkD",
+				},
+			},
+		},
+		"3": {
+			CheckOnly: true,
+			Commands: commands.Commands{
+				{
+					ID:    "b",
+					Check: "checkB",
+				},
+			},
+		},
+		"4": {
+			Commands: commands.Commands{
+				{
+					ID:    "z",
+					Check: "checkZ",
+				},
+			},
+			TriggerOnly: true,
 		},
 	}
 
@@ -356,8 +381,10 @@ func TestStateLoadExecJWTs(t *testing.T) {
 	s.loadExecJWTs(ctx)
 
 	assert.Equal(t, s.JWTs.Get("2").Audience[0], "2")
+	assert.Equal(t, s.JWTs.Keys(), []string{"2"})
 	assert.Equal(t, s.Patterns.Get("2").Run[0].ID, "a")
-	assert.Equal(t, s.Config.CLI.RunMockInputs(), []cli.RunMockInput{{Exec: "checkA"}})
+	assert.Equal(t, s.Patterns.Keys(), []string{"2", "3", "4"})
+	assert.Equal(t, s.Config.CLI.RunMockInputs(), []cli.RunMockInput{{Exec: "checkA"}, {Exec: "checkB"}})
 
 	os.RemoveAll("testdata")
 }

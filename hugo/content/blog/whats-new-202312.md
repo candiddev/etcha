@@ -13,6 +13,7 @@ type: blog
 ## Features
 
 - Config: [`cli.configPath`](../../docs/references/config#configpath) can be used to set a custom configuration path, along with [`etcha -c`](../../docs/references/cli#c)
+- Config: [`sources.commands`](../../docs/references/config#commands) can be used to set a static list of Commands for sources.
 
 ## Enhancements
 

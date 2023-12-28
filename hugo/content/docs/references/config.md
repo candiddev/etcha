@@ -319,6 +319,10 @@ Boolean, prevents patterns received on this source from running change commands.
 
 **Default:** `false`
 
+### `commands`
+
+List of static [Commands](../commands) to run for this source.  If allowed, Pattern pushes and pulls will override the list of Commands.  Commands will use the source's `exec` config, if allowed by the main `exec` config.  Commands will be ran at startup unless `triggerOnly` is set to true.  See [Running Commands](../../guides/running-commands#static-source-commands) for more information.
+
 ### `eventsReceive`
 
 List of event names that the source patterns can receive.

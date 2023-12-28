@@ -62,6 +62,7 @@ type Run struct {
 type Source struct {
 	AllowPush         bool                                        `json:"allowPush"`
 	CheckOnly         bool                                        `json:"checkOnly"`
+	Commands          commands.Commands                           `json:"commands"`
 	EventsReceive     []string                                    `json:"eventsReceive"`
 	EventsReceiveExit bool                                        `json:"eventsReceiveExit"`
 	EventsSend        regexp.Regexp                               `json:"eventsSend"`
