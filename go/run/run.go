@@ -230,20 +230,40 @@ func (s *state) listen(ctx context.Context) errs.Err {
 }
 
 func (s *state) loadExecJWTs(ctx context.Context) {
+	// Load static commands from config.
+	for k := range s.Config.Sources {
+		if len(s.Config.Sources[k].Commands) > 0 {
+			logger.Info(ctx, fmt.Sprintf("Loading config commands for %s...", k))
+
+			p := &pattern.Pattern{
+				Run:     s.Config.Sources[k].Commands,
+				RunExec: s.Config.Exec.Override(s.Config.Sources[k].Exec),
+			}
+			s.Patterns.Set(k, p)
+		}
+	}
+
 	js := pattern.ParseJWTsFromDir(ctx, s.Config)
 
 	for n, j := range js {
 		p, err := j.Pattern(ctx, s.Config, n)
 		if err == nil {
-			logger.Info(ctx, fmt.Sprintf("Loading existing config for %s...", n))
-
-			if _, err := p.Run.Run(ctx, s.Config.CLI, p.RunEnv, p.RunExec, s.Config.Sources[n].CheckOnly, false); err == nil {
-				s.JWTs.Set(n, j)
-				s.Patterns.Set(n, p)
-			} else {
-				logger.Error(ctx, err) //nolint:errcheck
-			}
+			logger.Info(ctx, fmt.Sprintf("Loading cached config for %s...", n))
+			s.JWTs.Set(n, j)
+			s.Patterns.Set(n, p)
 		} else {
+			logger.Error(ctx, err) //nolint:errcheck
+		}
+	}
+
+	for _, k := range s.Patterns.Keys() {
+		if s.Config.Sources[k].TriggerOnly {
+			continue
+		}
+
+		p := s.Patterns.Get(k)
+		if _, err := p.Run.Run(ctx, s.Config.CLI, p.RunEnv, p.RunExec, s.Config.Sources[k].CheckOnly, false); err != nil {
+			s.Patterns.Set(k, nil)
 			logger.Error(ctx, err) //nolint:errcheck
 		}
 	}

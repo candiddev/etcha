@@ -20,6 +20,7 @@ local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
     file(contents='root:*:19352:0:99999:7:::', group='daemon', ignoreContents=true, owner='daemon', path='testdata/shadow'),
     file(contents='hello', path='testdata/world'),
     file(path='testdata/touch'),
+    dir(path='testdata/src'),
     mount(args='-o bind', dst='testdata/dst', src='testdata/src'),
     password(hash='notahash', path='testdata/shadow'),
     symlink(src='testdata/shadow', dst='testdata/shadowsym'),
