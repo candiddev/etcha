@@ -106,19 +106,14 @@ func TestParseJWT(t *testing.T) {
 			},
 		},
 	}
-	j := ParseJWTFromSources(ctx, "1", c)
+	j := ParseJWTFromSource(ctx, "1", c)
 	assert.Equal(t, j.EtchaBuildManifest, "1")
 
 	f, _ := os.ReadFile("testdata/cache/1.jwt")
 	assert.Equal(t, string(f), jwt1)
 
-	j = ParseJWTFromSources(ctx, "3", c)
+	j = ParseJWTFromSource(ctx, "3", c)
 	assert.Equal(t, j, nil)
-
-	// ParseJWTsFromDir
-	c.Run.StateDir = "testdata"
-	js := ParseJWTsFromDir(ctx, c)
-	assert.Equal(t, len(js), 1)
 
 	os.RemoveAll("testdata")
 }

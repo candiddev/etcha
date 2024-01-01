@@ -147,7 +147,7 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 	if old := s.JWTs.Get(c); old == nil || old.Equal(push, src.PullIgnoreVersion) != nil || src.RunAll {
 		ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPush)
 
-		r, err := s.diffExec(ctx, r.URL.Query().Has("check"), c, push)
+		r, err := s.diffExec(ctx, r.URL.Query().Has("check"), c, push, false)
 		if err != nil {
 			w.WriteHeader(errs.ErrReceiver.Status())
 			logger.Error(ctx, err) //nolint:errcheck

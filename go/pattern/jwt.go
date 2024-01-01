@@ -58,8 +58,8 @@ func ParseJWTFromPath(ctx context.Context, c *config.Config, configSource, path 
 	return ParseJWT(ctx, c, b.String(), configSource)
 }
 
-// ParseJWTFromSources gathers and renders JWTs from the sources in a config.
-func ParseJWTFromSources(ctx context.Context, source string, c *config.Config) *JWT {
+// ParseJWTFromSource gathers and renders JWTs from the source in a config.
+func ParseJWTFromSource(ctx context.Context, source string, c *config.Config) *JWT {
 	if s, ok := c.Sources[source]; ok {
 		for _, target := range s.PullPaths {
 			j, err := ParseJWTFromPath(ctx, c, source, target)
@@ -76,25 +76,6 @@ func ParseJWTFromSources(ctx context.Context, source string, c *config.Config) *
 	logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("no valid targets for source %s", source))) //nolint: errcheck
 
 	return nil
-}
-
-// ParseJWTsFromDir finds and renders all JWTs in the StateDir.
-func ParseJWTsFromDir(ctx context.Context, c *config.Config) map[string]*JWT {
-	j := map[string]*JWT{}
-
-	for k := range c.Sources {
-		if c.Sources[k].NoRestore {
-			continue
-		}
-
-		path := filepath.Join(c.Run.StateDir, k+".jwt")
-
-		if jw, err := ParseJWTFromPath(ctx, c, k, path); err == nil && jw != nil {
-			j[k] = jw
-		}
-	}
-
-	return j
 }
 
 // Equal checks if two JWTs are equivalent.

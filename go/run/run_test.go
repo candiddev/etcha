@@ -111,6 +111,7 @@ func TestStateDiffExec(t *testing.T) {
 
 	tests := []struct {
 		check       bool
+		init        bool
 		j           *pattern.JWT
 		mockErrors  []error
 		name        string
@@ -190,6 +191,31 @@ func TestStateDiffExec(t *testing.T) {
 			},
 		},
 		{
+			name: "good init",
+			mockErrors: []error{
+				ErrNilJWT,
+			},
+			j: &pattern.JWT{
+				EtchaPattern: &jsonnet.Imports{
+					Entrypoint: "/main.jsonnet",
+					Files: map[string]string{
+						"/main.jsonnet": `{run:[{change:"changeB",check:"checkB",id:"b",remove:"removeB"}]}`,
+					},
+				},
+				Raw: "hello",
+			},
+			init: true,
+			wantInputs: []cli.RunMockInput{
+				{Exec: "checkB"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeB"},
+			},
+			wantJWT: "hello",
+			wantResult: &Result{
+				ChangedIDs:     []string{"b"},
+				ChangedOutputs: []string{""},
+			},
+		},
+		{
 			name: "good",
 			mockErrors: []error{
 				ErrNilJWT,
@@ -206,11 +232,15 @@ func TestStateDiffExec(t *testing.T) {
 			wantInputs: []cli.RunMockInput{
 				{Exec: "checkA"},
 				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
+				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT="}, Exec: "checkB"},
+				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT="}, Exec: "removeB"},
 			},
 			wantJWT: "hello",
 			wantResult: &Result{
 				ChangedIDs:     []string{"a"},
 				ChangedOutputs: []string{""},
+				RemovedIDs:     []string{"b"},
+				RemovedOutputs: []string{""},
 			},
 		},
 		{
@@ -289,7 +319,7 @@ func TestStateDiffExec(t *testing.T) {
 			s.Config.Sources["etcha"].RunAll = tc.runAll
 			s.Config.Sources["etcha"].TriggerOnly = tc.triggerOnly
 
-			r, err := s.diffExec(ctx, tc.check, "etcha", tc.j)
+			r, err := s.diffExec(ctx, tc.check, "etcha", tc.j, tc.init)
 
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, r, tc.wantResult)
@@ -444,6 +474,7 @@ func TestStateRunSource(t *testing.T) {
 	}
 
 	tests := []struct {
+		init        bool
 		mockErrors  []error
 		mockInputs  []cli.RunMockInput
 		name        string
@@ -485,6 +516,17 @@ func TestStateRunSource(t *testing.T) {
 			name:        "no_diff",
 			wantResults: &Result{},
 		},
+		{
+			init: true,
+			name: "no_diff_init",
+			mockInputs: []cli.RunMockInput{
+				{
+					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=b", "_CHECK=1", "_CHECK_OUT=a"},
+					Exec:        "checkA",
+				},
+			},
+			wantResults: &Result{},
+		},
 	}
 
 	for _, tc := range tests {
@@ -492,7 +534,7 @@ func TestStateRunSource(t *testing.T) {
 			c.CLI.RunMockErrors(tc.mockErrors)
 			c.CLI.RunMockOutputs([]string{"a", "b", "c", "d", "e"})
 
-			r, err := s.runSource(ctx, "1")
+			r, err := s.runSource(ctx, "1", tc.init)
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, c.CLI.RunMockInputs(), tc.mockInputs)
 			assert.Equal(t, r, tc.wantResults)

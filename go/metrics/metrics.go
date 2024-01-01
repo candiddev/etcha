@@ -21,37 +21,38 @@ const (
 	CommandModeCheck     CommandMode   = "check"
 	CommandModeRemove    CommandMode   = "remove"
 	SourceTriggerEvent   SourceTrigger = "event"
+	SourceTriggerInit    SourceTrigger = "init"
 	SourceTriggerPull    SourceTrigger = "pull"
 	SourceTriggerPush    SourceTrigger = "push"
 	SourceTriggerWebhook SourceTrigger = "webhook"
 )
 
 func GetCommandID(ctx context.Context) string {
-	return logger.GetAttribute(ctx, "commandID")
+	return logger.GetAttribute[string](ctx, "commandID")
 }
 
 func SetCommandID(ctx context.Context, command string) context.Context {
 	return logger.SetAttribute(ctx, "commandID", command)
 }
 
-func GetCommandMode(ctx context.Context) string {
-	return logger.GetAttribute(ctx, "commandMode")
+func GetCommandMode(ctx context.Context) CommandMode {
+	return logger.GetAttribute[CommandMode](ctx, "commandMode")
 }
 
 func SetCommandMode(ctx context.Context, mode CommandMode) context.Context {
-	return logger.SetAttribute(ctx, "commandMode", string(mode))
+	return logger.SetAttribute(ctx, "commandMode", mode)
 }
 
 func GetSourceName(ctx context.Context) string {
-	return logger.GetAttribute(ctx, "sourceName")
+	return logger.GetAttribute[string](ctx, "sourceName")
 }
 
 func SetSourceName(ctx context.Context, source string) context.Context {
 	return logger.SetAttribute(ctx, "sourceName", source)
 }
 
-func GetSourceTrigger(ctx context.Context) string {
-	return logger.GetAttribute(ctx, "sourceTrigger")
+func GetSourceTrigger(ctx context.Context) SourceTrigger {
+	return logger.GetAttribute[SourceTrigger](ctx, "sourceTrigger")
 }
 
 func SetSourceTrigger(ctx context.Context, trigger SourceTrigger) context.Context {
@@ -95,13 +96,13 @@ func init() { //nolint:gochecknoinits
 }
 
 func CollectCommands(ctx context.Context, err bool) {
-	commands.WithLabelValues(metrics.ParseBool(err), GetCommandID(ctx), GetCommandMode(ctx), GetSourceName(ctx)).Inc()
+	commands.WithLabelValues(metrics.ParseBool(err), GetCommandID(ctx), string(GetCommandMode(ctx)), GetSourceName(ctx)).Inc()
 }
 
 func CollectSources(ctx context.Context, err bool) {
-	sources.WithLabelValues(metrics.ParseBool(err), GetSourceName(ctx), GetSourceTrigger(ctx)).Inc()
+	sources.WithLabelValues(metrics.ParseBool(err), GetSourceName(ctx), string(GetSourceTrigger(ctx))).Inc()
 }
 
 func CollectSourcesCommands(ctx context.Context, value int) {
-	sourcesCommands.WithLabelValues(GetCommandMode(ctx), GetSourceName(ctx), GetSourceTrigger(ctx)).Set(float64(value))
+	sourcesCommands.WithLabelValues(string(GetCommandMode(ctx)), GetSourceName(ctx), string(GetSourceTrigger(ctx))).Set(float64(value))
 }

@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 
@@ -33,8 +34,6 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 		return logger.Error(ctx, err)
 	}
 
-	s.loadExecJWTs(ctx)
-
 	pubkey := len(c.Run.VerifyKeys) > 0
 	if !pubkey {
 		for i := range c.Sources {
@@ -50,17 +49,16 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 		return logger.Error(ctx, errs.ErrReceiver.Wrap(ErrNoVerifyKeys))
 	}
 
+	s.loadExecJWTs(ctx)
+
+	if once {
+		return nil
+	}
+
 	if len(c.Sources) != 0 {
-		if once {
-			for source := range c.Sources {
-				if _, err := s.runSource(ctx, source); err != nil {
-					logger.Error(ctx, err) //nolint: errcheck
-				}
-			}
-		} else {
-			logger.Info(ctx, "Starting source runner...")
-			go s.sourceRunner(ctx)
-		}
+		logger.Info(ctx, "Starting source runner...")
+
+		go s.sourceRunner(ctx)
 	}
 
 	if !once && s.Config.Run.ListenAddress != "" {
@@ -72,10 +70,10 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 	return nil
 }
 
-func (s *state) diffExec(ctx context.Context, check bool, source string, j *pattern.JWT) (*Result, errs.Err) {
+func (s *state) diffExec(ctx context.Context, check bool, source string, j *pattern.JWT, init bool) (*Result, errs.Err) {
 	ctx = metrics.SetSourceName(ctx, source)
 
-	if j == nil {
+	if !init && j == nil {
 		metrics.CollectSources(ctx, true)
 
 		return &Result{
@@ -83,25 +81,38 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 		}, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrNilJWT))
 	}
 
-	p, err := j.Pattern(ctx, s.Config, source)
-	if err != nil {
-		metrics.CollectSources(ctx, true)
+	var err errs.Err
 
-		return &Result{
-			Err: err.Error(),
-		}, logger.Error(ctx, err)
+	var pOld *pattern.Pattern
+
+	p := s.Patterns.Get(source)
+
+	if j != nil && j.EtchaPattern != nil {
+		pOld = p
+
+		p, err = j.Pattern(ctx, s.Config, source)
+		if err != nil {
+			metrics.CollectSources(ctx, true)
+
+			return &Result{
+				Err: err.Error(),
+			}, logger.Error(ctx, err)
+		}
+	}
+
+	if (p == nil || len(p.Run) == 0) && pOld == nil {
+		return nil, logger.Error(ctx, nil)
 	}
 
 	src := s.Config.Sources[source]
-	pOld := s.Patterns.Get(source)
-
-	logger.Info(ctx, fmt.Sprintf("Updating config for %s...", source))
 
 	var o commands.Outputs
 
 	var r Result
 
 	if !src.TriggerOnly {
+		logger.Info(ctx, fmt.Sprintf("Diffing Pattern for %s...", source))
+
 		l := s.PatternLocks[source]
 		if l == nil {
 			s.PatternLocks[source] = &sync.Mutex{}
@@ -145,7 +156,9 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 		}
 	}
 
-	if !src.NoRestore {
+	if !src.NoRestore && j != nil && j.Raw != "" {
+		logger.Info(ctx, fmt.Sprintf("Saving JWT for %s...", source))
+
 		jp := filepath.Join(s.Config.Run.StateDir, source+".jwt")
 
 		if err := os.WriteFile(jp+".tmp", []byte(j.Raw), 0644); err != nil { //nolint:gosec
@@ -165,12 +178,12 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 				Exit: s.handleEvents(ctx, o, src),
 			}, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 		}
+
+		s.JWTs.Set(source, j)
 	}
 
-	metrics.CollectSources(ctx, false)
-
-	s.JWTs.Set(source, j)
 	s.Patterns.Set(source, p)
+	metrics.CollectSources(ctx, false)
 
 	r.Exit = s.handleEvents(ctx, o, src)
 
@@ -230,64 +243,77 @@ func (s *state) listen(ctx context.Context) errs.Err {
 }
 
 func (s *state) loadExecJWTs(ctx context.Context) {
-	// Load static commands from config.
-	for k := range s.Config.Sources {
-		if len(s.Config.Sources[k].Commands) > 0 {
+	ss := []string{}
+	for source := range s.Config.Sources {
+		ss = append(ss, source)
+	}
+
+	sort.Strings(ss)
+
+	for _, k := range ss {
+		ctx = metrics.SetSourceName(ctx, k)
+		source := s.Config.Sources[k]
+
+		// Load static commands from config.
+		if len(source.Commands) > 0 {
 			logger.Info(ctx, fmt.Sprintf("Loading config commands for %s...", k))
 
 			p := &pattern.Pattern{
-				Run:     s.Config.Sources[k].Commands,
-				RunExec: s.Config.Exec.Override(s.Config.Sources[k].Exec),
+				Run:     source.Commands,
+				RunExec: s.Config.Exec.Override(source.Exec),
 			}
 			s.Patterns.Set(k, p)
 		}
-	}
 
-	js := pattern.ParseJWTsFromDir(ctx, s.Config)
+		// Load cached JWT from state.
+		if !source.NoRestore {
+			path := filepath.Join(s.Config.Run.StateDir, k+".jwt")
 
-	for n, j := range js {
-		p, err := j.Pattern(ctx, s.Config, n)
-		if err == nil {
-			logger.Info(ctx, fmt.Sprintf("Loading cached config for %s...", n))
-			s.JWTs.Set(n, j)
-			s.Patterns.Set(n, p)
-		} else {
-			logger.Error(ctx, err) //nolint:errcheck
-		}
-	}
-
-	for _, k := range s.Patterns.Keys() {
-		if s.Config.Sources[k].TriggerOnly {
-			continue
+			if jw, err := pattern.ParseJWTFromPath(ctx, s.Config, k, path); err == nil && jw != nil {
+				p, err := jw.Pattern(ctx, s.Config, k)
+				if err == nil {
+					logger.Info(ctx, fmt.Sprintf("Loading cached config for %s...", k))
+					s.JWTs.Set(k, jw)
+					s.Patterns.Set(k, p)
+				} else {
+					logger.Error(ctx, err) //nolint:errcheck
+				}
+			}
 		}
 
-		p := s.Patterns.Get(k)
-		if _, err := p.Run.Run(ctx, s.Config.CLI, p.RunEnv, p.RunExec, s.Config.Sources[k].CheckOnly, false); err != nil {
-			s.Patterns.Set(k, nil)
-			logger.Error(ctx, err) //nolint:errcheck
+		// Run source
+		if _, err := s.runSource(ctx, k, true); err != nil {
+			logger.Error(ctx, err) //nolint: errcheck
 		}
 	}
 }
 
-func (s *state) runSource(ctx context.Context, source string) (*Result, errs.Err) {
+func (s *state) runSource(ctx context.Context, source string, init bool) (*Result, errs.Err) {
 	var err errs.Err
 
 	r := &Result{}
 
 	oldJ := s.JWTs.Get(source)
-	newJ := s.JWTs.Get(source)
+
+	var newJ *pattern.JWT
 
 	diff := false
 
-	if j := pattern.ParseJWTFromSources(ctx, source, s.Config); j != nil && (j.Equal(oldJ, s.Config.Sources[source].PullIgnoreVersion) != nil) {
-		diff = true
-		newJ = j
+	if len(s.Config.Sources[source].PullPaths) > 0 {
+		if j := pattern.ParseJWTFromSource(ctx, source, s.Config); j != nil && (j.Equal(oldJ, s.Config.Sources[source].PullIgnoreVersion) != nil) {
+			diff = true
+			newJ = j
+		}
 	}
 
-	if diff || s.Config.Sources[source].RunAll {
-		ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPull)
+	if diff || init || s.Config.Sources[source].RunAll {
+		if init {
+			ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerInit)
+		} else {
+			ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPull)
+		}
 
-		r, err = s.diffExec(ctx, false, source, newJ)
+		r, err = s.diffExec(ctx, false, source, newJ, init)
 		if err != nil {
 			return r, logger.Error(ctx, err)
 		}
@@ -331,7 +357,7 @@ func (s *state) sourceRunner(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case source := <-pull:
-			r, err := s.runSource(ctx, source)
+			r, err := s.runSource(ctx, source, false)
 			if err != nil {
 				logger.Error(ctx, err) //nolint: errcheck
 			}
