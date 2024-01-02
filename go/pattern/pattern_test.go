@@ -19,6 +19,9 @@ import (
 func TestParsePatternFromImports(t *testing.T) {
 	logger.UseTestLogger(t)
 
+	t.Setenv("hello", "go")
+	t.Setenv("inherit", "yes")
+
 	ctx := context.Background()
 	c := config.Default()
 	c.Exec.Command = "0"
@@ -64,6 +67,7 @@ local config = std.native('getConfig')();
 `
 
 	tests := map[string]struct {
+		envInherit           bool
 		file                 string
 		override             bool
 		source               string
@@ -191,11 +195,56 @@ local config = std.native('getConfig')();
 				"test":   "true",
 			},
 		},
+		"env_inherit": {
+			envInherit: true,
+			file: `{
+				buildExec: {
+					command: std.native("getEnv")("hello", ""),
+				},
+				run: [
+					{
+						id: "a"
+					},
+				],
+				runExec: {
+					command: std.native("getEnv")("inherit", ""),
+				},
+			}`,
+			override:             true,
+			source:               "test",
+			wantBuildExecCommand: "go",
+			wantRunExecCommand:   "yes",
+		},
+		"env_no_inherit": {
+			envInherit: false,
+			file: `{
+				buildExec: {
+					command: std.native("getEnv")("hello", ""),
+				},
+				run: [
+					{
+						id: "a"
+					},
+				],
+				runExec: {
+					command: std.native("getEnv")("inherit", ""),
+				},
+			}`,
+			override:             true,
+			source:               "test",
+			wantBuildExecCommand: "world",
+			wantRunExecCommand:   "",
+		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			c.Exec.AllowOverride = tc.override
+			c.Exec.EnvInherit = tc.envInherit
+			c.Exec.Env = []string{
+				"hello=world",
+				"a=b",
+			}
 			p, err := ParsePatternFromImports(ctx, c, tc.source, &jsonnet.Imports{
 				Entrypoint: "/main.jsonnet",
 				Files: map[string]string{

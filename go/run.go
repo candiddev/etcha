@@ -8,6 +8,7 @@ import (
 	"github.com/candiddev/etcha/go/run"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
+	"github.com/candiddev/shared/go/types"
 )
 
 func runCommands(ctx context.Context, args []string, c *config.Config) errs.Err {
@@ -27,7 +28,13 @@ func runCommands(ctx context.Context, args []string, c *config.Config) errs.Err 
 			check = s.CheckOnly
 		}
 
-		_, err = p.Run.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, args[0] == "local-remove")
+		env := types.EnvVars{}
+
+		for k, v := range p.RunEnv {
+			env["ETCHA_RUN_"+k] = v
+		}
+
+		_, err = p.Run.Run(ctx, c.CLI, env, p.RunExec, check, args[0] == "local-remove")
 
 		return err
 	}

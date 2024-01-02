@@ -184,7 +184,7 @@ func TestStateDiffExec(t *testing.T) {
 				Raw: "hello",
 			},
 			wantInputs: []cli.RunMockInput{
-				{Environment: []string{"hello=world"}, Exec: "checkA"},
+				{Environment: []string{"ETCHA_RUN_hello=world"}, Exec: "checkA"},
 			},
 			wantResult: &Result{
 				ChangedIDs: []string{"a"},
@@ -521,8 +521,7 @@ func TestStateRunSource(t *testing.T) {
 			name: "no_diff_init",
 			mockInputs: []cli.RunMockInput{
 				{
-					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=b", "_CHECK=1", "_CHECK_OUT=a"},
-					Exec:        "checkA",
+					Exec: "checkA",
 				},
 			},
 			wantResults: &Result{},

@@ -203,15 +203,3 @@ func TestJWTPattern(t *testing.T) {
 		"world": "hello",
 	})
 }
-
-func TestJWTRunEnv(t *testing.T) {
-	j := JWT{
-		EtchaRunEnv: types.EnvVars{
-			"e": "f",
-			"c": "d",
-			"a": "b",
-		},
-	}
-
-	assert.Equal(t, j.RunEnv(), []string{"ETCHA_RUN_a=b", "ETCHA_RUN_c=d", "ETCHA_RUN_e=f"})
-}

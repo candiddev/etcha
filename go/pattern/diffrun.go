@@ -7,6 +7,7 @@ import (
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
+	"github.com/candiddev/shared/go/types"
 )
 
 // DiffRun performs a diff against two patterns and runs the changes.
@@ -42,15 +43,21 @@ func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, c
 		return o, nil
 	}
 
+	env := types.EnvVars{}
+
+	for k, v := range p.RunEnv {
+		env["ETCHA_RUN_"+k] = v
+	}
+
 	var err errs.Err
 
-	o, err = change.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, false)
+	o, err = change.Run(ctx, c.CLI, env, p.RunExec, check, false)
 
 	if err != nil {
 		return o, logger.Error(ctx, err)
 	}
 
-	removeOut, err := remove.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, true)
+	removeOut, err := remove.Run(ctx, c.CLI, env, p.RunExec, check, true)
 
 	o = append(o, removeOut...)
 
