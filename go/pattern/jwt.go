@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"sort"
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/errs"
@@ -115,19 +114,6 @@ func (j *JWT) Pattern(ctx context.Context, c *config.Config, configSource string
 	p.JWT = j.Raw
 
 	return p, logger.Error(ctx, nil)
-}
-
-// RunEnv parses RunEnv into environment values.
-func (j *JWT) RunEnv() []string {
-	env := []string{}
-
-	for k, v := range j.EtchaRunEnv {
-		env = append(env, "ETCHA_RUN_"+k+"="+v)
-	}
-
-	sort.Strings(env)
-
-	return env
 }
 
 func (*JWT) Valid() error {

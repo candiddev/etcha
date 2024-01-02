@@ -42,15 +42,17 @@ func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, c
 		return o, nil
 	}
 
+	env := p.GetRunEnv()
+
 	var err errs.Err
 
-	o, err = change.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, false)
+	o, err = change.Run(ctx, c.CLI, env, p.RunExec, check, false)
 
 	if err != nil {
 		return o, logger.Error(ctx, err)
 	}
 
-	removeOut, err := remove.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, true)
+	removeOut, err := remove.Run(ctx, c.CLI, env, p.RunExec, check, true)
 
 	o = append(o, removeOut...)
 

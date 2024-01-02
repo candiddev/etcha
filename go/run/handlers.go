@@ -56,13 +56,14 @@ func (s *state) handleEvents(ctx context.Context, o commands.Outputs, source *co
 					continue
 				}
 
-				_, err := p.Run.Run(ctx, s.Config.CLI, types.EnvVars{
-					"ETCHA_EVENT_ID":       event.Outputs[i].ID,
-					"ETCHA_EVENT_NAME":     event.Name,
-					"ETCHA_EVENT_OUTPUT":   event.Outputs[i].Change.String(),
-					"ETCHA_SOURCE_NAME":    source,
-					"ETCHA_SOURCE_TRIGGER": "event",
-				}, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), false, false)
+				env := p.GetRunEnv()
+				env["ETCHA_EVENT_ID"] = event.Outputs[i].ID
+				env["ETCHA_EVENT_NAME"] = event.Name
+				env["ETCHA_EVENT_OUTPUT"] = event.Outputs[i].Change.String()
+				env["ETCHA_SOURCE_NAME"] = source
+				env["ETCHA_SOURCE_TRIGGER"] = "event"
+
+				_, err := p.Run.Run(ctx, s.Config.CLI, env, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), false, false)
 
 				logger.Error(ctx, err) //nolint:errcheck
 			}

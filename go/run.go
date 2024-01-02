@@ -27,7 +27,7 @@ func runCommands(ctx context.Context, args []string, c *config.Config) errs.Err 
 			check = s.CheckOnly
 		}
 
-		_, err = p.Run.Run(ctx, c.CLI, p.RunEnv, p.RunExec, check, args[0] == "local-remove")
+		_, err = p.Run.Run(ctx, c.CLI, p.GetRunEnv(), p.RunExec, check, args[0] == "local-remove")
 
 		return err
 	}
