@@ -22,17 +22,13 @@ func TestBuild(t *testing.T) {
 
 	os.MkdirAll("testdata/src", 0700)
 	os.MkdirAll("testdata/dst", 0700)
-	os.WriteFile("testdata/src/main.jsonnet", []byte(`{build:[{id: 'a',always:true,change:std.manifestIni({main: std.native('getConfig')(),sections:{}})}],buildExec:{}}`), 0600)
+	os.WriteFile("testdata/src/main.jsonnet", []byte(`{build:[{id: 'a',always:true,change:'%s' % std.native('getConfig')().vars.test}],buildExec:{}}`), 0600)
 
 	prv, _, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 	c.Build.SigningKey = prv.String()
 
-	assert.HasErr(t, build(ctx, []string{"", "testdata/src/main.jsonnet", "testdata/dst/main.jwt"}, c), nil)
-	assert.Equal(t, c.CLI.RunMockInputs()[0].Exec, `buildDir = testdata/src
-buildPath = testdata/src/main.jsonnet
-source = etcha
-test = false
-`)
+	assert.HasErr(t, build.Run(ctx, []string{"", "testdata/src/main.jsonnet", "testdata/dst/main.jwt"}, c), nil)
+	assert.Equal(t, c.CLI.RunMockInputs()[0].Exec, `/usr/bin/false`)
 
 	os.RemoveAll("testdata")
 }

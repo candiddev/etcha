@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"strings"
@@ -20,6 +21,7 @@ type Exec struct {
 	Command             string   `json:"command"`
 	ContainerEntrypoint string   `json:"containerEntrypoint"`
 	ContainerImage      string   `json:"containerImage"`
+	ContainerNetwork    string   `json:"containerNetwork"`
 	ContainerPrivileged bool     `json:"containerPrivileged"`
 	ContainerPull       string   `json:"containerPull"`
 	ContainerUser       string   `json:"containerUser"`
@@ -79,6 +81,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		Command:             command,
 		ContainerEntrypoint: e.ContainerEntrypoint,
 		ContainerImage:      e.ContainerImage,
+		ContainerNetwork:    e.ContainerNetwork,
 		ContainerPrivileged: e.ContainerPrivileged,
 		ContainerUser:       e.ContainerUser,
 		ContainerVolumes:    e.ContainerVolumes,
@@ -87,7 +90,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		EnvironmentInherit:  e.EnvInherit,
 		Group:               e.Group,
 		NoErrorLog:          true,
-		Stdin:               stdin,
+		Stdin:               bytes.NewBufferString(stdin),
 		User:                e.User,
 		WorkDir:             e.WorkDir,
 	})

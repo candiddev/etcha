@@ -16,7 +16,7 @@ Etcha does not have any CVEs.  When a CVE is reported, it will be listed on this
 
 ## Cryptography
 
-Etcha leverages boring, secure cryptographic keys for signing and verifying JWTs.  See [Cryptography](../../references/cryptography) for more information.
+Etcha leverages boring, secure cryptographic keys for signing and verifying JWTs.  See [Cryptography]({{< ref "/docs/references/cryptography" >}}) for more information.
 
 ## Security Best Practices
 
@@ -24,7 +24,7 @@ Etcha can be a target for malicious usage.  See below for best practices on runn
 
 ### Don't Allow Push Access on the Internet
 
-Etcha's Push mode is the only way for attackers to access an Etcha instance remotely.  The attacker would need to know a [Source](../../references/configs#sources) name, as well correctly sign a verifiable JWT for that source.  They would also need to do do all of this without being rate-limited.  
+Etcha's Push mode is the only way for attackers to access an Etcha instance remotely.  The attacker would need to know a [Source]({{< ref "/docs/references/config#sources" >}}) name, as well correctly sign a verifiable JWT for that source.  They would also need to do do all of this without being rate-limited.  
 
 While this is highly unlikely to occur, it's best to avoid exposing Etcha on the Internet.
 

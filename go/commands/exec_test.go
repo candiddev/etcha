@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"strings"
+	"fmt"
 	"testing"
 
 	"github.com/candiddev/shared/go/assert"
@@ -63,7 +63,7 @@ func TestExecRun(t *testing.T) {
 	c.RunMockOutputs([]string{"hello"})
 
 	e := Exec{
-		Command:             "a long command",
+		Command:             `a long command "hello world"`,
 		ContainerEntrypoint: "d",
 		ContainerImage:      "e",
 		ContainerPrivileged: true,
@@ -85,7 +85,10 @@ func TestExecRun(t *testing.T) {
 	inputs := c.RunMockInputs()
 
 	assert.Equal(t, inputs[0].Environment, e.Env)
-	assert.Equal(t, strings.Contains(inputs[0].Exec, "-ehello=world --entrypoint d --privileged -u f -v volume -w work2 e a long command script"), true)
+
+	cr, _ := cli.GetContainerRuntime()
+
+	assert.Equal(t, inputs[0].Exec, fmt.Sprintf("/usr/bin/%s run -i --rm -e hello=world --entrypoint d --privileged -u f -v volume -w work2 e a long command hello world script", cr))
 	assert.Equal(t, inputs[0].WorkDir, e.WorkDir)
 
 	e.ContainerImage = ""
@@ -93,6 +96,6 @@ func TestExecRun(t *testing.T) {
 	inputs = c.RunMockInputs()
 
 	assert.Equal(t, inputs[0].Environment, e.Env)
-	assert.Equal(t, inputs[0].Exec, "a long command script")
+	assert.Equal(t, inputs[0].Exec, "a long command hello world script")
 	assert.Equal(t, inputs[0].WorkDir, e.WorkDir)
 }

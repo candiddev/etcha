@@ -27,6 +27,7 @@ type Config struct {
 	Build   Build              `json:"build"`
 	CLI     cli.Config         `json:"cli"`
 	Exec    commands.Exec      `json:"exec"`
+	Lint    Lint               `json:"lint"`
 	Run     Run                `json:"run"`
 	Sources map[string]*Source `json:"sources"`
 	Vars    map[string]any     `json:"vars"`
@@ -34,11 +35,16 @@ type Config struct {
 
 // Build configures Etcha's build behavior.
 type Build struct {
-	Linters           map[string]*commands.Exec `json:"linters"`
-	PushTLSSkipVerify bool                      `json:"pushTLSSkipVerify"`
-	SigningCommands   commands.Commands         `json:"signingCommands"`
-	SigningExec       *commands.Exec            `json:"signingExec,omitempty"`
-	SigningKey        string                    `json:"signingKey"`
+	PushTLSSkipVerify bool              `json:"pushTLSSkipVerify"`
+	SigningCommands   commands.Commands `json:"signingCommands"`
+	SigningExec       *commands.Exec    `json:"signingExec,omitempty"`
+	SigningKey        string            `json:"signingKey"`
+}
+
+// Lint are config values for linters.
+type Lint struct {
+	Exclude regexp.Regexp             `json:"exclude"`
+	Linters map[string]*commands.Exec `json:"linters"`
 }
 
 // Run configures Etcha's runtime behavior.
@@ -88,17 +94,20 @@ func (c *Config) CLIConfig() *cli.Config {
 
 func Default() *Config {
 	return &Config{
-		Build: Build{
+		Lint: Lint{
+			Exclude: *regexp.MustCompile("etcha.jsonnet"),
 			Linters: map[string]*commands.Exec{
 				"shellcheck": {
-					Command:        "-s bash -e 2154 -",
-					ContainerImage: "koalaman/shellcheck",
+					Command:          "-s bash -e 2154 -",
+					ContainerImage:   "koalaman/shellcheck",
+					ContainerNetwork: "none",
 				},
 			},
 		},
 		Exec: commands.Exec{
 			AllowOverride: true,
 			Command:       "/usr/bin/bash -e -o pipefail -c",
+			EnvInherit:    true,
 		},
 		Sources: map[string]*Source{},
 		Run: Run{

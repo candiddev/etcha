@@ -5,7 +5,7 @@ description: How to write and build a simple Pattern.
 title: Building Patterns
 ---
 
-In this tutorial, we'll write a simple [Pattern](../../references/patterns) and build it using Etcha.
+In this tutorial, we'll write a simple [Pattern]({{< ref "/docs/references/patterns" >}}) and build it using Etcha.
 
 ## Requirements
 
@@ -70,7 +70,7 @@ $ cat lib/etcha/native.libsonnet
 }
 ```
 
-6. It's a lot of Jsonnet code, but it is basically a bunch of helper functions called [Native Functions](../../references/jsonnet#native-functions)
+6. It's a lot of Jsonnet code, but it is basically a bunch of helper functions called [Native Functions]({{< ref "/docs/references/jsonnet#native-functions" >}})
 
 ## Writing a Pattern
 
@@ -103,12 +103,12 @@ local n = import '../lib/etcha/native.libsonnet';
 }
 ```
 
-This simple Pattern, built using [`etcha build`](../../guides/building-patterns), will always create a file, `helloworld`, with the current environment hostname, and read the contents of it when it changes, sending the output to the event `buildManifest`.
+This simple Pattern, built using [`etcha build`]({{< ref "/docs/guides/building-patterns" >}}), will always create a file, `helloworld`, with the current environment hostname, and read the contents of it when it changes, sending the output to the event `buildManifest`.
 
-2. We can view the rendered Pattern by running [`etcha show-pattern`](../../references/cli#show-pattern)
+2. We can view the rendered Pattern by running [`etcha render`]({{< ref "/docs/references/cli#render" >}})
 
 ```bash
-$ etcha show-pattern patterns/helloworld.jsonnet
+$ etcha render patterns/helloworld.jsonnet
 {
   "audience": null,
   "build": [
@@ -154,7 +154,7 @@ $ etcha show-pattern patterns/helloworld.jsonnet
 }
 ```
 
-We can filter to just see the build config using [`etcha jq`](../../references/cli#jq):
+We can filter to just see the build config using [`etcha jq`]({{< ref "/docs/references/cli#jq" >}}):
 
 ```bash
 $ etcha show-pattern patterns/helloworld.jsonnet | etcha jq -r '.build'
@@ -244,13 +244,13 @@ INFO  etcha/go/commands/command.go:123
 Changing read file...
 ```
 
-Etcha ran all of our build commands successfully and outputted a [JWT](../../references/jwt) in our current directory, `helloworld.jwt`
+Etcha ran all of our build commands successfully and outputted a [JWT]({{< ref "/docs/references/jwt" >}}) in our current directory, `helloworld.jwt`
 
 3. Lets inspect the JWT, using the public key we generated for verification:
 
 ```bash
 $ etcha -x run_verifyKeys='["ed25519public:MCowBQYDK2VwAyEAw7eTEuEH0+TfgtX3zB+JZVnYD0eskY6qn3n7ZCA7wWM=:reqYEklgP4"]' \
-    show-jwt helloworld.jwt 
+    jwt helloworld.jwt 
 {
   "etchaBuildManifest": "3cb2dfd2ed93",
   "etchaPattern": {
@@ -273,7 +273,7 @@ Etcha built our JWT successfully.  It included the output of the `buildManifest`
 
 ```bash
 $ etcha -x run_verifyKeys='["ed25519public:MCowBQYDK2VwAyEAE6mgQIQNiQM9WA9lX93PQcZIYGJevHp3xxyoxVEfOl8=:zbUeB0b0ni"]' \
-    show-jwt helloworld.jwt
+    jwt helloworld.jwt
 {
   "etchaBuildManifest": "3cb2dfd2ed93",
   "etchaPattern": {

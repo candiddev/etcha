@@ -124,7 +124,7 @@ func TestCompare(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			logger.SetStd()
-			assert.Equal(t, compare(ctx, tc.args, c) != nil, tc.wantErr)
+			assert.Equal(t, compare.Run(ctx, tc.args, c) != nil, tc.wantErr)
 
 			if tc.wantOut != "" {
 				assert.Equal(t, strings.Contains(logger.ReadStd(), tc.wantOut), true)

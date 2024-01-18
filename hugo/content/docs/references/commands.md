@@ -7,69 +7,71 @@ title: Commands
 
 ## Command
 
-A [Command](#command) is the smallest unit of work within Etcha.  [Patterns](../patterns) contain build and run properties which are lists of [Commands](#commands), as well as Signing and Verify commands for integrating JWT signing/verification with other systems.
+A [Command](#command) is the smallest unit of work within Etcha.  [Patterns]({{< ref "/docs/references/patterns" >}}) contain build and run properties which are lists of [Commands](#commands), as well as Signing and Verify commands for integrating JWT signing/verification with other systems.
 
 Within a list of Commands, **Commands are executed in the order they are listed**.  Additionally, a list of Commands can contain nested lists of Commands.  Etcha will flatten the lists into one ordered list automatically.
 
 ## Execution
 
-A Command is executed using the values within [`exec`](../config#exec).  Exec overrides mean the Command may need to support, handle, or not run within other Exec configurations.
+A Command is executed using the values within [`exec`]({{< ref "/docs/references/config#exec" >}}).  Exec overrides mean the Command may need to support, handle, or not run within other Exec configurations.
 
 ## Environment Variables
 
-A Command is passed environment variables within the `exec` configuration.  Each command can also add environment variables to subsequent check/change/command executions:
+A Command is passed environment variables within the `exec` configuration (or inherited values from the parent process).  Etcha will attempt to resolve environment variables before running commands, e.g. if `${MYVAR}` is present in a command, Etcha will resolve this if a match environment variable exists before passing it to the underlying command.
+
+Each command can also add environment variables to subsequent check/change/command executions:
 
 ### `ETCHA_EVENT_ID`
 
-This variable will be set for Commands in [`eventReceive`](../config#eventReceive) Pattern run lists.  It contains the [`id`](#id) of the Command that triggered the event.
+This variable will be set for Commands in [`eventReceive`]({{< ref "/docs/references/config#eventreceive" >}}) Pattern run lists.  It contains the [`id`](#id) of the Command that triggered the event.
 
 ### `ETCHA_EVENT_NAME`
 
-This variable will be set for Commands in [`eventReceive`](../config#eventReceive) Pattern run lists.  It contains the event name that triggered the event.
+This variable will be set for Commands in [`eventReceive`]({{< ref "/docs/references/config#eventreceive" >}}) Pattern run lists.  It contains the event name that triggered the event.
 
 ### `ETCHA_EVENT_OUTPUT`
 
-This variable will be set for Commands in [`eventReceive`](../config#eventReceive) Pattern run lists.  It contains the stdout/stderr of the `change` that triggered the event.
+This variable will be set for Commands in [`eventReceive`]({{< ref "/docs/references/config#eventreceive" >}}) Pattern run lists.  It contains the stdout/stderr of the `change` that triggered the event.
 
 ### `ETCHA_JWT`
 
-This variable will be set for [`verifyCommands`](../config#verifyCommands).  It contains the JWT that needs to be verified.
+This variable will be set for [`verifyCommands`]({{< ref "/docs/references/config#verifycommands" >}}).  It contains the JWT that needs to be verified.
 
 ### `ETCHA_PAYLOAD`
 
-This variable will be set for [`signCommands`](../config#signCommands).  It contains the base64 JWT payload that needs to be signed.
+This variable will be set for [`signCommands`]({{< ref "/docs/references/config#signcommands" >}}).  It contains the base64 JWT payload that needs to be signed.
 
 ### `ETCHA_RUN_`
 
-This variable will be set for any values specified in [`runEnv`](../patterns#runenv).  `ETCHA_RUN_` will be prepended to the key.
+This variable will be set for any values specified in [`runEnv`]({{< ref "/docs/references/patterns#runenv" >}}).  `ETCHA_RUN_` will be prepended to the key.
 
 ### `ETCHA_SOURCE_NAME`
 
-This variable will be set for Commands in [`eventReceive`](../config#eventReceive) or [`webhookPaths`](../config#webhookPaths) Pattern run lists.  It contains the name of the [`source`](../config#sources) receiving the Event or Webhook Pattern.
+This variable will be set for Commands in [`eventReceive`]({{< ref "/docs/references/config#eventreceive" >}}) or [`webhookPaths`]({{< ref "/docs/references/config#webhookPaths" >}}) Pattern run lists.  It contains the name of the [`source`]({{< ref "/docs/references/config#sources" >}}) receiving the Event or Webhook Pattern.
 
 ### `ETCHA_SOURCE_TRIGGER`
 
-This variable will be set for Commands in [`eventReceive`](../config#eventReceive) or [`webhookPaths`](../config#webhookPaths) Pattern run lists.  It contains the type for the trigger, `event` or `webhook`.
+This variable will be set for Commands in [`eventReceive`]({{< ref "/docs/references/config#eventreceive" >}}) or [`webhookPaths`]({{< ref "/docs/references/config#webhookPaths" >}}) Pattern run lists.  It contains the type for the trigger, `event` or `webhook`.
 
 ### `ETCHA_WEBHOOK_BODY`
 
-This variable will be set for Commands in [`webhookPaths`](../config#webhookPaths) Pattern run lists.  It contains the base64 encoded body of the webhook request.
+This variable will be set for Commands in [`webhookPaths`]({{< ref "/docs/references/config#webhookpaths" >}}) Pattern run lists.  It contains the base64 encoded body of the webhook request.
 
 ### `ETCHA_WEBHOOK_HEADERS`
 
-This variable will be set for Commands in [`webhookPaths`](../config#webhookPaths) Pattern run lists.  It contains a list of all webhook headers, separated with a newline (`\n`).
+This variable will be set for Commands in [`webhookPaths`]({{< ref "/docs/references/config#webhookpaths" >}}) Pattern run lists.  It contains a list of all webhook headers, separated with a newline (`\n`).
 
 ### `ETCHA_WEBHOOK_METHOD`
 
-This variable will be set for Commands in [`webhookPaths`](../config#webhookPaths) Pattern run lists.  It contains the name of the webhook method (`DELETE|GET|POST|PUT`).
+This variable will be set for Commands in [`webhookPaths`]({{< ref "/docs/references/config#webhookpaths" >}}) Pattern run lists.  It contains the name of the webhook method (`DELETE|GET|POST|PUT`).
 
 ### `ETCHA_WEBHOOK_PATH`
 
-This variable will be set for Commands in [`webhookPaths`](../config#webhookPaths) Pattern run lists.  It contains the request path for the webhook.
+This variable will be set for Commands in [`webhookPaths`]({{< ref "/docs/references/config#webhookpaths" >}}) Pattern run lists.  It contains the request path for the webhook.
 
 ### `ETCHA_WEBHOOK_QUERY`
 
-This variable will be set for Commands in [`webhookPaths`](../config#webhookPaths) Pattern run lists.  It contains the request query params separated with a `&`.
+This variable will be set for Commands in [`webhookPaths`]({{< ref "/docs/references/config#webhookpaths" >}}) Pattern run lists.  It contains the request query params separated with a `&`.
 
 ### `<envPrefix>_CHECK`
 
@@ -107,7 +109,7 @@ For push and pull, Etcha by default diff Patterns and run checks and changes for
 
 ### Check {#check-mode}
 
-Will always run [`check`](#check) if specified only.  [Sources](../config#sources) can be forced to run in check mode, and patterns can be ran directly in check mode using [`etcha check`](../cli#check)
+Will always run [`check`](#check) if specified only.  [Sources]({{< ref "/docs/references/config#sources" >}}) can be forced to run in check mode, and patterns can be ran in check mode using [`checkOnly`]({{< ref "/docs/references/config#checkonly" >}})
 
 ### Remove {#remove-mode}
 
@@ -135,7 +137,7 @@ String, an environment variable name prefix to add to all [Environment Variables
 
 ### `exec`
 
-See [`exec`](../config#exec).  Specifies a custom exec configuration for this command.  Parent exec configurations must allow overrides for this to work.
+See [`exec`]({{< ref "/docs/references/config#exec" >}}).  Specifies a custom exec configuration for this command.  Parent exec configurations must allow overrides for this to work.
 
 ### `id` (required) {#id}
 
@@ -143,8 +145,12 @@ An ID for the Command.  Must be specified.  Can overlap with other Commands.
 
 ### `onChange`, `onFail`, `onRemove` {#on}
 
-A list of other Command [`id`s](#id) to run, or a list of [Events](../events) to trigger, if this Command changes, removes or fails.  Event names must be prefixed with `etcha:`.  Cannot specify the current command ID (can't target self).  For onChange, targets must exist and occur after the current Command in the Command list (onRemove is the opposite, must occur before), or there will be an error during compilation.
+A list of other Command [`id`s](#id) to run, or a list of [Events]({{< ref "/docs/references/events" >}}) to trigger, if this Command changes, removes or fails.  Event names must be prefixed with `etcha:`.  Cannot specify the current command ID (can't target self).  For onChange, targets must exist and occur after the current Command in the Command list (onRemove is the opposite, must occur before), or there will be an error during compilation.
 
 ### `remove`
 
 String, the commands or executable to run during [Remove Mode](#remove-mode).  Can be multiple lines.  Will be appended to `exec.command`.  Should return 0 if successful, otherwise it will produce an error.
+
+### `stdin`
+
+String, sets the stdin for the Command for `change`, `check`, and `remove`.  Environment variables will be interpreted before being sent to any commands.

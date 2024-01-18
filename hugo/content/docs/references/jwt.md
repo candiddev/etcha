@@ -80,15 +80,15 @@ These are "standard" JWT claims present in most JWTs.
 
 ##### `aud`
 
-List of strings, typically used to indicate who the JWT was meant for.  This is populated by the Pattern property [`audience`](../patterns#audience).
+List of strings, typically used to indicate who the JWT was meant for.  This is populated by the Pattern property [`audience`]({{< ref "/docs/references/patterns#audience" >}}).
 
 ##### `exp`
 
-Integer, a unix timestamp indicating when the JWT expires.  This is populated by the Pattern property [`expiresInSec`](../patterns#expiresinsec).
+Integer, a unix timestamp indicating when the JWT expires.  This is populated by the Pattern property [`expiresInSec`]({{< ref "/docs/references/patterns#expiresinsec" >}}).
 
 ##### `jti`
 
-String, typically used to indicate a unique ID for the JWT.  This is populated by the Pattern property [`id`](../patterns#id).
+String, typically used to indicate a unique ID for the JWT.  This is populated by the Pattern property [`id`]({{< ref "/docs/references/patterns#id" >}}).
 
 ##### `iat`
 
@@ -96,7 +96,7 @@ Integer, a unix timestamp of when the JWT was created.  This is populated automa
 
 #### `iss`
 
-String, typically used to indicate a domain or organization that issued the JWT.  This is populated by the Pattern property [`issuer`](../patterns#issuer).
+String, typically used to indicate a domain or organization that issued the JWT.  This is populated by the Pattern property [`issuer`]({{< ref "/docs/references/patterns#issuer" >}}).
 
 ##### `nbf`
 
@@ -106,7 +106,7 @@ Integer, a unix timestamp of when the JWT becomes valid.  This is populated auto
 
 String, typically used to indicate the subject or user for the JWT.  
 
-String, typically used to indicate a domain or organization that issued the JWT.  This is populated by the Pattern property [`issuer`](../patterns#issuer).
+String, typically used to indicate a domain or organization that issued the JWT.  This is populated by the Pattern property [`issuer`]({{< ref "/docs/references/patterns#issuer" >}}).
 
 #### Etcha Claims
 
@@ -114,11 +114,11 @@ Etcha adds the following claims to JWTs:
 
 ##### `etchaBuildManifest`
 
-String, for [Commands](../commands) that produce the event [`buildManifest`](../events#buildManifest), the output of executing [`change`](../commands#change) is concated into this property.  This property is primarily used for cache busting/forcing a JWT to be downloaded during a run diff, but it could contain useful data around secure supply chain or patch versions.
+String, for [Commands]({{< ref "/docs/references/commands" >}}) that produce the event [`buildManifest`]({{< ref "/docs/references/events#buildManifest" >}}), the output of executing [`change`]({{< ref "/docs/references/commands#change" >}}) is concated into this property.  This property is primarily used for cache busting/forcing a JWT to be downloaded during a run diff, but it could contain useful data around secure supply chain or patch versions.
 
 ##### `etchaPattern`
 
-Object, containing the main [Pattern](../patterns) file and any related imports.  During build, Etcha will read in the Pattern path specified and gather all the imports.  It will set the `entrypoint` property to the main Pattern file, and include all files and imports under `files` as key, values:
+Object, containing the main [Pattern]({{< ref "/docs/references/patterns" >}}) file and any related imports.  During build, Etcha will read in the Pattern path specified and gather all the imports.  It will set the `entrypoint` property to the main Pattern file, and include all files and imports under `files` as key, values:
 
 ```json
 {
@@ -130,7 +130,7 @@ Object, containing the main [Pattern](../patterns) file and any related imports.
 }
 ```
 
-When this JWT is pulled or pushed, Etcha will [render the Pattern](../patterns#rendering) specified in this object.  The above Pattern would look like this after rendering:
+When this JWT is pulled or pushed, Etcha will [render the Pattern]({{< ref "/docs/references/patterns#rendering" >}}) specified in this object.  The above Pattern would look like this after rendering:
 
 ```json
 {
@@ -145,9 +145,9 @@ When this JWT is pulled or pushed, Etcha will [render the Pattern](../patterns#r
 
 ##### `etchaRunEnv`
 
-A map of [Environment Variables](../commands#environment-variables) that will be added to [Commands](../commands) when the Patter is run.
+A map of [Environment Variables]({{< ref "/docs/references/commands#environment-variables" >}}) that will be added to [Commands]({{< ref "/docs/references/commands" >}}) when the Patter is run.
 
-The keys must be valid Environment Variable names.  [`ETCHA_RUN_`](../commands#etcha_run_) will be prepended to the key names.
+The keys must be valid Environment Variable names.  [`ETCHA_RUN_`]({{< ref "/docs/references/commands#etcha_run_" >}}) will be prepended to the key names.
 
 ##### `etchaVersion`
 
@@ -155,17 +155,17 @@ String, the Etcha version used to build/sign the JWT.  This can be ignored durin
 
 ### Signature
 
-The final part of the JWT is the signature.  Given a string containing the base64 header and base64 payload, joined with a ".", a signature is generated using a private key or a HMAC and base64 raw URL encoded.  See [Cryptography](../cryptography) for more information on generating keys.
+The final part of the JWT is the signature.  Given a string containing the base64 header and base64 payload, joined with a ".", a signature is generated using a private key or a HMAC and base64 raw URL encoded.  See [Cryptography]({{< ref "/docs/references/cryptography" >}}) for more information on generating keys.
 
 ## Verification
 
 Etcha verifies the JWTs in a few ways:
 
-- It checks the signature using [`verifyKeys`](../config#verifykeys).  If a verify key cannot be found that matches the JWT, it does not accept the JWT (during either push or pull).
+- It checks the signature using [`verifyKeys`]({{< ref "/docs/references/config#verifykeys" >}}).  If a verify key cannot be found that matches the JWT, it does not accept the JWT (during either push or pull).
 - It validates the [`exp`](#exp) and [`nbf`](#nbf) values to ensure the token has valid timestamps.
 - 
 This verification process ensures the JWT can be trusted.
 
 ## Custom Sign/Verify
 
-Organizations wishing to provide more verification/signing capabilities can leverage custom verify and sign commands ([verifyCommands](../config#verifycommands) and [signCommands](../config#signingcommands)).  See [Building Patterns](../../guides/building-patterns) for more information.
+Organizations wishing to provide more verification/signing capabilities can leverage custom [verifyCommands]({{< ref "/docs/references/config#verifycommands" >}})) and [signCommands]({{< ref "/docs/references/config#signingcommands" >}}).  See [Building Patterns]({{< ref "/docs/guides/building-patterns" >}}) for more information.

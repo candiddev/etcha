@@ -10,15 +10,15 @@ In this guide, we'll go over initializing a directory, creating a Command librar
 
 ## Initialize a Directory
 
-In your code repository, run the command [`etcha init`](../../references/cli#init).  This command will do a few things:
+In your code repository, run the command [`etcha init`]({{< ref "/docs/references/cli#init" >}}).  This command will do a few things:
 
 - Scaffold a common development environment.
 - Populate handy, validated, Jsonnet libraries to kickstart your development process.
 
 After running this command, you'll have a directory structure like this:
 
-- `lib`: This folder should contain subfolders with various [Jsonnet libraries](../../references/jsonnet).  You'll import these libraries into Patterns.  All of these files should have a `.libsonnet` extension.
-- `lib/etcha`: This folder contains validated Jsonnet libraries.  You probably shouldn't change the files in here (instead, open a pull request!).  See [Libraries](../../references/libraries) for more information.  Etcha will add a comment at the top containing the Etcha version that generated these files.
+- `lib`: This folder should contain subfolders with various [Jsonnet libraries]({{< ref "/docs/references/jsonnet" >}}).  You'll import these libraries into Patterns.  All of these files should have a `.libsonnet` extension.
+- `lib/etcha`: This folder contains validated Jsonnet libraries.  You probably shouldn't change the files in here (instead, open a pull request!).  See [Libraries]({{< ref "/docs/references/libraries" >}}) for more information.  Etcha will add a comment at the top containing the Etcha version that generated these files.
 - `patterns`: This folder should contain the main pattern files you end up building.  The files in this directory should have a `.jsonnet` extension.
 
 Subsequent usage of this command will only overwrite the files in `lib/etcha`.  A Git diff should show you what changed, be sure to check this file into source control!
@@ -48,7 +48,7 @@ Once you've built a few Command libraries (or skipped those for now), you'll nee
 
 It's recommended to create Patterns under the `patterns` folder, possibly even under subfolders.  Most Patterns should be tightly scoped to limit their length.  Similar to Commands, how you organize your Patterns will mirror your organizational structure.
 
-Patterns contain build and run Command lists, as well as values for [JWTs](../../references/jwt).  A rendered Pattern may look like this:
+Patterns contain build and run Command lists, as well as values for [JWTs]({{< ref "/docs/references/jwt" >}}).  A rendered Pattern may look like this:
 
 ```json
 {
@@ -157,12 +157,12 @@ local runApp = import '../lib/myorg/runApp.libsonnet';
 }
 ```
 
-Etcha will flatten lists into a single, ordered list.  If you're curious to see how your Pattern might look once it's rendered, run [`etcha show-pattern`](../../references/cli#show-pattern).
+Etcha will flatten lists into a single, ordered list.  If you're curious to see how your Pattern might look once it's rendered, run [`etcha render`]({{< ref "/docs/references/cli#render" >}})).
 
 ### Build, Run, and Rendering
 
-The `build` commands in a Pattern are ran during [`etcha build`](../../references/cli#build), most likely on your local instance or a CI/CD runner.
+The `build` commands in a Pattern are ran during [`etcha build`]({{< ref "/docs/references/cli#build" >}})), most likely on your local instance or a CI/CD runner.
 
-The `run` commands in a Pattern are ran on an Etcha instance after pulling or pushing the Pattern.  **All Patterns are rendered immediately before they are used**.  If you use [dynamic lookups](../../references/jsonnet#native-functions) in your Pattern, like `getEnv`, `getRecord`, or `getURL`, those functions will be called and rendered on the _instance performing the run_.
+The `run` commands in a Pattern are ran on an Etcha instance after pulling or pushing the Pattern.  **All Patterns are rendered immediately before they are used**.  If you use [dynamic lookups]({{< ref "/docs/references/jsonnet#native-functions" >}})) in your Pattern, like `getEnv`, `getRecord`, or `getURL`, those functions will be called and rendered on the _instance performing the run_.
 
 `build` and `run` lists are not required to have Commands.  A server configuration may not have any `build` Commands, just `run` Commands.

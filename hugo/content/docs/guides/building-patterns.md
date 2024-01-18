@@ -10,7 +10,7 @@ In this guide, we'll go over building and signing Patterns in Etcha.
 
 ## Build Process
 
-Etcha builds Patterns by executing the `build` Command list on the local instance, and then generating a [JWT](../../references/jwt) containing the Pattern and other metadata.
+Etcha builds Patterns by executing the `build` Command list on the local instance, and then generating a [JWT]({{< ref "/docs/references/jwt" >}}) containing the Pattern and other metadata.
 
 The JWT is then cryptographically signed to prevent modification and prove to other Etcha instances that it was created by a trusted authority.
 
@@ -18,13 +18,13 @@ The output of the the build process is this JWT, a cryptographically secure file
 
 ## Signing Patterns
 
-We need a way to sign Patterns before building them.  Out of the box, Etcha cannot build or sign Patterns without [cryptographic keys](../../references/cryptography).  Specifically, we need to provide values in our Etcha configuration for [`signingKey`](../../references/config#signingkey) or [`signingCommands`](../../references/config#signingcommands).
+We need a way to sign Patterns before building them.  Out of the box, Etcha cannot build or sign Patterns without [cryptographic keys]({{< ref "/docs/references/cryptography" >}}).  Specifically, we need to provide values in our Etcha configuration for [`signingKey`]({{< ref "/docs/references/config#signingkey" >}}) or [`signingCommands`]({{< ref "/docs/references/config#signingcommands" >}}).
 
 ### `signingKey`
 
 A `signingKey` will use a static, private key to sign the Pattern JWT.  This value can be hardcoded in your "builder", or you can retrieve it from environment variables, a remote URL, a DNS record, etc.  This text is like a password though and should be protected.
 
-We can generate keys appropriate for signing using [`etcha generate-keys sign-verify`](../../references/cli#generate-keys).  We'll use the `privateKey` value during build for the `signingKey`, and then we'll save the `publicKey` and use that for the [`verifyKeys`](../../references/config#verifykeys) when we push/pull.
+We can generate keys appropriate for signing using [`etcha generate-keys sign-verify`]({{< ref "/docs/references/cli#generate-keys" >}}).  We'll use the `privateKey` value during build for the `signingKey`, and then we'll save the `publicKey` and use that for the [`verifyKeys`]({{< ref "/docs/references/config#verifykeys" >}}) when we push/pull.
 
 Here is an example Etcha configuration showing a static `signingKey`:
 
@@ -36,7 +36,7 @@ Here is an example Etcha configuration showing a static `signingKey`:
 }
 ```
 
-We can also leverage some of the [dynamic Jsonnet functions](../../references/jsonnet#native-functions) to pull the key from a separate tool, like HashiCorp Vault:
+We can also leverage some of the [dynamic Jsonnet functions]({{< ref "/docs/references/jsonnet#native-functions" >}}) to pull the key from a separate tool, like HashiCorp Vault:
 
 ```
 local getEnv(key) = std.native('getEnv')(key);
@@ -51,7 +51,7 @@ local getPath(path, fallback=null) = std.native('getPath')(path, fallback);
 
 This example looks a little intense, lets walk through it:
 
-- We declared two functions at the top to leverage [Jsonnet native functions](../../references/jsonnet#native-functions), `getEnv` which will retrieve an environment variable, and `getPath` which will retrieve the contents of a local file or URL.
+- We declared two functions at the top to leverage [Jsonnet native functions]({{< ref "/docs/references/jsonnet#native-functions" >}}), `getEnv` which will retrieve an environment variable, and `getPath` which will retrieve the contents of a local file or URL.
 - We defined our build object and signingKey using those function, working inside out:
   - We looked up the `VAULT_TOKEN` value using `getEnv`
   - We created a `path` for `getPath` using string formatting.  The path is the Vault API path to our signing key.  At the end, we added a syntax that `getPath` will use to set an HTTP header, `X-Vault-Token`, with the value from `getEnv`, which is used to authenticate to Vault with.
@@ -62,9 +62,9 @@ This example looks a little intense, lets walk through it:
 
 Some organizations may need to perform signing in a more secure, restrictive manner, like delegating signing to a HSM or HashiCorp Vault.  We can use `signingCommands` for this.  `signingCommands` are a list of Commands that will use environment variables to sign a Token and return the signed Token to Etcha.
 
-Etcha will set the [Environment Variable](../../references/commands#environment-variables) [`ETCHA_PAYLOAD`](../../references/commands#etcha_jwt) containing the base64 raw URL encoded string that needs to be signed.
+Etcha will set the [Environment Variable]({{< ref "/docs/references/commands#environment-variables" >}}) [`ETCHA_PAYLOAD`]({{< ref "/docs/references/commands#etcha_jwt" >}}) containing the base64 raw URL encoded string that needs to be signed.
 
-Our signing Commands need to construct the rest of the [JWT](../../references/jwt), and then print the JWT during a Command `change` that triggers the event [`jwt`](../../references/events#jwt), like this:
+Our signing Commands need to construct the rest of the [JWT]({{< ref "/docs/references/jwt" >}}), and then print the JWT during a Command `change` that triggers the event [`jwt`]({{< ref "/docs/references/events#jwt" >}}), like this:
 
 ```json
 [
@@ -120,12 +120,12 @@ local restart = function(name)
 }
 ```
 
-We'll run [`etcha -c config.jsonnet build patterns/myapp.jsonnet myapp.jwt myapp`](../../references/cli#build).  This does a few things:
+We'll run [`etcha -c config.jsonnet build patterns/myapp.jsonnet myapp.jwt myapp`]({{< ref "/docs/references/cli#build" >}}).  This does a few things:
 
 1. Import the Pattern Jsonnet file, `myapp.jsonnet`, and any other files it imports
 2. Render the Pattern Jsonnet file
-3. Run all of the [Commands](../../references/commands) in `build` in **Change Mode**.  Optionally using the [`Source`](../../references/config#sources) configuration [`exec`](../../references/config#exec), `myapp`, specified by the last parameter.
-4. Collect metadata from these Commands to populate the [JWT](../../references/jwt), like [`buildManifest`](../../references/events#buildManifest) and [`runEnv_`](../../references/events#runEnv).  In our Pattern, the build command `build %s` will fire these events, and these values will contain the stdout of the `change` execution.
+3. Run all of the [Commands]({{< ref "/docs/references/commands" >}}) in `build` in **Change Mode**.  Optionally using the [`Source`]({{< ref "/docs/references/config#sources" >}}) configuration [`exec`]({{< ref "/docs/references/config#exec" >}}), `myapp`, specified by the last parameter.
+4. Collect metadata from these Commands to populate the [JWT]({{< ref "/docs/references/jwt" >}}), like [`buildManifest`]({{< ref "/docs/references/events#buildManifest" >}}) and [`runEnv_`]({{< ref "/docs/references/events#runEnv" >}}).  In our Pattern, the build command `build %s` will fire these events, and these values will contain the stdout of the `change` execution.
 5. Create a JWT containing the _raw Pattern Jsonnet files_ collected in step 1, the metadata collected in step 4, and any JWT values set in our Pattern.
 6. Sign the JWT using [`signingKey`](#signingkey) or [`signingCommands`](#signing-commands)
 7. Save the JWT file to `myapp.jwt`, the parameter after the path to the Pattern.

@@ -72,14 +72,17 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 		vars["test"] = false
 	}
 
-	r := jsonnet.NewRender(ctx, vars)
-	r.Import(imports)
-
 	exec := &c.Exec
 
 	if s != nil {
 		exec = c.Exec.Override(s.Exec)
 	}
+
+	r := jsonnet.NewRender(ctx, map[string]any{
+		"exec": exec,
+		"vars": vars,
+	})
+	r.Import(imports)
 
 	if !exec.EnvInherit {
 		r.SetEnv(&exec.Env)

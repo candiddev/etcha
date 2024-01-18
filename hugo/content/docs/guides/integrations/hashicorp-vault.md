@@ -7,7 +7,7 @@ title: HashiCorp Vault
 
 ## Overview
 
-[HashiCorp Vault](https://www.vaultproject.io/) is a platform for managing secrets like passwords and cryptographic keys.  Etcha can leverage Vault's cryptographic functions to securely sign and verify [Patterns](../../../explanations/patterns) to limit access to private keys via [`signingCommands`](../../building-patterns#signingcommands) and [`verifyCommands`](../../running-patterns#verifycommands).
+[HashiCorp Vault](https://www.vaultproject.io/) is a platform for managing secrets like passwords and cryptographic keys.  Etcha can leverage Vault's cryptographic functions to securely sign and verify [Patterns]({{< ref "/docs/references/patterns" >}}) to limit access to private keys via [`signingCommands`]({{< ref "/docs/guides/building-patterns#signingcommands" >}}) and [`verifyCommands`]({{< ref "/docs/guides/running-patterns#verifycommands" >}}).
 
 ## Vault Setup
 
@@ -27,7 +27,7 @@ vault write transit/keys/etchaos type=ed25519
 
 ### Signing
 
-We'll configure Etcha to sign Patterns using Vault via [`signingCommands`](../../../references/config#signingcommands).  Here is an example configuration file:
+We'll configure Etcha to sign Patterns using Vault via [`signingCommands`]({{< ref "/docs/references/config#signingcommands" >}}).  Here is an example configuration file:
 
 **config.jsonnet**
 ```
@@ -54,13 +54,13 @@ We'll configure Etcha to sign Patterns using Vault via [`signingCommands`](../..
 
 This configuration does a few things:
 
-- Constructs a [JWT header](../../../references/jwt) using JSON and stores it in the variable `header`
-- Base64 encrypts the header and combines it with the [`ETCHA_PAYLOAD`](../../../references/commands#etcha_payload) variable into a `token`
+- Constructs a [JWT header]({{< ref "/docs/references/jwt" >}}) using JSON and stores it in the variable `header`
+- Base64 encrypts the header and combines it with the [`ETCHA_PAYLOAD`]({{< ref "/docs/references/commands#etcha_payload" >}}) variable into a `token`
 - Using Vault, it signs the `token` using the key we created above and stores it in `sig`
 - Combines the `sig` and `token` into a JWT and prints it to stdout
-- Using the [`jwt` event](../../../references/events#jwt), Etcha will take the output of this as the JWT for the build
+- Using the [`jwt` event]({{< ref "/docs/references/events#jwt" >}}), Etcha will take the output of this as the JWT for the build
 
-Continue following the [Building Patterns guide](../../building-patterns).
+Continue following the [Building Patterns guide]({{< ref "/docs/guides/building-patterns" >}}).
 
 ### Verifying
 
@@ -68,7 +68,7 @@ Etcha can verify Vault signatures [online](#online) using `verifyCommands` to co
 
 #### Online
 
-We'll configure Etcha to verify Patterns using Vault via [`verifyCommands`](../../../references/config#verifycommands).  Here is an example configuration file:
+We'll configure Etcha to verify Patterns using Vault via [`verifyCommands`]({{< ref "/docs/references/config#verifycommands" >}}).  Here is an example configuration file:
 
 **config.jsonnet**
 ```
@@ -97,12 +97,12 @@ We'll configure Etcha to verify Patterns using Vault via [`verifyCommands`](../.
 
 This configuration does a few things:
 
-- Constructs a [JWT](../../../references/jwt) header, payload, and signature using the [`ETCHA_JWT`](../../../references/commands#etcha_jwt) variable
+- Constructs a [JWT]({{< ref "/docs/references/jwt" >}}) header, payload, and signature using the [`ETCHA_JWT`]({{< ref "/docs/references/commands#etcha_jwt" >}}) variable
 - Using Vault, it verifies the `token` using the key and the `sig` we created above
 - **If it verifies successfully**, print the JWT
-- Using the [`jwt` event](../../../references/events#jwt), Etcha will take the output of this as the JWT and assume it was verified successfully.  If we didn't output a JWT or exited non-zero, Etcha will reject the JWT.
+- Using the [`jwt` event]({{< ref "/docs/references/events#jwt" >}}), Etcha will take the output of this as the JWT and assume it was verified successfully.  If we didn't output a JWT or exited non-zero, Etcha will reject the JWT.
 
-Continue following the [Running Patterns guide](../../running-patterns).
+Continue following the [Running Patterns guide]({{< ref "/docs/guides/running-patterns" >}}).
 
 #### Offline
 
@@ -113,7 +113,7 @@ $ vault read -field keys transit/export/public-key/etchaos
 map[1:gBykng9f71hnl54iBxadY6mUTEU058EhFJyT3C3RIjE=]
 ```
 
-We can add the key to [`verifyKeys`](../../../references/config#verifykeys) by adding the prefix `ed25519public:`
+We can add the key to [`verifyKeys`]({{< ref "/docs/references/config#verifykeys" >}}) by adding the prefix `ed25519public:`
 
 ```
 {
@@ -125,4 +125,4 @@ We can add the key to [`verifyKeys`](../../../references/config#verifykeys) by a
 }
 ```
 
-Continue following the [Running Patterns guide](../../running-patterns).
+Continue following the [Running Patterns guide]({{< ref "/docs/guides/running-patterns" >}}).
