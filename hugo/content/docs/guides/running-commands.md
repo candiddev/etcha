@@ -10,7 +10,7 @@ In this guide, we'll go over running Commands without Patterns.
 
 ## Use Cases
 
-Etcha can run Commands via [Source's `commands`](../../references/config#commands) and [`etcha push-command`](../../references/cli#push-command) in an ad-hoc way.  Some reasons you might want to use this include:
+Etcha can run Commands via [Source's `commands`]({{< ref "/docs/references/config#commands" >}}) and [`etcha push`]({{< ref "/docs/references/cli#push" >}}) in an ad-hoc way.  Some reasons you might want to use this include:
 
 - Executing long running tasks
 - Remote troubleshooting and debugging
@@ -18,7 +18,7 @@ Etcha can run Commands via [Source's `commands`](../../references/config#command
 
 ## Static Source Commands
 
-Static source Commands allow Etcha to run Commands for sources without having them pushed/pulled via Patterns.  Instead, the Commands live within Etcha's main configuration.  The Commands are defined under a [`source`](../../references/config#sources) config block like this:
+Static source Commands allow Etcha to run Commands for sources without having them pushed/pulled via Patterns.  Instead, the Commands live within Etcha's main configuration.  The Commands are defined under a [`source`]({{< ref "/docs/references/config#sources" >}}) config block like this:
 
 ```json
 {
@@ -52,27 +52,27 @@ The sender and receiver need to have certain configurations before it will work:
 
 The receiver of Push Commands needs to have certain configuration values set:
 
-- Add [`verifyKeys`](../../references/config#verifyKeys)
-- Configure a [`source`](../../references/config#sources) with the following options:
+- Add [`verifyKeys`]({{< ref "/docs/references/config#verifyKeys" >}})
+- Configure a [`source`]({{< ref "/docs/references/config#sources" >}}) with the following options:
   - **Required**:
-    - [`allowPush`](../../references#allowPush) set to `true`, this enables pushing.
+    - [`allowPush`]({{< ref "/docs/references/config#allowPush" >}}) set to `true`, this enables pushing.
   - **Recommended**:
-    - [`noRemove`](../../references#noRemove) set to `true`, this prevents `remove` from being ran.
-    - [`noRestore`](../../references#noRestore) set to `true`, this prevents Etcha from running your most recently pushed Command at every startup.
-    - [`runAll`](../../references#runAll) set to `true`, this forces Etcha to always run your push Command (otherwise repeated Commands will only run once).
+    - [`noRemove`]({{< ref "/docs/references/config#noRemove" >}}) set to `true`, this prevents `remove` from being ran.
+    - [`noRestore`]({{< ref "/docs/references/config#noRestore" >}}) set to `true`, this prevents Etcha from running your most recently pushed Command at every startup.
+    - [`runAll`]({{< ref "/docs/references/config#runAll" >}}) set to `true`, this forces Etcha to always run your push Command (otherwise repeated Commands will only run once).
   - **Optional**:
-    - [`runMulti`](../../references#runMulti) set to `true`, this allows Etcha to run multiple push Command  requests concurrently, otherwise they will be queued.
+    - [`runMulti`]({{< ref "/docs/references/config#runMulti" >}}) set to `true`, this allows Etcha to run multiple push Command  requests concurrently, otherwise they will be queued.
 
 ### Sender
 
-The sender of Push Commands needs to have a corresponding [`signingKey`](../../references/config#signingKey) configured.  Optionally, [`pushTLSSkipVerify`](../../references/config#pushTLSSkipVerify) can be set to `true`, but it may impact security.
+The sender of Push Commands needs to have a corresponding [`signingKey`]({{< ref "/docs/references/config#signingKey" >}}) configured.  Optionally, [`pushTLSSkipVerify`]({{< ref "/docs/references/config#pushTLSSkipVerify" >}}) can be set to `true`, but it may impact security.
 
 ### Pushing Commands
 
 Here is an example push from the Sender:
 
 ```bash
-$ etcha push-command ls https://etcha.local:4000/etcha/v1/mysource
+$ etcha push ls https://etcha.local:4000/etcha/v1/mysource
 README.md
 ```
 
@@ -85,7 +85,7 @@ In this example:
 
 ### Precautions
 
-Using `etcha push-command` can cause problems when used mixed with Sources that use Patterns.  `push-command` effectively pushes a new [Pattern](../../references/patterns) with the following format:
+Using `etcha push` can cause problems when used mixed with Sources that use Patterns.  `push` effectively pushes a new [Pattern]({{< ref "/docs/references/patterns" >}}) with the following format:
 
 ```json
 {
@@ -101,4 +101,4 @@ Using `etcha push-command` can cause problems when used mixed with Sources that 
 
 This will replace the current Pattern.  If you do not set `noRemove` in the destination Source config, the replaced Pattern will be diff'd and the `remove` Commands will be ran.  Additionally, subsequent Pattern pushes will most likely trigger their `change` values.
 
-We recommend using dedicated `sources` for `push-command` and only using it for break-glass scenarios, but advanced users may be able to use it for PAM as well.
+We recommend using dedicated `sources` for `push` and only using it for break-glass scenarios, but advanced users may be able to use it for PAM as well.

@@ -25,6 +25,7 @@ func TestParsePatternFromImports(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 	c.Exec.Command = "0"
+	c.Exec.User = "1"
 	c.Sources = map[string]*config.Source{
 		"1": {
 			Exec: &commands.Exec{
@@ -58,10 +59,10 @@ local config = std.native('getConfig')();
 		}
 	],
 	runEnv: {
-		bool: '%s' % config.bool,
-		int: '%s' % config.int,
-		string: config.hello,
-		test: '%s' % std.get(config, 'test', 'false'),
+		bool: '%s' % config.vars.bool,
+		int: '%s' % config.exec.user,
+		string: config.vars.hello,
+		test: '%s' % std.get(config.vars, 'test', 'false'),
 	}
 }
 `

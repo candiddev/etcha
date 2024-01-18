@@ -79,7 +79,7 @@ This Pattern will output the environment to a file `env` when the Pattern is ran
 
 ## Running Etcha Listener
 
-1. Lets configure Etcha with a [Source](../../guides/running-patterns#sources) that will handle our Events and Webhooks, and another that allows pushes to trigger Events:
+1. Lets configure Etcha with a [Source]({{< ref "/docs/guides/running-patterns#sourcesc" >}}) that will handle our Events and Webhooks, and another that allows pushes to trigger Events:
 
 ```bash
 $ docker run -d --name etcha_listen \
@@ -146,7 +146,7 @@ go_gc_duration_seconds{quantile="0.75"} 0.000104377
 ...
 ```
 
-We should see a bunch of [metrics](../../guides/monitoring).  Nothing interesting yet--we haven't triggered any commands.
+We should see a bunch of [metrics]({{< ref "/docs/guides/monitoring" >}}).  Nothing interesting yet--we haven't triggered any commands.
 
 3. Lets Push our `handler` Pattern:
 
@@ -242,4 +242,4 @@ $ docker network rm etcha
 
 ## Summary
 
-We've successfully triggered events and webhooks to execute Patterns.  This concludes the tutorials for now.  You should start looking through the [Guides](../../guides).
+We've successfully triggered events and webhooks to execute Patterns.  This concludes the tutorials for now.  You should start looking through the ({{< ref "/docs/guides" >}}).

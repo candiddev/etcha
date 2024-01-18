@@ -23,7 +23,7 @@ var ctx = context.Background()
 func TestLib(t *testing.T) {
 	logger.UseTestLogger(t)
 	c.Parse(ctx, cli.ConfigArgs{})
-	ctx = logger.SetLevel(ctx, c.CLI.LogLevel)
+	ctx = logger.SetLevel(ctx, logger.LevelDebug)
 
 	i := jsonnet.Imports{}
 
@@ -53,7 +53,9 @@ func TestLib(t *testing.T) {
 
 	r := jsonnet.NewRender(ctx, c)
 	r.Import(&i)
-	assert.HasErr(t, r.Fmt(ctx), nil)
+
+	_, err = r.Fmt(ctx)
+	assert.HasErr(t, err, nil)
 
 	os.WriteFile("lib/etcha/native.libsonnet", []byte(jsonnet.Native), 0600)
 
@@ -65,10 +67,6 @@ func TestLib(t *testing.T) {
 	p, err := pattern.ParsePatternFromImports(ctx, c, "", &i)
 	assert.HasErr(t, err, nil)
 
-	os.Mkdir("testdata", 0700)
-
 	res = p.Test(ctx, c, false)
 	assert.Equal(t, res, types.Results{})
-
-	os.RemoveAll("testdata")
 }

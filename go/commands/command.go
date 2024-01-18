@@ -17,8 +17,8 @@ import (
 type Command struct {
 	Always    bool     `json:"always,omitempty"`
 	Change    string   `json:"change,omitempty"`
-	Check     string   `json:"check,omitempty"`
 	ChangedBy []string `json:"-"`
+	Check     string   `json:"check,omitempty"`
 	EnvPrefix string   `json:"envPrefix"`
 	Exec      *Exec    `json:"exec,omitempty"`
 	ID        string   `json:"id"`
@@ -27,6 +27,7 @@ type Command struct {
 	OnRemove  []string `json:"onRemove,omitempty"`
 	Remove    string   `json:"remove,omitempty"`
 	RemovedBy []string `json:"-"`
+	Stdin     string   `json:"stdin"`
 }
 
 // Run will run the Command script for the given Mode.
@@ -79,7 +80,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 
 		logger.Debug(ctx, fmt.Sprintf("Checking %s...", cmd.ID))
 
-		out.Check, err = cfg.Run(ctx, c, cmd.Check, "")
+		out.Check, err = cfg.Run(ctx, c, cmd.Check, cmd.Stdin)
 		if (!remove && err == nil) || (remove && err != nil) {
 			newEnv[cmd.EnvPrefix+"_CHECK"] = "0"
 			newEnv[cmd.EnvPrefix+"_CHECK_OUT"] = out.Check.String()
@@ -89,6 +90,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 			return out, newEnv, nil //nolint:nilerr
 		}
 
+		logger.Debug(ctx, out.Check.String())
 		newEnv[cmd.EnvPrefix+"_CHECK_OUT"] = out.Check.String()
 	}
 
@@ -130,7 +132,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		s = cmd.Remove
 	}
 
-	o, err := cfg.Run(ctx, c, s, "")
+	o, err := cfg.Run(ctx, c, s, cmd.Stdin)
 	if err != nil {
 		if remove {
 			out.Remove = o

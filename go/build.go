@@ -6,25 +6,28 @@ import (
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/etcha/go/pattern"
+	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/errs"
 )
 
-func build(ctx context.Context, args []string, c *config.Config) errs.Err {
-	source := args[1]
-	destination := args[2]
+var build = cli.Command[*config.Config]{ //nolint:gochecknoglobals
+	ArgumentsRequired: []string{
+		"pattern path",
+		"destination path",
+	},
+	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
+		source := args[1]
+		destination := args[2]
 
-	configSource := "etcha"
-	if len(args) == 4 {
-		configSource = args[3]
-	}
+		c.Vars["buildDir"] = filepath.Dir(source)
+		c.Vars["buildPath"] = source
 
-	c.Vars["buildDir"] = filepath.Dir(source)
-	c.Vars["buildPath"] = source
+		p, err := pattern.ParsePatternFromPath(ctx, c, "", source)
+		if err != nil {
+			return err
+		}
 
-	p, err := pattern.ParsePatternFromPath(ctx, c, configSource, source)
-	if err != nil {
-		return err
-	}
-
-	return p.BuildSign(ctx, c, destination)
+		return p.BuildSign(ctx, c, destination)
+	},
+	Usage: "Build a pattern",
 }

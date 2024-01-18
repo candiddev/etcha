@@ -64,7 +64,7 @@ local n = import '../lib/etcha/native.libsonnet';
 
 ## Running Etcha Listener
 
-1. Lets configure Etcha with a [Source](../../guides/running-patterns#sources) that allows pushes and has `verifyKeys`, and run Etcha in listen mode:
+1. Lets configure Etcha with a [Source]({{< ref "/docs/guides/running-patterns#sources" >}}) that allows pushes and has `verifyKeys`, and run Etcha in listen mode:
 
 ```bash
 $ docker run -d --name etcha_listen \
@@ -109,7 +109,7 @@ go_gc_duration_seconds{quantile="0.75"} 0.000104377
 ...
 ```
 
-We should see a bunch of [metrics](../../guides/monitoring).  Nothing interesting yet--we haven't ran any commands.
+We should see a bunch of [metrics]({{< ref "/docs/guides/monitoring" >}}).  Nothing interesting yet--we haven't ran any commands.
 
 ## Pushing a Pattern
 

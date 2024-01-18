@@ -8,8 +8,8 @@ function(arch='amd64', cacheDir='', dst)
   [
     {
       id: 'download Etcha to %s' % cache,
-      check: '%s version 2>&1 | grep "$(curl -sL https://github.com/candiddev/etcha/releases/latest/download/version)" > /dev/null' % cache,
-      change: 'curl -sL https://github.com/candiddev/etcha/releases/latest/download/etcha_linux_%s.tar.gz | tar -xOz etcha > %s && chmod 0755 %s' % [arch, cache, cache],
+      check: '%s version 2>&1 | grep "$(etcha copy change https://github.com/candiddev/etcha/releases/latest/download/version -)" > /dev/null' % cache,
+      change: 'etcha copy change https://github.com/candiddev/etcha/releases/latest/download/etcha_linux_%s.tar.gz - | tar -xOz etcha > %s && chmod +x %s' % [arch, cache, cache],
       remove: 'rm %s' % cache,
     },
     if cacheDir == '' then [] else [

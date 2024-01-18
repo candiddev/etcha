@@ -19,7 +19,7 @@ func TestLint(t *testing.T) {
 	ctx := context.Background()
 	c := config.Default()
 	c.CLI.RunMock()
-	c.Build.Linters = map[string]*commands.Exec{
+	c.Lint.Linters = map[string]*commands.Exec{
 		"test": {
 			Command: "test",
 		},
@@ -46,10 +46,25 @@ func TestLint(t *testing.T) {
 	assert.HasErr(t, err, errs.ErrReceiver)
 	assert.Equal(t, r, nil)
 
+	d, _ := os.Getwd()
+
 	r, err = Lint(ctx, c, "testdata/bad", true)
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, r, types.Results{
-		"testdata/bad/main.jsonnet": {"files not formatted properly", "received empty commands"},
+		d + "/testdata/bad/main.jsonnet": {
+			`diff have /main.jsonnet want /main.jsonnet
+--- have /main.jsonnet
++++ want /main.jsonnet
+@@ -1,3 +1,3 @@
+ {
+-		run: [],
+-	}
+\ No newline at end of file
++  run: [],
++}
+`,
+			"received empty commands",
+		},
 	})
 
 	c.CLI.RunMockErrors([]error{
@@ -62,7 +77,33 @@ func TestLint(t *testing.T) {
 	r, err = Lint(ctx, c, "testdata/good", true)
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, r, types.Results{
-		"testdata/good/main.jsonnet": {"files not formatted properly", "linter test: whoops"},
+		d + "/testdata/good/main.jsonnet": {
+			`diff have /main.jsonnet want /main.jsonnet
+--- have /main.jsonnet
++++ want /main.jsonnet
+@@ -1,10 +1,10 @@
+ {
+-		run: [
+-			{
+-				id: "a",
+-				change: "change",
+-				check: "check",
+-				remove: "remove"
+-			}
+-		]
+-	}
+\ No newline at end of file
++  run: [
++    {
++      id: 'a',
++      change: 'change',
++      check: 'check',
++      remove: 'remove',
++    },
++  ],
++}
+`,
+			"linter test: whoops"},
 	})
 
 	os.RemoveAll("testdata")

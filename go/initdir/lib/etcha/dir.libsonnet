@@ -1,18 +1,17 @@
 // Manage a directory at path with a specific mode.
 
-function(mode='0755', path)
+function(group='""', owner='""', path, mode='0755')
 
   local vars = {
+    group: group,
     mode: if std.length(mode) == 3 then '0%s' % mode else mode,
+    owner: owner,
     path: path,
   };
 
   {
-    change: |||
-      mkdir -p %(path)s
-      chmod %(mode)s %(path)s
-    ||| % vars,
-    check: '[[ -d %(path)s ]] && [[ $(stat -c "%%#a" %(path)s) == %(mode)s ]]' % vars,
+    change: 'etcha dir change %(path)s %(mode)s %(owner)s %(group)s' % vars,
+    check: 'etcha dir check %(path)s %(mode)s %(owner)s %(group)s' % vars,
     id: 'dir %s' % path,
-    remove: 'rm -rf ' + path,
+    remove: 'etcha dir remove %(path)s %(mode)s %(owner)s %(group)s' % vars,
   }

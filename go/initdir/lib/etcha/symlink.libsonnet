@@ -2,8 +2,8 @@
 
 function(dst, src)
   {
-    change: 'ln -nsf %s %s' % [src, dst],
-    check: '[[ $(readlink %s) == %s ]]' % [dst, src],
+    change: 'etcha link change %s %s' % [src, dst],
+    check: 'etcha link check %s %s' % [src, dst],
     id: 'symlink %s' % dst,
-    remove: 'rm -f %s' % dst,
+    remove: 'etcha link remove %s %s' % [src, dst],
   }
