@@ -67,12 +67,15 @@ Patterns are rendered from Jsonnet everytime they are ran.  That means all of th
 
 ### Variables
 
-The native Jsonnet function, [`getConfig() object`], can be used to retrieve the combined `vars` for the `source`.  Given a configuration like this:
+The native Jsonnet function, [`getConfig() object`]({{< ref "/docs/references/jsonnet#getConfig" >}}), can be used to retrieve the combined [`exec`]({{< ref "/docs/references/config#exec" >}}) and [`vars`]({{< ref "/docs/references/config#vars" >}}) for the `source`.  Given a configuration like this:
 
 ```json
 {
   "sources": {
     "source1": {
+      "exec": {
+        "command": "/bin/bash"
+      },
       "vars": {
         "var1": false,
         "var2": "value"
@@ -86,7 +89,15 @@ The native Jsonnet function, [`getConfig() object`], can be used to retrieve the
 }
 ```
 
-Running `getConfig()` within a Pattern for the source `source1` will render a Jsonnet object like this:
+Running `getConfig().exec` within a Pattern for the source `source1` will render a Jsonnet object like this:
+
+```json
+{
+  "command": "/bin/bash"
+}
+```
+
+Running `getConfig().vars` within a Pattern for the source `source1` will render a Jsonnet object like this:
 
 ```json
 {

@@ -65,7 +65,7 @@ func dirFileRunMk(change, dir bool, contents []byte, path string, permissions *f
 					p = *permissions
 				}
 
-				if err := os.Mkdir(path, p); err != nil {
+				if err := os.MkdirAll(path, p); err != nil {
 					return nil, err
 				}
 			} else {
