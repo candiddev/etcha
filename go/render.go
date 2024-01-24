@@ -20,10 +20,11 @@ var render = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 
 		// Try JWT
 		j, err := pattern.ParseJWTFromPath(logger.SetLevel(ctx, logger.LevelNone), c, "", args[1])
-		if err != nil && j == nil {
+		if err != nil && (j == nil || j.EtchaPattern == nil) {
 			p, err = pattern.ParsePatternFromPath(ctx, c, "", args[1])
 		} else {
 			var e errs.Err
+
 			p, e = j.Pattern(ctx, c, "")
 			if e != nil {
 				return e
