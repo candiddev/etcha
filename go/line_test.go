@@ -107,6 +107,20 @@ world
 replaceME
 youtoo`,
 		},
+		{
+			name:  "ssh",
+			match: "(?m)^#?PermitRootLogin.*",
+			mode:  "change",
+			path:  "-",
+			stdin: `#LoginGraceTime 2m
+#PermitRootLogin prohibit-password
+#StrictModes yes
+`,
+			replace: "PermitRootLogin yes",
+			wantContent: `#LoginGraceTime 2m
+PermitRootLogin yes
+#StrictModes yes`,
+		},
 	}
 
 	for _, tc := range tests {
