@@ -4,11 +4,12 @@ local copy = import '../lib/etcha/copy.libsonnet';
 local dir = import '../lib/etcha/dir.libsonnet';
 local etchaInstall = import '../lib/etcha/etchaInstall.libsonnet';
 local file = import '../lib/etcha/file.libsonnet';
+local group = import '../lib/etcha/group.libsonnet';
 local line = import '../lib/etcha/line.libsonnet';
 local mount = import '../lib/etcha/mount.libsonnet';
-local password = import '../lib/etcha/password.libsonnet';
 local symlink = import '../lib/etcha/symlink.libsonnet';
 local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
+local user = import '../lib/etcha/user.libsonnet';
 
 {
   run: [
@@ -30,13 +31,47 @@ local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
     dir(group='daemon', mode='0700', owner='daemon', path='testdata/test'),
     etchaInstall(cacheDir='testdata/test', dst='testdata/etcha'),
     etchaInstall(dst='testdata/etcha1'),
-    file(contents='root:*:19352:0:99999:7:::', group='daemon', owner='daemon', ignoreContents=true, path='testdata/shadow'),
-    line(match='19352', path='testdata/shadow', replaceChange='19352!', replaceRemove='19352'),
+    file(contents=|||
+      root:x:0:0:root:/root:/bin/bash
+      daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+      bin:x:2:2:bin:/bin:/usr/sbin/nologin
+      sys:x:3:3:sys:/dev:/usr/sbin/nologin
+      sync:x:4:65534:sync:/bin:/bin/sync
+      games:x:2010:60:samba:/home/games:/bin/false
+    |||, group='daemon', owner='daemon', ignoreContents=true, path='testdata/passwd'),
+    file(contents=|||
+      root:*:18919:0:99999:7:::
+      daemon:*:18907:0:99999:7:::
+      bin:*:18907:0:99999:7:::
+      sys:*:18907:0:99999:7:::
+      sync:*:18907:0:99999:7:::
+      games:*:18907:0:99999:7:::
+    |||, group='daemon', owner='daemon', ignoreContents=true, path='testdata/shadow'),
+    line(match='18919', path='testdata/shadow', replaceChange='18920', replaceRemove='18919'),
+    user(comment='syncer', gid='444', hash='123', home='/sbin', id='5', name='sync', pathPasswd='testdata/passwd', pathShadow='testdata/shadow', remove=false, shell='/bin/bash'),
+    user(comment='syncer', gid='444', hash='123', home='/sbin', id='5', name='syncer', pathPasswd='testdata/passwd', pathShadow='testdata/shadow', remove=false, shell='/bin/bash'),
+    file(contents=|||
+      root:x:0:
+      daemon:x:1:
+      bin:x:2:
+      sys:x:3:
+      adm:x:4:
+      tty:x:5:
+    |||, ignoreContents=true, path='testdata/group'),
+    file(contents=|||
+      root:*::
+      daemon:*::
+      bin:*::
+      sys:*::
+      adm:*::
+      tty:*::
+    |||, ignoreContents=true, path='testdata/gshadow'),
+    group(id='4', members='user1,user2', name='adm', pathGroup='testdata/group', pathGshadow='testdata/gshadow'),
+    group(id='1000', members='user3,user4', name='admins', pathGroup='testdata/group', pathGshadow='testdata/gshadow', remove=true),
     file(contents='hello', path='testdata/world'),
     file(path='testdata/touch'),
     dir(path='testdata/src'),
     mount(args='-o bind', dst='testdata/dst', src='testdata/src'),
-    password(hash='notahash', path='testdata/shadow'),
     symlink(src='testdata/shadow', dst='testdata/shadowsym'),
     systemdUnit(contents=|||
       [Unit]

@@ -35,14 +35,14 @@ See [Writing Patterns]({{< ref "/docs/guides/writing-patterns" >}}) for more inf
 ### `file`
 {{% etcha-library "file" %}}
 
+### `group`
+{{% etcha-library "group" %}}
+
 ### `line`
 {{% etcha-library "line" %}}
 
 ### `mount`
 {{% etcha-library "mount" %}}
-
-### `password`
-{{% etcha-library "password" %}}
 
 ### `symlink`
 {{% etcha-library "symlink" %}}
@@ -50,6 +50,5 @@ See [Writing Patterns]({{< ref "/docs/guides/writing-patterns" >}}) for more inf
 ### `systemdUnit`
 {{% etcha-library "systemdUnit" %}}
 
-
-
-
+### `user`
+{{% etcha-library "user" %}}
