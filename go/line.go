@@ -54,6 +54,10 @@ var line = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			}
 
 			o := r.ReplaceAll(content, []byte(rep))
+			if !bytes.Contains(o, []byte(rep)) {
+				o = append(o, append([]byte("\n"), rep...)...)
+			}
+
 			if args[2] == "-" {
 				logger.Raw(string(o))
 			} else if !bytes.Equal(o, content) {

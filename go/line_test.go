@@ -121,6 +121,44 @@ youtoo`,
 PermitRootLogin yes
 #StrictModes yes`,
 		},
+		{
+			name:  "append-check",
+			match: "(?m)^#?PermitRootLogin.*",
+			mode:  "check",
+			path:  "-",
+			stdin: `#LoginGraceTime 2m
+#StrictModes yes
+`,
+			replace:     "PermitRootLogin yes",
+			wantErr:     true,
+			wantContent: "ERROR replacement text not found\n",
+		},
+		{
+			name:  "append-change",
+			match: "(?m)^#?PermitRootLogin.*",
+			mode:  "change",
+			path:  "-",
+			stdin: `#LoginGraceTime 2m
+#StrictModes yes
+`,
+			replace: "PermitRootLogin yes",
+			wantContent: `#LoginGraceTime 2m
+#StrictModes yes
+PermitRootLogin yes`,
+		},
+		{
+			name:  "no_change",
+			match: "(?m)^#?PermitRootLogin.*",
+			mode:  "change",
+			path:  "-",
+			stdin: `#LoginGraceTime 2m
+#StrictModes yes
+PermitRootLogin yes`,
+			replace: "PermitRootLogin yes",
+			wantContent: `#LoginGraceTime 2m
+#StrictModes yes
+PermitRootLogin yes`,
+		},
 	}
 
 	for _, tc := range tests {

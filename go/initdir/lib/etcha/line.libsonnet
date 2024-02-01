@@ -1,4 +1,4 @@
-// Manage a line at path.  Can set the contents, expand or not expand variables in the heredoc, set the owner and group, ignore content changes, and set the mode.
+// Manage a line at path.  Can set the contents, owner and group, ignore content changes, and set the mode.  Will append the line to the end of the file during a change if nothing matches.
 
 function(match, path, replaceChange, replaceRemove='""')
   local vars = {
