@@ -61,7 +61,11 @@ func TestLib(t *testing.T) {
 
 	res, err := pattern.Lint(ctx, c, ".", true)
 	assert.HasErr(t, err, nil)
-	assert.Equal(t, res, types.Results{})
+
+	if len(res) != 0 {
+		t.Errorf(strings.Join(res.Show(), "\n"))
+	}
+
 	os.Remove("lib/etcha/native.libsonnet")
 
 	p, err := pattern.ParsePatternFromImports(ctx, c, "", &i)

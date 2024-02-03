@@ -47,6 +47,9 @@ See [Writing Patterns]({{< ref "/docs/guides/writing-patterns" >}}) for more inf
 ### `symlink`
 {{% etcha-library "symlink" %}}
 
+### `systemdNetwork`
+{{% etcha-library "systemdUnit" %}}
+
 ### `systemdUnit`
 {{% etcha-library "systemdUnit" %}}
 

@@ -153,4 +153,4 @@ String, the commands or executable to run during [Remove Mode](#remove-mode).  C
 
 ### `stdin`
 
-String, sets the stdin for the Command for `change`, `check`, and `remove`.  Environment variables will be interpreted before being sent to any commands.
+String, sets the stdin for the Command for `change`, `check`, and `remove`.

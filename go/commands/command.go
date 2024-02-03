@@ -15,19 +15,19 @@ import (
 
 // Command is a configuration to run.
 type Command struct {
-	Always    bool     `json:"always,omitempty"`
-	Change    string   `json:"change,omitempty"`
-	ChangedBy []string `json:"-"`
-	Check     string   `json:"check,omitempty"`
-	EnvPrefix string   `json:"envPrefix"`
-	Exec      *Exec    `json:"exec,omitempty"`
-	ID        string   `json:"id"`
-	OnChange  []string `json:"onChange,omitempty"`
-	OnFail    []string `json:"onFail,omitempty"`
-	OnRemove  []string `json:"onRemove,omitempty"`
-	Remove    string   `json:"remove,omitempty"`
-	RemovedBy []string `json:"-"`
-	Stdin     string   `json:"stdin"`
+	Always    bool              `json:"always,omitempty"`
+	Change    string            `json:"change,omitempty"`
+	ChangedBy []string          `json:"-"`
+	Check     string            `json:"check,omitempty"`
+	EnvPrefix string            `json:"envPrefix"`
+	Exec      *Exec             `json:"exec,omitempty"`
+	ID        string            `json:"id"`
+	OnChange  types.SliceString `json:"onChange,omitempty"`
+	OnFail    types.SliceString `json:"onFail,omitempty"`
+	OnRemove  types.SliceString `json:"onRemove,omitempty"`
+	Remove    string            `json:"remove,omitempty"`
+	RemovedBy []string          `json:"-"`
+	Stdin     string            `json:"stdin"`
 }
 
 // Run will run the Command script for the given Mode.

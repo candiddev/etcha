@@ -8,6 +8,7 @@ local group = import '../lib/etcha/group.libsonnet';
 local line = import '../lib/etcha/line.libsonnet';
 local mount = import '../lib/etcha/mount.libsonnet';
 local symlink = import '../lib/etcha/symlink.libsonnet';
+local systemdNetwork = import '../lib/etcha/systemdNetwork.libsonnet';
 local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
 local user = import '../lib/etcha/user.libsonnet';
 
@@ -84,6 +85,17 @@ local user = import '../lib/etcha/user.libsonnet';
       [Install]
       WantedBy=multi-user.target
     |||, enable=true, name='test.service', restart=true),
+    dir(path='testdata/network'),
+    systemdNetwork(enable=false, files={
+      'test.network': |||
+        [Match]
+        Name=!veth*
+        Type=ether wlan
+
+        [Network]
+        DHCP=yes
+      |||,
+    }, path='testdata/network', restart=false),
   ],
   runExec: {
     allowOverride: true,

@@ -35,11 +35,13 @@ var link = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 				if err := os.Symlink(src, dst); err != nil {
 					return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 				}
+
+				return nil
 			} else if mode == metrics.CommandModeRemove {
 				return nil
-			} else {
-				return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 			}
+
+			return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 		}
 
 		s, err := os.Readlink(dst)
@@ -55,7 +57,7 @@ var link = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			}
 		}
 
-		if mode == metrics.CommandModeRemove {
+		if mode == metrics.CommandModeRemove || s != "" && s != src {
 			if err := os.Remove(dst); err != nil {
 				return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 			}
