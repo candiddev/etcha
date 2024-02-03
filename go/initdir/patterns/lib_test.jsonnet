@@ -33,6 +33,12 @@ local user = import '../lib/etcha/user.libsonnet';
     etchaInstall(cacheDir='testdata/test', dst='testdata/etcha'),
     etchaInstall(dst='testdata/etcha1'),
     file(contents=|||
+      HOME=${HOME}
+    |||, expand=true, path='testdata/home'),
+    file(contents=|||
+      HOME=/root
+    |||, expand=false, path='testdata/home'),
+    file(contents=|||
       root:x:0:0:root:/root:/bin/bash
       daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
       bin:x:2:2:bin:/bin:/usr/sbin/nologin

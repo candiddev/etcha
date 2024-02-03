@@ -2,7 +2,7 @@
 
 local line = import './line.libsonnet';
 
-function(comment, gid, hash='*', home='/bin', id, name, pathPasswd='/etc/passwd', pathShadow='/etc/shadow', remove=false, shell='/usr/sbin/nologin')
+function(comment='',gid,hash='*',home='/bin',id,name,pathPasswd='/etc/passwd',pathShadow='/etc/shadow',remove=false,shell='/usr/sbin/nologin')
   local vars = {
     comment: comment,
     gid: gid,
