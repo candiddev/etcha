@@ -44,18 +44,19 @@ var line = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			}
 		}
 
+		reg := args[3]
 		rep := args[4]
 
 		switch mode {
 		case metrics.CommandModeChange:
-			r, err := regexp.Compile(args[3])
+			r, err := regexp.Compile(reg)
 			if err != nil {
 				return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 			}
 
-			o := r.ReplaceAll(content, []byte(rep))
+			o := r.ReplaceAllLiteral(content, []byte(rep))
 			if !bytes.Contains(o, []byte(rep)) {
-				o = append(o, append([]byte("\n"), rep...)...)
+				o = append(append(o, append([]byte("\n"), rep...)...), []byte("\n")...)
 			}
 
 			if args[2] == "-" {

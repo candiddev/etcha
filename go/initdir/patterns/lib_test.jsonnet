@@ -33,6 +33,12 @@ local user = import '../lib/etcha/user.libsonnet';
     etchaInstall(cacheDir='testdata/test', dst='testdata/etcha'),
     etchaInstall(dst='testdata/etcha1'),
     file(contents=|||
+      HOME=${HOME}
+    |||, expand=true, path='testdata/home'),
+    file(contents=|||
+      HOME=/root
+    |||, expand=false, path='testdata/home'),
+    file(contents=|||
       root:x:0:0:root:/root:/bin/bash
       daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
       bin:x:2:2:bin:/bin:/usr/sbin/nologin
@@ -49,7 +55,7 @@ local user = import '../lib/etcha/user.libsonnet';
       games:*:18907:0:99999:7:::
     |||, group='daemon', owner='daemon', ignoreContents=true, path='testdata/shadow'),
     line(match='18919', path='testdata/shadow', replaceChange='18920', replaceRemove='18919'),
-    user(comment='syncer', gid='444', hash='123', home='/sbin', id='5', name='sync', pathPasswd='testdata/passwd', pathShadow='testdata/shadow', remove=false, shell='/bin/bash'),
+    user(comment='syncer', gid='444', hash='$y$j9T$hu21ZriPN8iCXixA/SRAI/$Wfw4stnUOjn3xULjD.7hhtn/mzvX/cwLePDPY9PBE6A', home='/sbin', id='5', name='sync', pathPasswd='testdata/passwd', pathShadow='testdata/shadow', remove=false, shell='/bin/bash'),
     user(comment='syncer', gid='444', hash='123', home='/sbin', id='5', name='syncer', pathPasswd='testdata/passwd', pathShadow='testdata/shadow', remove=false, shell='/bin/bash'),
     file(contents=|||
       root:x:0:

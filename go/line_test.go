@@ -108,6 +108,19 @@ replaceME
 youtoo`,
 		},
 		{
+			name:  "erase",
+			match: `(?m)world\n`,
+			mode:  "change",
+			path:  "-",
+			stdin: `hello
+world
+replaceME
+`,
+			wantContent: `hello
+replaceME
+`,
+		},
+		{
 			name:  "ssh",
 			match: "(?m)^#?PermitRootLogin.*",
 			mode:  "change",
@@ -144,7 +157,8 @@ PermitRootLogin yes
 			replace: "PermitRootLogin yes",
 			wantContent: `#LoginGraceTime 2m
 #StrictModes yes
-PermitRootLogin yes`,
+PermitRootLogin yes
+`,
 		},
 		{
 			name:  "no_change",
@@ -154,10 +168,10 @@ PermitRootLogin yes`,
 			stdin: `#LoginGraceTime 2m
 #StrictModes yes
 PermitRootLogin yes`,
-			replace: "PermitRootLogin yes",
+			replace: "PermitRootLogin yes$$",
 			wantContent: `#LoginGraceTime 2m
 #StrictModes yes
-PermitRootLogin yes`,
+PermitRootLogin yes$$`,
 		},
 	}
 
