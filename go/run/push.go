@@ -119,6 +119,9 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 
 	c := chi.URLParam(r, "config")
 	ctx = metrics.SetSourceName(ctx, c)
+	ctx = logger.SetAttribute(ctx, "remoteAddr", r.RemoteAddr)
+
+	logger.Info(ctx, "Push configuration request")
 
 	src, ok := s.Config.Sources[c]
 	if !ok || !src.AllowPush {

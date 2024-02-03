@@ -1,10 +1,11 @@
-// Manage a line at path.  Can set the contents, owner and group, ignore content changes, and set the mode.  Will append the line to the end of the file during a change if nothing matches.
+// Manage a line at path.  Can set the match regexp, the path to the file, the replacement strings for change, optionally for check (will use change if not specified) and remove (will not remove line if not specified).  Will append the line to the end of the file during a change if nothing matches.
 
-function(match, path, replaceChange, replaceRemove=null)
+function(match, path, replaceChange, replaceCheck=null, replaceRemove=null)
   local vars = {
     match: match,
     path: path,
     replaceChange: replaceChange,
+    replaceCheck: if replaceCheck == null then replaceChange else replaceCheck,
     replaceRemove: replaceRemove,
   };
 

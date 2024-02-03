@@ -98,7 +98,7 @@ func Default() *Config {
 			Exclude: *regexp.MustCompile("etcha.jsonnet"),
 			Linters: map[string]*commands.Exec{
 				"shellcheck": {
-					Command:          "-s bash -e 2154 -",
+					Command:          "-s bash -e 2016 -e 2154 -",
 					ContainerImage:   "koalaman/shellcheck",
 					ContainerNetwork: "none",
 				},
