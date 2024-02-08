@@ -38,6 +38,16 @@ func TestPush(t *testing.T) {
 
 	os.WriteFile("testdata/good1.jsonnet", []byte(`
 {
+	build: [
+		{
+			id: "1",
+			always: true,
+			change: "change2",
+			onChange: [
+				"etcha:runEnv_a",
+			],
+		},
+	],
 	run: [
 		{
 			change: "change1",
@@ -97,6 +107,14 @@ func TestPush(t *testing.T) {
 			path:       "testdata/good1.jsonnet",
 			wantErr:    pattern.ErrPatternMissingKey,
 			wantResult: &Result{},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{
+						"_CHECK=1",
+					},
+					Exec: "/usr/bin/bash -e -o pipefail -c change2",
+				},
+			},
 		},
 		{
 			name:        "no_source",
@@ -105,6 +123,14 @@ func TestPush(t *testing.T) {
 			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
 			wantResult:  &Result{},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{
+						"_CHECK=1",
+					},
+					Exec: "/usr/bin/bash -e -o pipefail -c change2",
+				},
+			},
 		},
 		{
 			name:        "denied_source",
@@ -113,6 +139,14 @@ func TestPush(t *testing.T) {
 			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
 			wantResult:  &Result{},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{
+						"_CHECK=1",
+					},
+					Exec: "/usr/bin/bash -e -o pipefail -c change2",
+				},
+			},
 		},
 		{
 			name:        "bad_private_key",
@@ -121,19 +155,65 @@ func TestPush(t *testing.T) {
 			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
 			wantResult:  &Result{},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{
+						"_CHECK=1",
+					},
+					Exec: "/usr/bin/bash -e -o pipefail -c change2",
+				},
+			},
+		},
+		{
+			name:        "error_build",
+			destination: ts.URL + "/etcha/v1/push/etcha",
+			mockErrors: []error{
+				ErrPushSourceMismatch,
+			},
+			signingKey: prv1,
+			path:       "testdata/good1.jsonnet",
+			wantErr:    ErrPushSourceMismatch,
+			wantResult: &Result{},
+			wantInputs: []cli.RunMockInput{
+				{
+					Environment: []string{
+						"_CHECK=1",
+					},
+					Exec: "/usr/bin/bash -e -o pipefail -c change2",
+				},
+			},
 		},
 		{
 			name:        "error_exec",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
+				nil,
 				ErrNoVerifyKeys,
 				ErrNoVerifyKeys,
 			},
 			signingKey: prv1,
 			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
-				{Exec: "check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "change1"},
+				{
+					Environment: []string{
+						"_CHECK=1",
+					},
+					Exec: "/usr/bin/bash -e -o pipefail -c change2",
+				},
+				{
+					Environment: []string{
+						"ETCHA_RUN_a=1",
+					},
+					Exec: "check1",
+				},
+				{
+					Environment: []string{
+						"ETCHA_RUN_a=1",
+						"_CHECK=1",
+						"_CHECK_OUT=a",
+					},
+					Exec: "change1",
+				},
 			},
 			wantResult: &Result{
 				Err: "error changing id 1: error running commands: error running commands: no verify keys specified: b",
@@ -144,13 +224,20 @@ func TestPush(t *testing.T) {
 			name:        "good",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
+				nil,
 				ErrNoVerifyKeys,
 			},
 			signingKey: prv1,
 			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
-				{Exec: "check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "change1"},
+				{
+					Environment: []string{
+						"_CHECK=1",
+					},
+					Exec: "/usr/bin/bash -e -o pipefail -c change2",
+				},
+				{Environment: []string{"ETCHA_RUN_a=1"}, Exec: "check1"},
+				{Environment: []string{"ETCHA_RUN_a=1", "_CHECK=1", "_CHECK_OUT=a"}, Exec: "change1"},
 			},
 			wantResult: &Result{
 				ChangedIDs:     []string{"1"},
@@ -167,7 +254,7 @@ func TestPush(t *testing.T) {
 			path:       "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check2"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=1"}, Exec: "check1"},
 			},
 			wantResult: &Result{
 				ChangedIDs: []string{"2"},
@@ -181,12 +268,12 @@ func TestPush(t *testing.T) {
 			path:        "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check2"},
-				{Environment: []string{"_CHECK=0", "_CHECK_OUT=a"}, Exec: "check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT=b"}, Exec: "remove1"},
+				{Environment: []string{"_CHECK=0", "_CHECK_OUT=1"}, Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "remove1"},
 			},
 			wantResult: &Result{
 				RemovedIDs:     []string{"1"},
-				RemovedOutputs: []string{"c"},
+				RemovedOutputs: []string{"b"},
 			},
 		},
 		{
@@ -196,17 +283,17 @@ func TestPush(t *testing.T) {
 			signingKey:  prv1,
 			wantInputs: []cli.RunMockInput{
 				{Environment: []string{"_CHECK=1"}, Exec: "/usr/bin/ls"},
-				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1"}, Exec: "check2"},
+				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=1", "_CHECK=1"}, Exec: "check2"},
 				{
-					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=a", "_CHECK=1", "_CHECK_OUT=b"},
+					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=1", "_CHECK=1", "_CHECK_OUT=a"},
 					Exec:        "remove2",
 				},
 			},
 			wantResult: &Result{
 				ChangedIDs:     []string{"etcha push"},
-				ChangedOutputs: []string{"a"},
+				ChangedOutputs: []string{"1"},
 				RemovedIDs:     []string{"2"},
-				RemovedOutputs: []string{"c"},
+				RemovedOutputs: []string{"b"},
 			},
 		},
 	}
@@ -215,7 +302,7 @@ func TestPush(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c.Build.SigningKey = tc.signingKey.String()
 			c.CLI.RunMockErrors(tc.mockErrors)
-			c.CLI.RunMockOutputs([]string{"a", "b", "c", "d", "e"})
+			c.CLI.RunMockOutputs([]string{"1", "a", "b", "c", "d", "e"})
 
 			r, err := Push(ctx, c, tc.destination, tc.command, tc.path)
 			assert.HasErr(t, err, tc.wantErr)

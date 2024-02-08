@@ -44,6 +44,9 @@ See [Writing Patterns]({{< ref "/docs/guides/writing-patterns" >}}) for more inf
 ### `mount`
 {{% etcha-library "mount" %}}
 
+### `rotInstall`
+{{% etcha-library "rotInstall" %}}
+
 ### `symlink`
 {{% etcha-library "symlink" %}}
 

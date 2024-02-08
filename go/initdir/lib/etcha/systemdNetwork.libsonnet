@@ -3,10 +3,10 @@
 local file = import './file.libsonnet';
 local systemdUnit = import './systemdUnit.libsonnet';
 
-function(enable=true, files, path='/etc/systemd/network', restart=true)
+function(enable=true, expand=false, files, path='/etc/systemd/network', restart=true)
   [
     [
-      file(contents=files[f], group='systemd-network', mode='0600', owner='systemd-network', path='%s/%s' % [path, f]) + if restart then {
+      file(contents=files[f], expand=expand, group='systemd-network', mode='0600', owner='systemd-network', path='%s/%s' % [path, f]) + if restart then {
         onChange: [
           'systemctl restart systemd-networkd',
         ],

@@ -73,29 +73,33 @@ This variable will be set for Commands in [`webhookPaths`]({{< ref "/docs/refere
 
 This variable will be set for Commands in [`webhookPaths`]({{< ref "/docs/references/config#webhookpaths" >}}) Pattern run lists.  It contains the request query params separated with a `&`.
 
+### `envPrefix`
+
+This variable will be set to the stdout and stderr of the check execution of a Command with [`envPrefix`](#envPrefix).  This variable will not be set if the Command wasn't checked.  If no envPrefix is defined, this variable will not be set.
+
 ### `<envPrefix>_CHECK`
 
-This variable will be set to 0 if a Command with [`envPrefix`](#envPrefix) is checked without any error or skipped checking due to no check value, `always` set to false, or not changed by anything.  It will be 1 if it had errors while checking.  If no envPrefix is defined, the variable will be `_CHECK` and will show the previously run command.
+This variable will be set to 0 if a Command is checked without any error or skipped checking due to no check value, `always` set to false, or not changed by anything.  It will be 1 if it had errors while checking.  If no [`envPrefix`](#envPrefix) is defined, the variable will be `_CHECK` and will show the previously run command.
 
 ### `<envPrefix>_CHECK_OUT`
 
-This variable will be set to the stdout and stderr of the check execution of a Command with [`envPrefix`](#envPrefix).  This variable will not be set if the Command wasn't checked.  If no envPrefix is defined, the variable will be `_CHECK_OUT` and will show the previously run command.
+This variable will be set to the stdout and stderr of the check execution of a Command.  This variable will not be set if the Command wasn't checked.  If no [`envPrefix`](#envPrefix) is defined, the variable will be `_CHECK_OUT` and will show the previously run command.
 
 ### `<envPrefix>_CHANGE`
 
-This variable will be set to 0 if a Command with [`envPrefix`](#envPrefix) is changed without any error, or 1 if it had errors.  This variable will not be set if the Command didn't have any change executed.  If no envPrefix is defined, the variable will be `_CHANGE` and will show the previously run command.
+This variable will be set to 0 if a Command is changed without any error, or 1 if it had errors.  This variable will not be set if the Command didn't have any change executed.  If no [`envPrefix`](#envPrefix) is defined, the variable will be `_CHANGE` and will show the previously run command.
 
 ### `<envPrefix>_CHANGE_OUT`
 
-This variable will be set to the stdout and stderr of the change execution of a Command with [`envPrefix`](#envPrefix).  This variable will not be set if the Command didn't have any change executed.  If no envPrefix is defined, the variable will be `_CHANGE_OUT` and will show the previously run command.
+This variable will be set to the stdout and stderr of the change execution of a Command.  This variable will not be set if the Command didn't have any change executed.  If no [`envPrefix`](#envPrefix) is defined, the variable will be `_CHANGE_OUT` and will show the previously run command.
 
 ### `<envPrefix>_REMOVE`
 
-This variable will be set to 0 if a Command with [`envPrefix`](#envPrefix) is removed without any error, and 1 if it had errors.  If no envPrefix is defined, the variable will be `_REMOVE` and will show the previously run command.
+This variable will be set to 0 if a Command is removed without any error, and 1 if it had errors.  If no [`envPrefix`](#envPrefix) is defined, the variable will be `_REMOVE` and will show the previously run command.
 
 ### `<envPrefix>_REMOVE_OUT`
 
-This variable will be set to the stdout and stderr of the remove execution for a Command with [`envPrefix`](#envPrefix).  If no envPrefix is defined, the variable will be `_REMOVE_OUT` and will show the previously run command.
+This variable will be set to the stdout and stderr of the remove execution for a Command.  If no [`envPrefix`](#envPrefix) is defined, the variable will be `_REMOVE_OUT` and will show the previously run command.
 
 ## Operating Modes
 

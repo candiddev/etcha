@@ -37,6 +37,7 @@ func TestCommandRun(t *testing.T) {
 			},
 			remove: true,
 			wantEnv: types.EnvVars{
+				"a":           "output",
 				"a_CHECK":     "0",
 				"a_CHECK_OUT": "output",
 			},
@@ -62,6 +63,7 @@ func TestCommandRun(t *testing.T) {
 			},
 			remove: true,
 			wantEnv: types.EnvVars{
+				"a":           "output",
 				"a_CHECK":     "0",
 				"a_CHECK_OUT": "output",
 			},
@@ -89,6 +91,7 @@ func TestCommandRun(t *testing.T) {
 			},
 			remove: true,
 			wantEnv: types.EnvVars{
+				"a":            "output",
 				"a_CHECK":      "1",
 				"a_CHECK_OUT":  "output",
 				"a_REMOVE":     "1",
@@ -100,7 +103,7 @@ func TestCommandRun(t *testing.T) {
 					Exec: "check",
 				},
 				{
-					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
+					Environment: []string{"a=output", "a_CHECK=1", "a_CHECK_OUT=output"},
 					Exec:        "remove",
 				},
 			},
@@ -123,6 +126,7 @@ func TestCommandRun(t *testing.T) {
 			},
 			remove: true,
 			wantEnv: types.EnvVars{
+				"a":            "output",
 				"a_CHECK":      "1",
 				"a_CHECK_OUT":  "output",
 				"a_REMOVE":     "0",
@@ -133,7 +137,7 @@ func TestCommandRun(t *testing.T) {
 					Exec: "check",
 				},
 				{
-					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
+					Environment: []string{"a=output", "a_CHECK=1", "a_CHECK_OUT=output"},
 					Exec:        "remove",
 				},
 			},
@@ -217,6 +221,7 @@ func TestCommandRun(t *testing.T) {
 				ID:        "a",
 			},
 			wantEnv: types.EnvVars{
+				"a":           "output",
 				"a_CHECK":     "0",
 				"a_CHECK_OUT": "output",
 			},
@@ -243,6 +248,7 @@ func TestCommandRun(t *testing.T) {
 				ErrCommandsSelfTarget,
 			},
 			wantEnv: types.EnvVars{
+				"a":           "output",
 				"a_CHECK":     "1",
 				"a_CHECK_OUT": "output",
 			},
@@ -268,6 +274,7 @@ func TestCommandRun(t *testing.T) {
 				ErrCommandsSelfTarget,
 			},
 			wantEnv: types.EnvVars{
+				"a":           "output",
 				"a_CHECK":     "1",
 				"a_CHECK_OUT": "output",
 			},
@@ -295,6 +302,7 @@ func TestCommandRun(t *testing.T) {
 				ErrCommandsIDRequired,
 			},
 			wantEnv: types.EnvVars{
+				"a":            "output",
 				"a_CHANGE":     "1",
 				"a_CHANGE_OUT": "output2",
 				"a_CHECK":      "1",
@@ -306,7 +314,7 @@ func TestCommandRun(t *testing.T) {
 					Exec: "check",
 				},
 				{
-					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
+					Environment: []string{"a=output", "a_CHECK=1", "a_CHECK_OUT=output"},
 					Exec:        "change",
 				},
 			},
@@ -331,6 +339,7 @@ func TestCommandRun(t *testing.T) {
 				ErrCommandsSelfTarget,
 			},
 			wantEnv: types.EnvVars{
+				"a":            "output",
 				"a_CHANGE":     "0",
 				"a_CHANGE_OUT": "output2",
 				"a_CHECK":      "1",
@@ -341,7 +350,7 @@ func TestCommandRun(t *testing.T) {
 					Exec: "check",
 				},
 				{
-					Environment: []string{"a_CHECK=1", "a_CHECK_OUT=output"},
+					Environment: []string{"a=output", "a_CHECK=1", "a_CHECK_OUT=output"},
 					Exec:        "change",
 				},
 			},

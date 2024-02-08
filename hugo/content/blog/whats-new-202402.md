@@ -10,8 +10,9 @@ type: blog
 
 {{< etcha-release version="2024.02" >}}
 
-## Features
-
 ## Enhancements
 
+- Added [rotInstall]({{< ref "/docs/references/libraries#rotInstall" >}}) library for installing the latest version of [Rot](https://rotx.dev).
+- Changed [Environment Variables]({{< ref "/docs/references/commands#environment-variables>}}) to set `envPrefix` to check stderr/stdout if defined.
+- Changed Push mode to run build commands.
 - Updated all Go libraries to latest version

@@ -1,6 +1,6 @@
 // Install the latest version of Etcha to dst.  Will cache the file to cacheDir for subsequent runs, if specified
 
-local copy = import '../etcha/copy.libsonnet';
+local copy = import './copy.libsonnet';
 
 function(arch='amd64', cacheDir='', dst, onChange=[])
   local cache = if cacheDir == '' then dst else cacheDir + '/etcha';

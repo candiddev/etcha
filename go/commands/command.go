@@ -81,9 +81,14 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		logger.Debug(ctx, fmt.Sprintf("Checking %s...", cmd.ID))
 
 		out.Check, err = cfg.Run(ctx, c, cmd.Check, cmd.Stdin)
+
+		newEnv[cmd.EnvPrefix+"_CHECK_OUT"] = out.Check.String()
+		if cmd.EnvPrefix != "" {
+			newEnv[cmd.EnvPrefix] = out.Check.String()
+		}
+
 		if (!remove && err == nil) || (remove && err != nil) {
 			newEnv[cmd.EnvPrefix+"_CHECK"] = "0"
-			newEnv[cmd.EnvPrefix+"_CHECK_OUT"] = out.Check.String()
 
 			metrics.CollectCommands(ctx, false)
 
@@ -91,7 +96,6 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		}
 
 		logger.Debug(ctx, out.Check.String())
-		newEnv[cmd.EnvPrefix+"_CHECK_OUT"] = out.Check.String()
 	}
 
 	if remove {

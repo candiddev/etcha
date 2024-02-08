@@ -7,6 +7,7 @@ local file = import '../lib/etcha/file.libsonnet';
 local group = import '../lib/etcha/group.libsonnet';
 local line = import '../lib/etcha/line.libsonnet';
 local mount = import '../lib/etcha/mount.libsonnet';
+local rotInstall = import '../lib/etcha/rotInstall.libsonnet';
 local symlink = import '../lib/etcha/symlink.libsonnet';
 local systemdNetwork = import '../lib/etcha/systemdNetwork.libsonnet';
 local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
@@ -32,6 +33,8 @@ local user = import '../lib/etcha/user.libsonnet';
     dir(group='daemon', mode='0700', owner='daemon', path='testdata/test'),
     etchaInstall(cacheDir='testdata/test', dst='testdata/etcha'),
     etchaInstall(dst='testdata/etcha1'),
+    rotInstall(cacheDir='testdata/test', dst='testdata/rot'),
+    rotInstall(dst='testdata/rot1'),
     file(contents=|||
       HOME=${HOME}
     |||, expand=true, path='testdata/home'),
