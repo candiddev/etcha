@@ -69,14 +69,14 @@ type Source struct {
 	AllowPush         bool                                        `json:"allowPush"`
 	CheckOnly         bool                                        `json:"checkOnly"`
 	Commands          commands.Commands                           `json:"commands"`
-	EventsReceive     []string                                    `json:"eventsReceive"`
+	EventsReceive     types.SliceString                           `json:"eventsReceive"`
 	EventsReceiveExit bool                                        `json:"eventsReceiveExit"`
 	EventsSend        regexp.Regexp                               `json:"eventsSend"`
 	Exec              *commands.Exec                              `json:"exec,omitempty"`
 	NoRemove          bool                                        `json:"noRemove"`
 	NoRestore         bool                                        `json:"noRestore"`
 	PullIgnoreVersion bool                                        `json:"pullIgnoreVersion"`
-	PullPaths         []string                                    `json:"pullPaths"`
+	PullPaths         types.SliceString                           `json:"pullPaths"`
 	RunAll            bool                                        `json:"runAll"`
 	RunFrequencySec   int                                         `json:"runFrequencySec"`
 	RunMulti          bool                                        `json:"runMulti"`
@@ -85,7 +85,7 @@ type Source struct {
 	VerifyExec        *commands.Exec                              `json:"verifyExec,omitempty"`
 	VerifyKeys        cryptolib.Keys[cryptolib.KeyProviderPublic] `json:"verifyKeys"`
 	Vars              map[string]any                              `json:"vars"`
-	WebhookPaths      []string                                    `json:"webhookPaths"`
+	WebhookPaths      types.SliceString                           `json:"webhookPaths"`
 }
 
 func (c *Config) CLIConfig() *cli.Config {
