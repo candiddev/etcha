@@ -41,10 +41,6 @@ This variable will be set for [`verifyCommands`]({{< ref "/docs/references/confi
 
 This variable will be set for [`signCommands`]({{< ref "/docs/references/config#signcommands" >}}).  It contains the base64 JWT payload that needs to be signed.
 
-### `ETCHA_RUN_`
-
-This variable will be set for any values specified in [`runEnv`]({{< ref "/docs/references/patterns#runenv" >}}).  `ETCHA_RUN_` will be prepended to the key.
-
 ### `ETCHA_SOURCE_NAME`
 
 This variable will be set for Commands in [`eventReceive`]({{< ref "/docs/references/config#eventreceive" >}}) or [`webhookPaths`]({{< ref "/docs/references/config#webhookPaths" >}}) Pattern run lists.  It contains the name of the [`source`]({{< ref "/docs/references/config#sources" >}}) receiving the Event or Webhook Pattern.

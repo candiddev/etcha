@@ -40,9 +40,19 @@ var local = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			return err
 		}
 
+		_, runVars, err := p.BuildRun(ctx, c)
+		if err != nil {
+			return logger.Error(ctx, err)
+		}
+
+		p, err = pattern.ParsePatternFromImports(ctx, c, source, p.Imports, runVars)
+		if err != nil {
+			return err
+		}
+
 		s := c.Sources[source]
 
-		_, err = p.Run.Run(ctx, c.CLI, p.GetRunEnv(), p.RunExec, s != nil && s.CheckOnly, mode == "remove")
+		_, err = p.Run.Run(ctx, c.CLI, nil, p.RunExec, s != nil && s.CheckOnly, mode == "remove")
 
 		return err
 	},

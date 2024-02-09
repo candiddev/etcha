@@ -14,7 +14,6 @@ import (
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/jwt"
 	"github.com/candiddev/shared/go/logger"
-	"github.com/candiddev/shared/go/types"
 )
 
 func TestParseJWT(t *testing.T) {
@@ -161,7 +160,7 @@ func TestJWTPattern(t *testing.T) {
 	}
 
 	j := JWT{
-		EtchaRunEnv: map[string]string{
+		EtchaRunVars: map[string]any{
 			"hello": "world",
 		},
 		EtchaPattern: &jsonnet.Imports{
@@ -182,10 +181,10 @@ func TestJWTPattern(t *testing.T) {
 		{
 			run: [
 				{
-					id: "id"
+					id: std.native('getConfig')().vars.hello,
 				}
 			],
-			runEnv: {
+			runVars: {
 				world: "hello",
 			},
 		}
@@ -197,9 +196,8 @@ func TestJWTPattern(t *testing.T) {
 	assert.Equal(t, p.RunExec.Command, "hello")
 	assert.Equal(t, p.RunExec.Command, "hello")
 	assert.Equal(t, p.JWT, "raw")
-	assert.Equal(t, p.Run[0].ID, "id")
-	assert.Equal(t, p.RunEnv, types.EnvVars{
+	assert.Equal(t, p.Run[0].ID, "world")
+	assert.Equal(t, p.RunVars, map[string]any{
 		"hello": "world",
-		"world": "hello",
 	})
 }

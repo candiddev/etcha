@@ -16,7 +16,6 @@ import (
 	"github.com/candiddev/shared/go/get"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
-	"github.com/candiddev/shared/go/types"
 )
 
 func TestRun(t *testing.T) {
@@ -178,13 +177,13 @@ func TestStateDiffExec(t *testing.T) {
 						"/main.jsonnet": `{run:[{change:"changeA",check:"checkA",id:"a",remove:"removeA"}]}`,
 					},
 				},
-				EtchaRunEnv: types.EnvVars{
+				EtchaRunVars: map[string]any{
 					"hello": "world",
 				},
 				Raw: "hello",
 			},
 			wantInputs: []cli.RunMockInput{
-				{Environment: []string{"ETCHA_RUN_hello=world"}, Exec: "checkA"},
+				{Exec: "checkA"},
 			},
 			wantResult: &Result{
 				ChangedIDs: []string{"a"},

@@ -27,7 +27,7 @@ func Lint(ctx context.Context, c *config.Config, path string, checkFormat bool) 
 				continue
 			}
 
-			p, err := ParsePatternFromImports(ctx, c, "test", im)
+			p, err := ParsePatternFromImports(ctx, c, "test", im, nil)
 			if err != nil {
 				r[path] = append(r[path], err.Error())
 

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/etcha/go/metrics"
@@ -37,7 +36,7 @@ type Result struct {
 }
 
 // Push sends content to the dest.
-func Push(ctx context.Context, c *config.Config, dest, cmd, path string) (r *Result, err errs.Err) { //nolint:gocognit
+func Push(ctx context.Context, c *config.Config, dest, cmd, path string) (r *Result, err errs.Err) {
 	logger.Debug(ctx, fmt.Sprintf("Pushing config to %s...", dest))
 
 	r = &Result{}
@@ -60,33 +59,12 @@ func Push(ctx context.Context, c *config.Config, dest, cmd, path string) (r *Res
 		}
 	}
 
-	buildManifest := ""
-	runEnv := map[string]string{}
-
-	if len(p.Build) > 0 {
-		out, err := p.Build.Run(ctx, c.CLI, nil, p.BuildExec, false, false)
-		if err != nil {
-			return r, logger.Error(ctx, err)
-		}
-
-		for _, event := range out.Events() {
-			if event.Name == "buildManifest" {
-				for _, output := range event.Outputs {
-					buildManifest += output.Change.String() + "\n"
-				}
-
-				continue
-			}
-
-			if s := strings.Split(event.Name, "runEnv_"); len(s) == 2 {
-				for _, output := range event.Outputs {
-					runEnv[s[1]] = output.Change.String()
-				}
-			}
-		}
+	buildManifest, runVars, err := p.BuildRun(ctx, c)
+	if err != nil {
+		return r, logger.Error(ctx, err)
 	}
 
-	jwt, err := p.Sign(ctx, c, buildManifest, runEnv)
+	jwt, err := p.Sign(ctx, c, buildManifest, runVars)
 	if err != nil {
 		return r, logger.Error(ctx, err)
 	}

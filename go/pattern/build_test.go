@@ -31,7 +31,7 @@ func TestPatternBuildSign(t *testing.T) {
 				ID:     "a",
 				OnChange: []string{
 					"etcha:buildManifest",
-					"etcha:runEnv_hello",
+					"etcha:runVar_hello",
 				},
 			},
 		},
@@ -43,6 +43,9 @@ func TestPatternBuildSign(t *testing.T) {
 			Files: map[string]string{
 				"/main.jsonnet": "hello",
 			},
+		},
+		RunVars: map[string]any{
+			"extra": "value",
 		},
 	}
 
@@ -88,7 +91,8 @@ func TestPatternBuildSign(t *testing.T) {
 				j, err := ParseJWTFromPath(ctx, c, "", "test.jwt")
 				assert.HasErr(t, err, nil)
 				assert.Equal(t, j.EtchaBuildManifest, "world\n")
-				assert.Equal(t, j.EtchaRunEnv, map[string]string{
+				assert.Equal(t, j.EtchaRunVars, map[string]any{
+					"extra": "value",
 					"hello": "world",
 				})
 				assert.Equal(t, j.EtchaPattern, p.Imports)

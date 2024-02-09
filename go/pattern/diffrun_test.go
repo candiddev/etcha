@@ -9,7 +9,6 @@ import (
 	"github.com/candiddev/shared/go/assert"
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/logger"
-	"github.com/candiddev/shared/go/types"
 )
 
 func TestPatternDiffRun(t *testing.T) {
@@ -69,7 +68,6 @@ func TestPatternDiffRun(t *testing.T) {
 		check       bool
 		noRemove    bool
 		runAll      bool
-		runEnv      types.EnvVars
 		mockError   []error
 		wantErr     error
 		wantInputs  []cli.RunMockInput
@@ -242,9 +240,6 @@ func TestPatternDiffRun(t *testing.T) {
 			},
 		},
 		"good_runAll": {
-			runEnv: types.EnvVars{
-				"hello": "world",
-			},
 			mockError: []error{
 				nil,
 				nil,
@@ -254,19 +249,18 @@ func TestPatternDiffRun(t *testing.T) {
 			runAll: true,
 			wantInputs: []cli.RunMockInput{
 				{
-					Environment: []string{"ETCHA_RUN_hello=world"},
-					Exec:        "checkA",
+					Exec: "checkA",
 				},
 				{
-					Environment: []string{"ETCHA_RUN_hello=world", "_CHECK=0", "_CHECK_OUT="},
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
 					Exec:        "checkB",
 				},
 				{
-					Environment: []string{"ETCHA_RUN_hello=world", "_CHECK=0", "_CHECK_OUT="},
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
 					Exec:        "checkD",
 				},
 				{
-					Environment: []string{"ETCHA_RUN_hello=world", "_CHECK=0", "_CHECK_OUT="},
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
 					Exec:        "checkC",
 				},
 			},
@@ -294,8 +288,6 @@ func TestPatternDiffRun(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			c.CLI.RunMockErrors(tc.mockError)
-
-			pNew.RunEnv = tc.runEnv
 
 			o, err := pNew.DiffRun(ctx, c, &pOld, tc.check, tc.noRemove, tc.runAll)
 

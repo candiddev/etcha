@@ -68,7 +68,7 @@ func TestLib(t *testing.T) {
 
 	os.Remove("lib/etcha/native.libsonnet")
 
-	p, err := pattern.ParsePatternFromImports(ctx, c, "", &i)
+	p, err := pattern.ParsePatternFromImports(ctx, c, "", &i, nil)
 	assert.HasErr(t, err, nil)
 
 	res = p.Test(ctx, c, false)

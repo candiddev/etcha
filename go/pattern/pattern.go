@@ -32,8 +32,8 @@ type Pattern struct {
 	ID           string            `json:"id"`
 	Issuer       string            `json:"issuer"`
 	Run          commands.Commands `json:"run"`
-	RunEnv       types.EnvVars     `json:"runEnv"`
 	RunExec      *commands.Exec    `json:"runExec,omitempty"`
+	RunVars      map[string]any    `json:"runVars"`
 	Subject      string            `json:"subject"`
 
 	Imports *jsonnet.Imports `json:"-"`
@@ -41,7 +41,7 @@ type Pattern struct {
 }
 
 // ParsePatternFromImports returns a new Pattern from a list of imports.
-func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource string, imports *jsonnet.Imports) (*Pattern, errs.Err) {
+func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource string, imports *jsonnet.Imports, runVars map[string]any) (*Pattern, errs.Err) {
 	if imports == nil || len(imports.Files) == 0 {
 		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(commands.ErrCommandsEmpty))
 	}
@@ -51,6 +51,10 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 	}
 
 	vars := map[string]any{}
+
+	for k, v := range runVars {
+		vars[k] = v
+	}
 
 	for k, v := range c.Vars {
 		vars[k] = v
@@ -95,10 +99,6 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 	p.BuildExec = exec.Override(p.BuildExec)
 	p.RunExec = exec.Override(p.RunExec)
 
-	if p.RunEnv == nil {
-		p.RunEnv = map[string]string{}
-	}
-
 	if len(p.Build) == 0 && len(p.Run) == 0 {
 		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(commands.ErrCommandsEmpty))
 	}
@@ -127,22 +127,11 @@ func ParsePatternFromPath(ctx context.Context, c *config.Config, configSource, p
 		return nil, logger.Error(ctx, err)
 	}
 
-	return ParsePatternFromImports(ctx, c, configSource, i)
-}
-
-// GetRunEnv returns the RunEnv with the correct prefix.
-func (p *Pattern) GetRunEnv() types.EnvVars {
-	env := types.EnvVars{}
-
-	for k, v := range p.RunEnv {
-		env["ETCHA_RUN_"+k] = v
-	}
-
-	return env
+	return ParsePatternFromImports(ctx, c, configSource, i, nil)
 }
 
 // Sign creates a signed JWT.
-func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest string, runEnv map[string]string) (string, errs.Err) {
+func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest string, runVars map[string]any) (string, errs.Err) {
 	key, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](c.Build.SigningKey)
 	if err != nil {
 		// try to decrypt the key
@@ -164,19 +153,11 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 		e = time.Now().Add(time.Duration(p.ExpiresInSec) * time.Second)
 	}
 
-	if p.RunEnv == nil {
-		p.RunEnv = types.EnvVars{}
-	}
-
-	for k, v := range runEnv {
-		p.RunEnv[k] = v
-	}
-
 	j := &JWT{
 		EtchaBuildManifest: buildManifest,
 		EtchaPattern:       p.Imports,
 		EtchaVersion:       cli.BuildVersion,
-		EtchaRunEnv:        p.RunEnv,
+		EtchaRunVars:       runVars,
 	}
 
 	t, err := jwt.New(j, e, p.Audience, p.ID, p.Issuer, p.Subject)

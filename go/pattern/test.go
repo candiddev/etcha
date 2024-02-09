@@ -72,14 +72,14 @@ func (p *Pattern) Test(ctx context.Context, c *config.Config, testBuild bool) ty
 	}
 
 	if !testBuild {
-		l := p.Build.Test(ctx, c.CLI, p.BuildExec, p.RunEnv)
+		l := p.Build.Test(ctx, c.CLI, p.BuildExec, nil)
 
 		for k, v := range l {
 			r[k] = v
 		}
 	}
 
-	l := p.Run.Test(ctx, c.CLI, p.RunExec, p.RunEnv)
+	l := p.Run.Test(ctx, c.CLI, p.RunExec, nil)
 
 	if len(l) > 0 {
 		for k, v := range l {

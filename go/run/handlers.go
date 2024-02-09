@@ -56,7 +56,7 @@ func (s *state) handleEvents(ctx context.Context, o commands.Outputs, source *co
 					continue
 				}
 
-				env := p.GetRunEnv()
+				env := types.EnvVars{}
 				env["ETCHA_EVENT_ID"] = event.Outputs[i].ID
 				env["ETCHA_EVENT_NAME"] = event.Name
 				env["ETCHA_EVENT_OUTPUT"] = event.Outputs[i].Change.String()

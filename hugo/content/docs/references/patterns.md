@@ -45,17 +45,22 @@ String, the Issuer to set in the [JWT `iss` property]({{< ref "/docs/references/
 
 A list of [Commands]({{< ref "/docs/references/commands" >}}) to execute when a Pattern is push, pulled, manually applied via [CLI]({{< ref "/docs/references/cli" >}}), or triggered via [`eventsReceive`]({{< ref "/docs/references/config#eventsreceive" >}}) and [`webhookPaths`]({{< ref "/docs/references/config#webhookpaths" >}}) in a [Source]({{< ref "/docs/references/config#sources" >}}).
 
-### `runEnv`
-
-A map of [Environment Variables]({{< ref "/docs/references/commands#environment-variables" >}}) that will be added to [Commands]({{< ref "/docs/references/commands" >}}) when the Patter is run.
-
-The keys must be valid Environment Variable names.  [`ETCHA_RUN_`]({{< ref "/docs/references/commands#etcha_run_" >}}) will be prepended to the key names.
-
-Additional environment variables will be added to this property from the JWT during a run via build commands that fire the [`runEnv_`]({{< ref "/docs/references/events#runEnv_" >}}) event.
-
 ### `runExec`
 
 See [`exec`]({{< ref "/docs/references/config#exec" >}}).  Specifies a custom exec configuration for the Pattern `run` Commands.  Parent exec configurations must allow overrides for this to work.
+
+### `runVars`
+
+A map of values that will be combined with [Vars]({{< ref "/docs/references/config#vars" >}}) when the Pattern is rendered.  These are exposed using the [Jsonnet native function, `getConfig`]({{< ref "/docs/references/jsonnet#getConfig" >}}), for rendering these values during a run:
+
+```
+{
+  run: [
+    id: 'run a thing',
+    change: std.native('getConfig')().vars.myVar,
+  ],
+}
+```
 
 ### `subject`
 

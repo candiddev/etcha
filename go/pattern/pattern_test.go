@@ -13,7 +13,6 @@ import (
 	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
-	"github.com/candiddev/shared/go/types"
 )
 
 func TestParsePatternFromImports(t *testing.T) {
@@ -58,12 +57,12 @@ local config = std.native('getConfig')();
 			id: '1',
 		}
 	],
-	runEnv: {
+	runVars: {
 		bool: '%s' % config.vars.bool,
 		int: '%s' % config.exec.user,
 		string: config.vars.hello,
 		test: '%s' % std.get(config.vars, 'test', 'false'),
-	}
+	},
 }
 `
 
@@ -71,11 +70,11 @@ local config = std.native('getConfig')();
 		envInherit           bool
 		file                 string
 		override             bool
+		runVars              map[string]any
 		source               string
 		wantErr              bool
 		wantBuildExecCommand string
 		wantRunExecCommand   string
-		wantRunEnv           types.EnvVars
 	}{
 		"bad_render": {
 			wantErr: true,
@@ -151,10 +150,13 @@ local config = std.native('getConfig')();
 					}
 				],
 				runExec: {
-					command: "4",
+					command: std.native('getConfig')().vars.command,
 				},
 			}`,
-			override:             false,
+			override: false,
+			runVars: map[string]any{
+				"command": "4",
+			},
 			source:               "1",
 			wantBuildExecCommand: "0",
 			wantRunExecCommand:   "0",
@@ -177,24 +179,12 @@ local config = std.native('getConfig')();
 			source:               "1",
 			wantBuildExecCommand: "0",
 			wantRunExecCommand:   "0",
-			wantRunEnv: types.EnvVars{
-				"bool":   "true",
-				"int":    "1",
-				"string": "person",
-				"test":   "false",
-			},
 		},
 		"test": {
 			file:                 cValues,
 			source:               "test",
 			wantBuildExecCommand: "0",
 			wantRunExecCommand:   "0",
-			wantRunEnv: types.EnvVars{
-				"bool":   "true",
-				"int":    "1",
-				"string": "world",
-				"test":   "true",
-			},
 		},
 		"env_inherit": {
 			envInherit: true,
@@ -251,16 +241,12 @@ local config = std.native('getConfig')();
 				Files: map[string]string{
 					"/main.jsonnet": tc.file,
 				},
-			})
+			}, tc.runVars)
 			assert.Equal(t, err != nil, tc.wantErr)
 			if !tc.wantErr {
 				assert.Equal(t, p.BuildExec.Command, tc.wantBuildExecCommand)
 				assert.Equal(t, p.RunExec.Command, tc.wantRunExecCommand)
 				assert.Equal(t, len(p.Run), 1)
-
-				if tc.wantRunEnv != nil {
-					assert.Equal(t, p.RunEnv, tc.wantRunEnv)
-				}
 			}
 		})
 	}
@@ -288,13 +274,13 @@ func TestPatternSign(t *testing.T) {
 			},
 		},
 		Issuer: "issuer!",
-		RunEnv: types.EnvVars{
+		RunVars: map[string]any{
 			"world": "hello",
 		},
 		Subject: "subject!",
 	}
 
-	j, err := p.Sign(ctx, c, "build", map[string]string{"hello": "world"})
+	j, err := p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
 	assert.HasErr(t, err, ErrPatternMissingKey)
 	assert.Equal(t, j, "")
 
@@ -304,7 +290,7 @@ func TestPatternSign(t *testing.T) {
 		pub,
 	}
 
-	j, err = p.Sign(ctx, c, "build", map[string]string{"hello": "world"})
+	j, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, j != "", true)
 
@@ -313,7 +299,7 @@ func TestPatternSign(t *testing.T) {
 	assert.Equal(t, jw.Audience, p.Audience)
 	assert.Equal(t, jw.EtchaBuildManifest, "build")
 	assert.Equal(t, jw.EtchaPattern, p.Imports)
-	assert.Equal(t, jw.EtchaRunEnv, map[string]string{"hello": "world", "world": "hello"})
+	assert.Equal(t, jw.EtchaRunVars, map[string]any{"hello": "world"})
 	assert.Equal(t, jw.EtchaVersion, "v2023.10.02")
 	assert.Equal(t, time.Unix(jw.ExpiresAt, 0).Before(time.Now().Add(1*time.Minute)), true)
 	assert.Equal(t, jw.Issuer, p.Issuer)
@@ -337,17 +323,17 @@ func TestPatternSign(t *testing.T) {
 
 	cli.SetStdin("password")
 
-	j, err = p.Sign(ctx, c, "build", map[string]string{"hello": "world"})
+	j, err = p.Sign(ctx, c, "build", map[string]any{"world": "hello"})
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, j != "", true)
 
 	jw, err = ParseJWT(ctx, c, j, "")
 	assert.HasErr(t, err, nil)
-	assert.Equal(t, jw.EtchaRunEnv, map[string]string{"hello": "world", "world": "hello"})
+	assert.Equal(t, jw.EtchaRunVars, map[string]any{"world": "hello"})
 
 	cli.SetStdin("wrong")
 
-	j, err = p.Sign(ctx, c, "build", map[string]string{"hello": "world"})
+	j, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
 	assert.HasErr(t, err, ErrPatternMissingKey)
 	assert.Equal(t, j, "")
 

@@ -22,11 +22,11 @@ var ErrEqualVersion = errors.New("etchaVersion does not match")
 
 // JWT is an artifact JWT.
 type JWT struct {
-	EtchaBuildManifest string            `json:"etchaBuildManifest"`
-	EtchaPattern       *jsonnet.Imports  `json:"etchaPattern"`
-	EtchaRunEnv        map[string]string `json:"etchaRunEnv"`
-	EtchaVersion       string            `json:"etchaVersion,omitempty"`
-	Raw                string            `json:"-"`
+	EtchaBuildManifest string           `json:"etchaBuildManifest"`
+	EtchaPattern       *jsonnet.Imports `json:"etchaPattern"`
+	EtchaRunVars       map[string]any   `json:"etchaRunVars"`
+	EtchaVersion       string           `json:"etchaVersion,omitempty"`
+	Raw                string           `json:"-"`
 
 	jwt.RegisteredClaims
 }
@@ -102,16 +102,13 @@ func (j *JWT) GetRegisteredClaims() *jwt.RegisteredClaims {
 
 // Pattern returns a Pattern from the JWT.
 func (j *JWT) Pattern(ctx context.Context, c *config.Config, configSource string) (*Pattern, errs.Err) {
-	p, err := ParsePatternFromImports(ctx, c, configSource, j.EtchaPattern)
+	p, err := ParsePatternFromImports(ctx, c, configSource, j.EtchaPattern, j.EtchaRunVars)
 	if err != nil {
 		return nil, logger.Error(ctx, err)
 	}
 
-	for k, v := range j.EtchaRunEnv {
-		p.RunEnv[k] = v
-	}
-
 	p.JWT = j.Raw
+	p.RunVars = j.EtchaRunVars
 
 	return p, logger.Error(ctx, nil)
 }

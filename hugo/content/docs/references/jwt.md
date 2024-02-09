@@ -56,7 +56,7 @@ An example payload looks like this:
       "/main.jsonnet": "{\n\t\t\t\t\trun: [\n\t\t\t\t\t\tid: \"1\"\n\t\t\t\t\t]\n\t\t\t\t}"
     }
   },
-  "etchaRunEnv": {
+  "etchaRunVars": {
     "hello": "world",
     "world": "hello"
   },
@@ -143,11 +143,11 @@ When this JWT is pulled or pushed, Etcha will [render the Pattern]({{< ref "/doc
 }
 ```
 
-##### `etchaRunEnv`
+##### `etchaRunVars`
 
-A map of [Environment Variables]({{< ref "/docs/references/commands#environment-variables" >}}) that will be added to [Commands]({{< ref "/docs/references/commands" >}}) when the Patter is run.
+A map of values that will be combined with [Vars]({{< ref "/docs/references/config#vars" >}}) when the Pattern is rendered.  These are exposed using the [Jsonnet native function, `getConfig`]({{< ref "/docs/references/jsonnet#getConfig" >}}).
 
-The keys must be valid Environment Variable names.  [`ETCHA_RUN_`]({{< ref "/docs/references/commands#etcha_run_" >}}) will be prepended to the key names.
+See [Patterns]({{< ref "/docs/references/patterns#runvars" >}}) for more information.
 
 ##### `etchaVersion`
 

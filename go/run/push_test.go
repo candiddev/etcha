@@ -44,18 +44,21 @@ func TestPush(t *testing.T) {
 			always: true,
 			change: "change2",
 			onChange: [
-				"etcha:runEnv_a",
+				"etcha:runVar_a",
 			],
 		},
 	],
 	run: [
 		{
 			change: "change1",
-			check: "check1",
+			check: std.get(std.native('getConfig')().vars, 'check'),
 			id: "1",
 			remove: "remove1",
 		}
-	]
+	],
+	runVars: {
+		check: 'check1',
+	},
 }
 `), 0600)
 
@@ -201,14 +204,10 @@ func TestPush(t *testing.T) {
 					Exec: "/usr/bin/bash -e -o pipefail -c change2",
 				},
 				{
-					Environment: []string{
-						"ETCHA_RUN_a=1",
-					},
 					Exec: "check1",
 				},
 				{
 					Environment: []string{
-						"ETCHA_RUN_a=1",
 						"_CHECK=1",
 						"_CHECK_OUT=a",
 					},
@@ -236,8 +235,8 @@ func TestPush(t *testing.T) {
 					},
 					Exec: "/usr/bin/bash -e -o pipefail -c change2",
 				},
-				{Environment: []string{"ETCHA_RUN_a=1"}, Exec: "check1"},
-				{Environment: []string{"ETCHA_RUN_a=1", "_CHECK=1", "_CHECK_OUT=a"}, Exec: "change1"},
+				{Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "change1"},
 			},
 			wantResult: &Result{
 				ChangedIDs:     []string{"1"},

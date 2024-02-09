@@ -46,9 +46,9 @@ Firing this event during [`verifyCommands`]({{< ref "/docs/references/config#ver
 
 **DO NOT TRIGGER THIS EVENT IF THE TOKEN IS NOT VERIFIED**
 
-### runEnv_
+### runVar_
 
-Firing any event with this prefix during a `build` will add the output of the [Command's `change`]({{< ref "/docs/references/commands#change" >}}) to the [JWT's `etchaRunEnv` property]({{< ref "/docs/references/jwt#etcharunenv" >}}).
+Firing any event with this prefix during a `build` will add the output of the [Command's `change`]({{< ref "/docs/references/commands#change" >}}) to the [JWT's `etchaRunVars` property]({{< ref "/docs/references/jwt#etcharunvars" >}}).
 
 ### stderr
 
