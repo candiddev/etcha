@@ -17,7 +17,7 @@ You can test an entire path or specific files using [`etcha test`]({{< ref "/doc
 3. Run all Commands in [**Remove Mode**]({{< ref "/docs/references/commands#remove-mode" >}}) (reverse order, execute `remove`).  Any `remove` errors will cause testing to fail.
 4. Run all Commands in [**Check Mode**]({{< ref "/docs/references/commands#check-mode" >}}) (execute `check` only).  Any IDs that previously failed `check`/changed during step 1 that do not fail `check` again will cause testing to fail.
 
-By default, Etcha will only test `run` Commands in a Pattern.  To test `build` Commands too, pass an additional argument after the path: `etcha test mydir yes`.
+By default, Etcha will only test `run` Commands in a Pattern.  To test `build` Commands too, use the `-b` flag: `etcha test -b mydir`.
 
 Testing is performed under the [`source`({{< ref "/docs/references/config#sources" >}}) "`test`".  It's highly recommended to configure an alternative `exec` configuration in here, such as a container, to avoid testing impacting a local system.
 

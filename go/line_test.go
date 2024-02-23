@@ -185,7 +185,7 @@ PermitRootLogin yes$$`,
 				tc.path,
 				tc.match,
 				tc.replace,
-			}, c) != nil, tc.wantErr)
+			}, nil, c) != nil, tc.wantErr)
 
 			content := logger.ReadStd()
 			if !tc.wantErr && tc.stdin == "" {

@@ -17,7 +17,7 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"destination URL",
 		"command or pattern path",
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, c *config.Config) errs.Err {
 		var cmd string
 
 		var path string

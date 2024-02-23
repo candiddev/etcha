@@ -56,9 +56,9 @@ func TestConfigParse(t *testing.T) {
 	wd, _ := os.Getwd()
 
 	c.CLI.ConfigPath = "/notreal"
-	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}) != nil, true)
+	assert.Equal(t, c.Parse(ctx, []string{}) != nil, true)
 	c.CLI.ConfigPath = "./config.jsonnet"
-	assert.Equal(t, c.Parse(ctx, cli.ConfigArgs{}) == nil, true)
+	assert.Equal(t, c.Parse(ctx, []string{}) == nil, true)
 	assert.Equal(t, c.Run.VerifyKeys, cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub1,
 		pub2,

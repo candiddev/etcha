@@ -15,7 +15,7 @@ var render = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	ArgumentsRequired: []string{
 		"jwt or pattern path",
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, c *config.Config) errs.Err {
 		var p *pattern.Pattern
 
 		// Try JWT

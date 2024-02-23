@@ -12,7 +12,7 @@ Etcha can lint Patterns, libraries, and more--basically if it's written in Jsonn
 
 You can lint an entire path or specific files using [`etcha lint`]({{< ref "/docs/references/cli#lint" >}}).  Lint will traverse directories and perform linting on all `.jsonnet` and `.libsonnet` files.  It will ensure they can be imported into Etcha correctly.  Any errors will be shown in the console, and the tool will exit with a non-zero status code.
 
-You can also check the formatting of the files by passing an additional argument after the path: `etcha lint mydir yes`.  Formatting errors will be reported, along with diffs on what the correct formatting should be.  The tool will exit with a non-zero status code on formatting errors, too.
+You can also check the formatting of the files by adding the flag `-f` : `etcha -c lint mydir`.  Formatting errors will be reported, along with diffs on what the correct formatting should be.  The tool will exit with a non-zero status code on formatting errors, too.
 
 **For Continuous Delivery/Continuous Integration Usage**, it's highly recommended to run linting across your entire Etcha codebase.
 

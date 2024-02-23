@@ -56,6 +56,7 @@ func TestCompare(t *testing.T) {
 
 	tests := map[string]struct {
 		args    []string
+		flags   cli.Flags
 		wantErr bool
 		wantOut string
 	}{
@@ -109,7 +110,11 @@ func TestCompare(t *testing.T) {
 				"",
 				"testdata/1.jwt",
 				"testdata/v.jwt",
-				"yes",
+			},
+			flags: cli.Flags{
+				"i": {
+					Values: []string{""},
+				},
 			},
 		},
 		"good": {
@@ -124,7 +129,7 @@ func TestCompare(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			logger.SetStd()
-			assert.Equal(t, compare.Run(ctx, tc.args, c) != nil, tc.wantErr)
+			assert.Equal(t, compare.Run(ctx, tc.args, tc.flags, c) != nil, tc.wantErr)
 
 			if tc.wantOut != "" {
 				assert.Equal(t, strings.Contains(logger.ReadStd(), tc.wantOut), true)

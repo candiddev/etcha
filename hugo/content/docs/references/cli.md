@@ -35,7 +35,7 @@ Set config key=value (can be provided multiple times)
 
 Import [Pattern]({{< ref "/docs/references/patterns" >}}) [Jsonnet]({{< ref "/docs/references/jsonnet" >}}) files from path, execute build [Commands]({{< ref "/docs/references/commands" >}}), sign a [JWT]({{< ref "/docs/references/jwt" >}}), and output the JWT to the destination path.
 
-### `compare [new jwt path or URL] [old jwt path or URL] [ignore version, default: no]` {#compare}
+### `compare [-i ignore version differences] [new jwt path or URL] [old jwt path or URL]` {#compare}
 
 Compare two [JWTs]({{< ref "/docs/references/jwt" >}}) to see if they have the same etchaBuildManfiest, etchaPattern, and etchaVersion (can optionally ignore version mismatch).
 
@@ -43,15 +43,15 @@ Compare two [JWTs]({{< ref "/docs/references/jwt" >}}) to see if they have the s
 
 Copy a local file or HTTP path to a destination path.  Utilizes the same function as Jsonnet [getFile]({{< ref "/docs/references/jsonnet#getFile" >}}) and can set HTTP headers in the source path using `#`.
 
-### `dir [mode [check,change,remove]] [path] [permissions] [owner] [group]` {#dir}
+### `dir [-g group] [-o owner] [-p permissions] [mode [check,change,remove]] [path]` {#dir}
 
-Manages a directory on the local machine using check/change/remove.  Can optionally set permissions, owner, or group, or set `""` to skip them individually, otherwise permissions will be `0755` and the user and group will be inherited from the current user.
+Manages a directory on the local machine using check/change/remove.  Can optionally set permissions, owner, or group, otherwise permissions will be `0755` and the user and group will be inherited from the current user.
 
-### `file [mode [check,change,remove]] [path] [contents, or - to read from stdin] [permissions] [owner] [group]` {#file}
+### `file [-g group] [-o owner] [-p permissions] [mode [check,change,remove]] [path] [contents, or - to read from stdin]` {#file}
 
-Manages a file on the local machine using check/change/remove.  Can optionally provide contents directly or via stdin, or set permissions, owner, or group, or set `""` to skip them individually, otherwise permissions will be `0644` and the user and group will be inherited from the current user.
+Manages a file on the local machine using check/change/remove.  Can optionally provide contents directly or via stdin, or set permissions, owner, or group, otherwise permissions will be `0644` and the user and group will be inherited from the current user.
 
-### `generate-keys <key name, optional> <encryption, default: best>` {#generate-keys}
+### `generate-keys [-a algorithm, default: best] [key name, optional]` {#generate-keys}
 
 Generate cryptographic keys for use with signing and encryption.  The keys will be output as JSON:
 
@@ -84,7 +84,7 @@ Manage a line in a file or in text on the local machine from stdin using check/c
 
 Manage a symlink on the local machinge using check/change.
 
-### `lint [path] [check formatting, default: no]` {#lint}
+### `lint [-f check formatting] [path]` {#lint}
 
 Lint all `.jsonnet` and `.libsonnet` files in the path, checking the syntax and optionally the formatting of the files.  Can also use external linters to provide more validation. See [Linting Patterns]({{< ref "/docs/guides/linting-patterns" >}}) for more information.
 
@@ -100,9 +100,9 @@ Push ad-hoc commands or a signed pattern to a destination URL.  See [Running Com
 
 Render a Pattern from JWT or Jsonnet and display the result.
 
-### `run [run once, default: no]` {#run-listen}
+### `run [-o run once]` {#run-listen}
 
-Run Etcha in listening mode, periodically pulling new patterns, receiving new patterns via push, and exposing metrics.  Can specify an additional argument to only run once and exit.
+Run Etcha in listening mode, periodically pulling new patterns, receiving new patterns via push, and exposing metrics.  Can specify an additional flag to only run once and exit.
 
 ### `show-config` {#show-config}
 
@@ -112,6 +112,6 @@ Show the rendered config from all sources (files, environment variables, and com
 
 Show the rendered pattern of a JWT or pattern file.
 
-### `test [path] [test build commands, default: no]` {#test}
+### `test [-b test build commands] [path]` {#test}
 
 Test all patterns in path.  See [Testing Patterns]({{< ref "/docs/guides/testing-patterns" >}}) for more information.

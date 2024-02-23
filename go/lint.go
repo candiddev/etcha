@@ -21,8 +21,15 @@ var lint = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	ArgumentsOptional: []string{
 		"check formatting, default: no",
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
-		l, err := pattern.Lint(ctx, c, args[1], len(args) == 3)
+	Flags: cli.Flags{
+		"f": {
+			Usage: "Check formatting",
+		},
+	},
+	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
+		_, check := flags.Value("f")
+
+		l, err := pattern.Lint(ctx, c, args[1], check)
 		if err != nil {
 			return err
 		}

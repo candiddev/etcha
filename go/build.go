@@ -15,7 +15,7 @@ var build = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"pattern path",
 		"destination path",
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, c *config.Config) errs.Err {
 		source := args[1]
 		destination := args[2]
 

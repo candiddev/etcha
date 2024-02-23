@@ -18,11 +18,14 @@ var test = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	ArgumentsRequired: []string{
 		"path",
 	},
-	ArgumentsOptional: []string{
-		"test build commands, default: no",
+	Flags: cli.Flags{
+		"b": {
+			Usage: "Test build commands",
+		},
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
-		l, err := pattern.Test(ctx, c, args[1], len(args) == 3)
+	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
+		_, b := flags.Value("b")
+		l, err := pattern.Test(ctx, c, args[1], b)
 		if err != nil {
 			return err
 		}

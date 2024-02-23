@@ -11,15 +11,15 @@ import (
 )
 
 var runCmd = cli.Command[*config.Config]{ //nolint:gochecknoglobals
-	ArgumentsOptional: []string{
-		"run once, default: no",
+	Flags: cli.Flags{
+		"o": {
+			Usage: "Run once",
+		},
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
-		once := false
+	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
+		_, once := flags.Value("o")
 
-		if len(args) == 3 {
-			once = true
-		} else if c.CLI.LogFormat == "" {
+		if c.CLI.LogFormat == "" {
 			c.CLI.LogFormat = logger.FormatKV
 			ctx = logger.SetFormat(ctx, logger.FormatKV)
 		}

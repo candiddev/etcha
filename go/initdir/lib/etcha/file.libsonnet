@@ -6,6 +6,7 @@ function(contents='', expand=false, group='""', ignoreContents=false, mode='0644
     contentsChange: if contents == '' then '' else '-',
     contentsCheck: if ignoreContents then '' else '-',
     eof: if expand then 'EOF' else "'EOF'",
+    flags: '-g %(group)s -o %(owner)s -p %(mode)s' % self,
     group: group,
     mode: if std.length(mode) == 3 then '0%s' % mode else '%s' % mode,
     owner: owner,
@@ -15,12 +16,12 @@ function(contents='', expand=false, group='""', ignoreContents=false, mode='0644
   {
     id: 'file %s' % path,
     check: |||
-      etcha file check %(path)s %(mode)s %(owner)s %(group)s %(contentsCheck)s << %(eof)s
+      etcha file %(flags)s check %(path)s %(contentsCheck)s << %(eof)s
       %(contents)s
     ||| % vars,
     change: |||
-      etcha file change %(path)s %(mode)s %(owner)s %(group)s %(contentsChange)s << %(eof)s
+      etcha file %(flags)s change %(path)s %(contentsChange)s << %(eof)s
       %(contents)s
     ||| % vars,
-    remove: 'etcha file remove %(path)s %(mode)s %(owner)s %(group)s' % vars,
+    remove: 'etcha file %(flags)s remove %(path)s' % vars,
   }

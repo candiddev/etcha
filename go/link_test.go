@@ -99,7 +99,7 @@ func TestLink(t *testing.T) {
 				tc.mode,
 				tc.src,
 				tc.dst,
-			}, c)
+			}, nil, c)
 			assert.Equal(t, err != nil, tc.wantErr)
 		})
 	}

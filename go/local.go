@@ -20,7 +20,7 @@ var local = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	ArgumentsOptional: []string{
 		"source name, default: local",
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, c *config.Config) errs.Err {
 		mode, err := parseMode(args[1], false)
 		if err != nil {
 			return logger.Error(ctx, err)

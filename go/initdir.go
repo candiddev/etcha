@@ -16,7 +16,7 @@ var initCmd = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	ArgumentsOptional: []string{
 		"directory, default: current directory",
 	},
-	Run: func(ctx context.Context, args []string, _ *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, _ *config.Config) errs.Err {
 		var path string
 
 		var err error

@@ -17,10 +17,12 @@ var compare = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"new jwt path or URL",
 		"old jwt path or URL",
 	},
-	ArgumentsOptional: []string{
-		"ignore version, default: no",
+	Flags: cli.Flags{
+		"i": {
+			Usage: "Ignore JWT etchaVersion differences",
+		},
 	},
-	Run: func(ctx context.Context, args []string, c *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
 		j1, err := pattern.ParseJWTFromPath(ctx, c, "", args[1])
 		if err != nil {
 			return err
@@ -31,10 +33,7 @@ var compare = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			return err
 		}
 
-		ignore := false
-		if len(args) == 4 && args[3] != "" {
-			ignore = true
-		}
+		_, ignore := flags.Value("i")
 
 		if err := j1.Equal(j2, ignore); err != nil {
 			var c string

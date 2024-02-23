@@ -20,7 +20,7 @@ var link = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"src",
 		"dst",
 	},
-	Run: func(ctx context.Context, args []string, config *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, config *config.Config) errs.Err {
 		mode, e := parseMode(args[1], true)
 		if e != nil {
 			return logger.Error(ctx, e)

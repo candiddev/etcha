@@ -24,7 +24,7 @@ func TestCopyCmd(t *testing.T) {
 		"check",
 		"test",
 		"test2",
-	}, c), errs.ErrReceiver)
+	}, nil, c), errs.ErrReceiver)
 	assert.Equal(t, logger.ReadStd(), "ERROR open test2: no such file or directory\n")
 
 	logger.SetStd()
@@ -33,7 +33,7 @@ func TestCopyCmd(t *testing.T) {
 		"change",
 		"test",
 		"-",
-	}, c), nil)
+	}, nil, c), nil)
 	assert.Equal(t, logger.ReadStd(), "hello")
 
 	logger.SetStd()
@@ -42,7 +42,7 @@ func TestCopyCmd(t *testing.T) {
 		"change",
 		"test",
 		"test2",
-	}, c), nil)
+	}, nil, c), nil)
 	assert.Equal(t, logger.ReadStd(), "")
 
 	logger.SetStd()
@@ -51,7 +51,7 @@ func TestCopyCmd(t *testing.T) {
 		"check",
 		"test",
 		"test2",
-	}, c), nil)
+	}, nil, c), nil)
 	assert.Equal(t, logger.ReadStd(), "")
 
 	logger.SetStd()
@@ -60,7 +60,7 @@ func TestCopyCmd(t *testing.T) {
 		"check",
 		"test",
 		"-",
-	}, c), errs.ErrReceiver)
+	}, nil, c), errs.ErrReceiver)
 	assert.Equal(t, logger.ReadStd(), "ERROR src and dst do not match\n")
 
 	logger.SetStd()
@@ -69,7 +69,7 @@ func TestCopyCmd(t *testing.T) {
 		"change",
 		"/testttttt",
 		"-",
-	}, c), errs.ErrReceiver)
+	}, nil, c), errs.ErrReceiver)
 	assert.Equal(t, logger.ReadStd(), "ERROR error opening src: stat /testttttt: no such file or directory\n")
 
 	os.Remove("test")

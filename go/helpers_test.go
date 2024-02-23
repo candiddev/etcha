@@ -18,48 +18,62 @@ import (
 func TestDirFileRunParse(t *testing.T) {
 	root := uint32(0)
 	permissions := fs.FileMode(uint32(256))
+	permissionsDir := fs.FileMode(uint32(256) + uint32(fs.ModeDir))
 
 	tests := map[string]struct {
-		group           string
-		owner           string
-		permissions     string
+		dir             bool
+		group           []string
+		owner           []string
+		permissions     []string
 		wantErr         bool
 		wantGroup       *uint32
 		wantOwner       *uint32
 		wantPermissions *fs.FileMode
 	}{
 		"all values": {
-			group:           "root",
-			owner:           "root",
-			permissions:     "0400",
+			group:           []string{"root"},
+			owner:           []string{"root"},
+			permissions:     []string{"0400"},
 			wantGroup:       &root,
 			wantOwner:       &root,
 			wantPermissions: &permissions,
 		},
+		"all values dir": {
+			dir:             true,
+			group:           []string{"root"},
+			owner:           []string{"root"},
+			permissions:     []string{"0400"},
+			wantGroup:       &root,
+			wantOwner:       &root,
+			wantPermissions: &permissionsDir,
+		},
 		"no values": {},
 		"wrong group": {
-			group:   "not real",
+			group:   []string{"not real"},
 			wantErr: true,
 		},
 		"wrong owner": {
-			owner:   "not real",
+			owner:   []string{"not real"},
 			wantErr: true,
 		},
 		"wrong permissions": {
-			permissions: "wrong",
+			permissions: []string{"wrong"},
 			wantErr:     true,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			p, o, g, err := dirFileRunParse([]string{
-				"",
-				"",
-				"",
-				tc.permissions,
-				tc.owner,
-				tc.group,
+			p, o, g, err := dirFileRunParse(tc.dir, cli.Flags{
+				"g": {
+					Values: tc.group,
+				},
+				"o": {
+					Values: tc.owner,
+				},
+				"p": {
+					Values: tc.permissions,
+				},
 			})
 			assert.Equal(t, err != nil, tc.wantErr)
 			assert.Equal(t, g, tc.wantGroup)
@@ -167,11 +181,14 @@ func TestDirFileRun(t *testing.T) {
 	uid := strconv.Itoa(os.Getuid())
 
 	tests := []struct {
-		dir   bool
-		name  string
-		args  []string
-		stdin string
-		want  string
+		args        []string
+		dir         bool
+		group       []string
+		name        string
+		owner       []string
+		permissions []string
+		stdin       string
+		want        string
 	}{
 		{
 			name: "path_check1",
@@ -230,51 +247,51 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"change",
 				"test",
-				"600",
-				uid,
-				gid,
 			},
+			group:       []string{gid},
+			owner:       []string{uid},
+			permissions: []string{"600"},
 		},
 		{
 			name: "full_change_id",
 			args: []string{
 				"change",
 				"test",
-				"600",
-				uid,
-				gid,
 			},
+			group:       []string{gid},
+			owner:       []string{uid},
+			permissions: []string{"600"},
 		},
 		{
 			name: "full_check_id1",
 			args: []string{
 				"check",
 				"test",
-				"0600",
-				uid,
-				gid,
 			},
+			group:       []string{gid},
+			owner:       []string{uid},
+			permissions: []string{"600"},
 		},
 		{
 			name: "full_check_id2",
 			args: []string{
 				"check",
 				"test",
-				"0640",
-				uid,
-				gid,
 			},
-			want: "ERROR file test does not match:\n\tmismatch permissions: got 600, want 640\n",
+			group:       []string{gid},
+			owner:       []string{uid},
+			permissions: []string{"640"},
+			want:        "ERROR file test does not match:\n\tmismatch permissions: got 600, want 640\n",
 		},
 		{
 			name: "full_check_id3",
 			args: []string{
 				"check",
 				"test",
-				"640",
-				"0",
-				"0",
 			},
+			group:       []string{"0"},
+			owner:       []string{"0"},
+			permissions: []string{"640"},
 			want: fmt.Sprintf(`ERROR file test does not match:
 	mismatch group: got %s, want 0
 	mismatch owner: got %s, want 0
@@ -286,9 +303,6 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"check",
 				"test",
-				"",
-				"",
-				"",
 				"-",
 			},
 			stdin: "contents",
@@ -301,9 +315,6 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"change",
 				"test",
-				"",
-				"",
-				"",
 				"-",
 			},
 			stdin: "contents",
@@ -313,9 +324,6 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"check",
 				"test",
-				"",
-				"",
-				"",
 				"-",
 			},
 			stdin: "contents",
@@ -325,37 +333,30 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"change",
 				"test",
-				"",
-				"",
-				gid,
 			},
+			group: []string{gid},
 		},
 		{
 			name: "full_check_group",
 			args: []string{
 				"check",
 				"test",
-				"",
-				"",
-				gid,
 			},
+			group: []string{gid},
 		},
 		{
 			name: "full_change_permissions",
 			args: []string{
 				"change",
 				"test",
-				"600",
 			},
+			permissions: []string{"600"},
 		},
 		{
 			name: "full_change_contents",
 			args: []string{
 				"change",
 				"test",
-				"",
-				"",
-				"",
 				"hello",
 			},
 		},
@@ -364,9 +365,6 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"check",
 				"test",
-				"",
-				"",
-				"",
 				"hello",
 			},
 		},
@@ -375,21 +373,21 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"remove",
 				"test",
-				"600",
-				uid,
-				gid,
 			},
+			group:       []string{gid},
+			owner:       []string{uid},
+			permissions: []string{"600"},
 		},
 		{
 			name: "full_check_id4",
 			args: []string{
 				"check",
 				"test",
-				"600",
-				uid,
-				gid,
 			},
-			want: "ERROR stat test: no such file or directory\n",
+			want:        "ERROR stat test: no such file or directory\n",
+			group:       []string{gid},
+			owner:       []string{uid},
+			permissions: []string{"600"},
 		},
 		{
 			dir:  true,
@@ -397,9 +395,9 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"check",
 				"testdata",
-				"0700",
 			},
-			want: "ERROR stat testdata: no such file or directory\n",
+			want:        "ERROR stat testdata: no such file or directory\n",
+			permissions: []string{"0700"},
 		},
 		{
 			dir:  true,
@@ -407,8 +405,8 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"change",
 				"testdata",
-				"0700",
 			},
+			permissions: []string{"0700"},
 		},
 		{
 			dir:  true,
@@ -416,8 +414,8 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"check",
 				"testdata",
-				"0700",
 			},
+			permissions: []string{"0700"},
 		},
 		{
 			dir:  true,
@@ -425,8 +423,8 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"change",
 				"testdata",
-				"0700",
 			},
+			permissions: []string{"0700"},
 		},
 		{
 			dir:  true,
@@ -442,9 +440,9 @@ func TestDirFileRun(t *testing.T) {
 			args: []string{
 				"check",
 				"testdata",
-				"0700",
 			},
-			want: "ERROR stat testdata: no such file or directory\n",
+			permissions: []string{"0700"},
+			want:        "ERROR stat testdata: no such file or directory\n",
 		},
 	}
 
@@ -458,10 +456,22 @@ func TestDirFileRun(t *testing.T) {
 				cmd = "dir"
 			}
 
+			f := cli.Flags{
+				"g": {
+					Values: tests[i].group,
+				},
+				"o": {
+					Values: tests[i].owner,
+				},
+				"p": {
+					Values: tests[i].permissions,
+				},
+			}
+
 			if tests[i].want == "" {
-				assert.HasErr(t, file.Run(ctx, append([]string{cmd}, tests[i].args...), c), nil)
+				assert.HasErr(t, file.Run(ctx, append([]string{cmd}, tests[i].args...), f, c), nil)
 			} else {
-				assert.HasErr(t, file.Run(ctx, append([]string{cmd}, tests[i].args...), c), errs.ErrReceiver)
+				assert.HasErr(t, file.Run(ctx, append([]string{cmd}, tests[i].args...), f, c), errs.ErrReceiver)
 			}
 
 			assert.Equal(t, logger.ReadStd(), tests[i].want)
