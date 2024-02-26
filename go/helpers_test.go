@@ -22,59 +22,73 @@ func TestDirFileRunParse(t *testing.T) {
 
 	tests := map[string]struct {
 		dir             bool
-		group           []string
-		owner           []string
-		permissions     []string
+		group           string
+		owner           string
+		permissions     string
 		wantErr         bool
 		wantGroup       *uint32
 		wantOwner       *uint32
 		wantPermissions *fs.FileMode
 	}{
 		"all values": {
-			group:           []string{"root"},
-			owner:           []string{"root"},
-			permissions:     []string{"0400"},
+			group:           "root",
+			owner:           "root",
+			permissions:     "0400",
 			wantGroup:       &root,
 			wantOwner:       &root,
 			wantPermissions: &permissions,
 		},
 		"all values dir": {
 			dir:             true,
-			group:           []string{"root"},
-			owner:           []string{"root"},
-			permissions:     []string{"0400"},
+			group:           "root",
+			owner:           "root",
+			permissions:     "0400",
 			wantGroup:       &root,
 			wantOwner:       &root,
 			wantPermissions: &permissionsDir,
 		},
 		"no values": {},
 		"wrong group": {
-			group:   []string{"not real"},
+			group:   "not real",
 			wantErr: true,
 		},
 		"wrong owner": {
-			owner:   []string{"not real"},
+			owner:   "not real",
 			wantErr: true,
 		},
 		"wrong permissions": {
-			permissions: []string{"wrong"},
+			permissions: "wrong",
 			wantErr:     true,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			p, o, g, err := dirFileRunParse(tc.dir, cli.Flags{
+			f := cli.Flags{
 				"g": {
-					Values: tc.group,
+					Placeholder: "p",
 				},
 				"o": {
-					Values: tc.owner,
+					Placeholder: "p",
 				},
 				"p": {
-					Values: tc.permissions,
+					Placeholder: "p",
 				},
-			})
+			}
+
+			if tc.group != "" {
+				f.Parse([]string{"-g", tc.group})
+			}
+
+			if tc.owner != "" {
+				f.Parse([]string{"-o", tc.owner})
+			}
+
+			if tc.permissions != "" {
+				f.Parse([]string{"-p", tc.permissions})
+			}
+
+			p, o, g, err := dirFileRunParse(tc.dir, f)
 			assert.Equal(t, err != nil, tc.wantErr)
 			assert.Equal(t, g, tc.wantGroup)
 			assert.Equal(t, o, tc.wantOwner)
@@ -183,10 +197,10 @@ func TestDirFileRun(t *testing.T) {
 	tests := []struct {
 		args        []string
 		dir         bool
-		group       []string
+		group       string
 		name        string
-		owner       []string
-		permissions []string
+		owner       string
+		permissions string
 		stdin       string
 		want        string
 	}{
@@ -248,9 +262,9 @@ func TestDirFileRun(t *testing.T) {
 				"change",
 				"test",
 			},
-			group:       []string{gid},
-			owner:       []string{uid},
-			permissions: []string{"600"},
+			group:       gid,
+			owner:       uid,
+			permissions: "600",
 		},
 		{
 			name: "full_change_id",
@@ -258,9 +272,9 @@ func TestDirFileRun(t *testing.T) {
 				"change",
 				"test",
 			},
-			group:       []string{gid},
-			owner:       []string{uid},
-			permissions: []string{"600"},
+			group:       gid,
+			owner:       uid,
+			permissions: "600",
 		},
 		{
 			name: "full_check_id1",
@@ -268,9 +282,9 @@ func TestDirFileRun(t *testing.T) {
 				"check",
 				"test",
 			},
-			group:       []string{gid},
-			owner:       []string{uid},
-			permissions: []string{"600"},
+			group:       gid,
+			owner:       uid,
+			permissions: "600",
 		},
 		{
 			name: "full_check_id2",
@@ -278,9 +292,9 @@ func TestDirFileRun(t *testing.T) {
 				"check",
 				"test",
 			},
-			group:       []string{gid},
-			owner:       []string{uid},
-			permissions: []string{"640"},
+			group:       gid,
+			owner:       uid,
+			permissions: "640",
 			want:        "ERROR file test does not match:\n\tmismatch permissions: got 600, want 640\n",
 		},
 		{
@@ -289,9 +303,9 @@ func TestDirFileRun(t *testing.T) {
 				"check",
 				"test",
 			},
-			group:       []string{"0"},
-			owner:       []string{"0"},
-			permissions: []string{"640"},
+			group:       "0",
+			owner:       "0",
+			permissions: "640",
 			want: fmt.Sprintf(`ERROR file test does not match:
 	mismatch group: got %s, want 0
 	mismatch owner: got %s, want 0
@@ -334,7 +348,7 @@ func TestDirFileRun(t *testing.T) {
 				"change",
 				"test",
 			},
-			group: []string{gid},
+			group: gid,
 		},
 		{
 			name: "full_check_group",
@@ -342,7 +356,7 @@ func TestDirFileRun(t *testing.T) {
 				"check",
 				"test",
 			},
-			group: []string{gid},
+			group: gid,
 		},
 		{
 			name: "full_change_permissions",
@@ -350,7 +364,7 @@ func TestDirFileRun(t *testing.T) {
 				"change",
 				"test",
 			},
-			permissions: []string{"600"},
+			permissions: "600",
 		},
 		{
 			name: "full_change_contents",
@@ -374,9 +388,9 @@ func TestDirFileRun(t *testing.T) {
 				"remove",
 				"test",
 			},
-			group:       []string{gid},
-			owner:       []string{uid},
-			permissions: []string{"600"},
+			group:       gid,
+			owner:       uid,
+			permissions: "600",
 		},
 		{
 			name: "full_check_id4",
@@ -385,9 +399,9 @@ func TestDirFileRun(t *testing.T) {
 				"test",
 			},
 			want:        "ERROR stat test: no such file or directory\n",
-			group:       []string{gid},
-			owner:       []string{uid},
-			permissions: []string{"600"},
+			group:       gid,
+			owner:       uid,
+			permissions: "600",
 		},
 		{
 			dir:  true,
@@ -397,7 +411,7 @@ func TestDirFileRun(t *testing.T) {
 				"testdata",
 			},
 			want:        "ERROR stat testdata: no such file or directory\n",
-			permissions: []string{"0700"},
+			permissions: "0700",
 		},
 		{
 			dir:  true,
@@ -406,7 +420,7 @@ func TestDirFileRun(t *testing.T) {
 				"change",
 				"testdata",
 			},
-			permissions: []string{"0700"},
+			permissions: "0700",
 		},
 		{
 			dir:  true,
@@ -415,7 +429,7 @@ func TestDirFileRun(t *testing.T) {
 				"check",
 				"testdata",
 			},
-			permissions: []string{"0700"},
+			permissions: "0700",
 		},
 		{
 			dir:  true,
@@ -424,7 +438,7 @@ func TestDirFileRun(t *testing.T) {
 				"change",
 				"testdata",
 			},
-			permissions: []string{"0700"},
+			permissions: "0700",
 		},
 		{
 			dir:  true,
@@ -441,7 +455,7 @@ func TestDirFileRun(t *testing.T) {
 				"check",
 				"testdata",
 			},
-			permissions: []string{"0700"},
+			permissions: "0700",
 			want:        "ERROR stat testdata: no such file or directory\n",
 		},
 	}
@@ -458,14 +472,26 @@ func TestDirFileRun(t *testing.T) {
 
 			f := cli.Flags{
 				"g": {
-					Values: tests[i].group,
+					Placeholder: "hello",
 				},
 				"o": {
-					Values: tests[i].owner,
+					Placeholder: "hello",
 				},
 				"p": {
-					Values: tests[i].permissions,
+					Placeholder: "hello",
 				},
+			}
+
+			if tests[i].group != "" {
+				f.Parse([]string{"-g", tests[i].group})
+			}
+
+			if tests[i].owner != "" {
+				f.Parse([]string{"-o", tests[i].owner})
+			}
+
+			if tests[i].permissions != "" {
+				f.Parse([]string{"-p", tests[i].permissions})
 			}
 
 			if tests[i].want == "" {

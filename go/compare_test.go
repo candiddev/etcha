@@ -112,9 +112,7 @@ func TestCompare(t *testing.T) {
 				"testdata/v.jwt",
 			},
 			flags: cli.Flags{
-				"i": {
-					Values: []string{""},
-				},
+				"i": {},
 			},
 		},
 		"good": {
@@ -128,6 +126,7 @@ func TestCompare(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			tc.flags.Parse([]string{"-i"})
 			logger.SetStd()
 			assert.Equal(t, compare.Run(ctx, tc.args, tc.flags, c) != nil, tc.wantErr)
 
