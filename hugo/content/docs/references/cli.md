@@ -31,6 +31,10 @@ Set config key=value (can be provided multiple times)
 
 ## Commands
 
+### `autocomplete`
+
+{{< autocomplete name="Etcha" >}}
+
 ### `build [pattern path] [destination path]` {#build}
 
 Import [Pattern]({{< ref "/docs/references/patterns" >}}) [Jsonnet]({{< ref "/docs/references/jsonnet" >}}) files from path, execute build [Commands]({{< ref "/docs/references/commands" >}}), sign a [JWT]({{< ref "/docs/references/jwt" >}}), and output the JWT to the destination path.

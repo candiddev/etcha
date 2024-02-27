@@ -12,8 +12,8 @@ type: blog
 
 ## Enhancements
 
-- Added [rotInstall]({{< ref "/docs/references/libraries#rotInstall" >}}) library for installing the latest version of [Rot](https://rotx.dev).
 - Added [autocomplete]({{< ref "/docs/references/cli#autocomplete" >}}) to enable autocompletion within Etcha's CLI using your shell.
+- Added [rotInstall]({{< ref "/docs/references/libraries#rotInstall" >}}) library for installing the latest version of [Rot](https://rotx.dev).
 - Changed [Environment Variables]({{< ref "/docs/references/commands#environment-variables" >}}) to set `envPrefix` to `check` stderr/stdout if defined.
 - Changed Push mode to run build commands.
 - Changed RunEnv to RunVars--these can be used during Jsonnet rendering for variables defined at build time.  See [Patterns]({{< ref "/docs/references/patterns#runvars" >}}) for more information.
