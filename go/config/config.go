@@ -99,8 +99,9 @@ func Default() *Config {
 			Linters: map[string]*commands.Exec{
 				"shellcheck": {
 					Command:          "-s bash -e 2016 -e 2154 -",
-					ContainerImage:   "koalaman/shellcheck",
+					ContainerImage:   "docker.io/koalaman/shellcheck",
 					ContainerNetwork: "none",
+					EnvInherit:       true,
 				},
 			},
 		},
