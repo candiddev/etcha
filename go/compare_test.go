@@ -38,20 +38,20 @@ func TestCompare(t *testing.T) {
 			},
 		},
 	}
-	j1, _ := p1.Sign(ctx, c, "", nil)
+	j1, _, _ := p1.Sign(ctx, c, "", nil)
 	os.WriteFile("testdata/1.jwt", []byte(j1), 0700)
 
-	m1, _ := p1.Sign(ctx, c, "manifest", nil)
+	m1, _, _ := p1.Sign(ctx, c, "manifest", nil)
 	os.WriteFile("testdata/m.jwt", []byte(m1), 0700)
 
 	cli.BuildVersion = "1.1"
-	v1, _ := p1.Sign(ctx, c, "", nil)
+	v1, _, _ := p1.Sign(ctx, c, "", nil)
 	os.WriteFile("testdata/v.jwt", []byte(v1), 0700)
 
 	cli.BuildVersion = ""
 	p2 := p1
 	p2.Imports.Files["/main.jsonnet"] = `{run:[{change:"changeA",check:"checkA",id:"c"}]}`
-	j2, _ := p2.Sign(ctx, c, "", nil)
+	j2, _, _ := p2.Sign(ctx, c, "", nil)
 	os.WriteFile("testdata/2.jwt", []byte(j2), 0700)
 
 	tests := map[string]struct {

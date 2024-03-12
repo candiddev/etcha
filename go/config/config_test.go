@@ -89,12 +89,12 @@ func TestParseJWTFile(t *testing.T) {
 
 	e := time.Now().Add(10 * time.Second)
 
-	t1, _ := jwt.New(&j{
+	t1, _, _ := jwt.New(&j{
 		A: "prv1",
 	}, e, []string{}, "", "", "")
 	t1.Sign(prv1)
 
-	t3, _ := jwt.New(&j{
+	t3, _, _ := jwt.New(&j{
 		A: "prv3",
 	}, e, []string{}, "", "", "")
 	t3.Sign(prv3)
@@ -128,17 +128,17 @@ func TestParseJWTFile(t *testing.T) {
 	ctx := context.Background()
 	out := &j{}
 
-	key, err := c.ParseJWTFile(ctx, out, "testdata/jwt4.jwt", "")
+	key, _, err := c.ParseJWTFile(ctx, out, "testdata/jwt4.jwt", "")
 	assert.HasErr(t, err, errs.ErrReceiver)
 	assert.Equal(t, key.IsNil(), true)
 	assert.Equal(t, out.A, "")
 
-	key, err = c.ParseJWTFile(ctx, out, "testdata/jwt3.jwt", "")
+	key, _, err = c.ParseJWTFile(ctx, out, "testdata/jwt3.jwt", "")
 	assert.HasErr(t, err, errs.ErrReceiver)
 	assert.Equal(t, key.ID, "")
 	assert.Equal(t, out.A, "prv3")
 
-	_, err = c.ParseJWTFile(ctx, out, "testdata/jwt1.jwt", "etcha")
+	_, _, err = c.ParseJWTFile(ctx, out, "testdata/jwt1.jwt", "etcha")
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, out.A, "prv1")
 	assert.Equal(t, c.CLI.RunMockInputs(), []cli.RunMockInput{
@@ -155,7 +155,7 @@ func TestParseJWTFile(t *testing.T) {
 		},
 	})
 
-	_, err = c.ParseJWTFile(ctx, out, "testdata/jwt1.jwt", "etcha")
+	_, _, err = c.ParseJWTFile(ctx, out, "testdata/jwt1.jwt", "etcha")
 	assert.HasErr(t, err, cryptolib.ErrVerify)
 	assert.Equal(t, c.CLI.RunMockInputs(), []cli.RunMockInput{
 		{

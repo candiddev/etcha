@@ -16,7 +16,7 @@ var jwt = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"jwt path",
 	},
 	Run: func(ctx context.Context, args []string, _ cli.Flags, c *config.Config) errs.Err {
-		j, err := pattern.ParseJWTFromPath(ctx, c, "", args[1])
+		j, _, err := pattern.ParseJWTFromPath(ctx, c, "", args[1])
 
 		if j != nil {
 			logger.Raw(types.JSONToString(j) + "\n")

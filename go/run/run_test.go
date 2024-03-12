@@ -388,7 +388,7 @@ func TestStateLoadExecJWTs(t *testing.T) {
 			Entrypoint: "/main.jsonnet",
 		},
 	}
-	j, _ := jwt1.Sign(ctx, c, "", nil)
+	j, _, _ := jwt1.Sign(ctx, c, "", nil)
 	os.WriteFile("testdata/1.jwt", []byte(j), 0600)
 
 	jwt2 := pattern.Pattern{
@@ -402,14 +402,14 @@ func TestStateLoadExecJWTs(t *testing.T) {
 			},
 		},
 	}
-	j, _ = jwt2.Sign(ctx, c, "", nil)
+	j, r, _ := jwt2.Sign(ctx, c, "", nil)
 	os.WriteFile("testdata/2.jwt", []byte(j), 0600)
 
 	s, _ := newState(ctx, c)
 
 	s.loadExecJWTs(ctx)
 
-	assert.Equal(t, s.JWTs.Get("2").Audience[0], "2")
+	assert.Equal(t, r.Audience[0], "2")
 	assert.Equal(t, s.JWTs.Keys(), []string{"2"})
 	assert.Equal(t, s.Patterns.Get("2").Run[0].ID, "a")
 	assert.Equal(t, s.Patterns.Keys(), []string{"2", "3", "4"})
@@ -445,9 +445,9 @@ func TestStateRunSource(t *testing.T) {
 		},
 	}
 	cli.BuildVersion = "v2023.10.02"
-	j1, _ := jwt1.Sign(ctx, c, "", nil)
+	j1, _, _ := jwt1.Sign(ctx, c, "", nil)
 
-	j, _ := pattern.ParseJWT(ctx, c, j1, "1")
+	j, _, _ := pattern.ParseJWT(ctx, c, j1, "1")
 	p, _ := j.Pattern(ctx, c, "1")
 	s.JWTs.Set("1", j)
 	s.Patterns.Set("1", p)
@@ -461,7 +461,7 @@ func TestStateRunSource(t *testing.T) {
 		},
 	}
 	cli.BuildVersion = "v2023.10.03"
-	j2, _ := jwt2.Sign(ctx, c, "", nil)
+	j2, _, _ := jwt2.Sign(ctx, c, "", nil)
 
 	ts := get.NewHTTPMock([]string{"/1.jwt"}, []byte(j2), time.Time{})
 

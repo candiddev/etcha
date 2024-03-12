@@ -45,7 +45,7 @@ func TestParseJWT(t *testing.T) {
 			c := config.Default()
 			c.Build.SigningKey = prv.String()
 
-			content, _ := p.Sign(ctx, c, "hello", nil)
+			content, _, _ := p.Sign(ctx, c, "hello", nil)
 
 			if !tc.key.IsNil() {
 				c.Sources = map[string]*config.Source{
@@ -57,7 +57,7 @@ func TestParseJWT(t *testing.T) {
 				}
 			}
 
-			j, err := ParseJWT(ctx, c, content, "etcha")
+			j, _, err := ParseJWT(ctx, c, content, "etcha")
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, j.EtchaBuildManifest, tc.wantOut)
 		})
@@ -66,9 +66,9 @@ func TestParseJWT(t *testing.T) {
 	c := config.Default()
 	c.Build.SigningKey = prv.String()
 
-	jwt1, _ := p.Sign(ctx, c, "1", nil)
-	jwt2, _ := p.Sign(ctx, c, "2", nil)
-	jwt3, _ := p.Sign(ctx, c, "2", nil)
+	jwt1, _, _ := p.Sign(ctx, c, "1", nil)
+	jwt2, _, _ := p.Sign(ctx, c, "2", nil)
+	jwt3, _, _ := p.Sign(ctx, c, "2", nil)
 
 	os.MkdirAll("testdata/cache", 0700)
 	os.WriteFile("testdata/1.jwt", []byte(jwt1), 0600)

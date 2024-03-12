@@ -131,7 +131,7 @@ func ParsePatternFromPath(ctx context.Context, c *config.Config, configSource, p
 }
 
 // Sign creates a signed JWT.
-func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest string, runVars map[string]any) (string, errs.Err) {
+func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest string, runVars map[string]any) (string, *jwt.RegisteredClaims, errs.Err) {
 	key, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](c.Build.SigningKey)
 	if err != nil {
 		// try to decrypt the key
@@ -145,7 +145,7 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 	}
 
 	if key.IsNil() && len(c.Build.SigningCommands) == 0 {
-		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternMissingKey))
+		return "", nil, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternMissingKey))
 	}
 
 	e := time.Time{}
@@ -160,9 +160,9 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 		EtchaRunVars:       runVars,
 	}
 
-	t, err := jwt.New(j, e, p.Audience, p.ID, p.Issuer, p.Subject)
+	t, r, err := jwt.New(j, e, p.Audience, p.ID, p.Issuer, p.Subject)
 	if err != nil {
-		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, err))
+		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, err))
 	}
 
 	if len(c.Build.SigningCommands) > 0 {
@@ -172,21 +172,21 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 
 		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, e, c.Exec.Override(c.Build.SigningExec), false, false)
 		if err != nil {
-			return "", logger.Error(ctx, err)
+			return "", r, logger.Error(ctx, err)
 		}
 
 		for _, event := range out.Events() {
 			if event.Name == "jwt" && len(event.Outputs) > 0 {
-				return string(event.Outputs[0].Change), nil
+				return string(event.Outputs[0].Change), r, nil
 			}
 		}
 
-		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, fmt.Errorf("no token returned from signingCommands")))
+		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, fmt.Errorf("no token returned from signingCommands")))
 	}
 
 	if err := t.Sign(key); err != nil {
-		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 
-	return t.String(), logger.Error(ctx, nil)
+	return t.String(), r, logger.Error(ctx, nil)
 }

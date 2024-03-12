@@ -62,7 +62,7 @@ func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination s
 		return logger.Error(ctx, err)
 	}
 
-	out, err := p.Sign(ctx, c, buildManifest, runVars)
+	out, _, err := p.Sign(ctx, c, buildManifest, runVars)
 	if err != nil {
 		f.Close()
 		os.Remove(destination + ".tmp") //nolint:errcheck

@@ -269,7 +269,7 @@ func (s *state) loadExecJWTs(ctx context.Context) {
 		if !source.NoRestore {
 			path := filepath.Join(s.Config.Run.StateDir, k+".jwt")
 
-			if jw, err := pattern.ParseJWTFromPath(ctx, s.Config, k, path); err == nil && jw != nil {
+			if jw, _, err := pattern.ParseJWTFromPath(ctx, s.Config, k, path); err == nil && jw != nil {
 				p, err := jw.Pattern(ctx, s.Config, k)
 				if err == nil {
 					logger.Info(ctx, fmt.Sprintf("Loading cached config for %s...", k))

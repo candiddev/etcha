@@ -280,7 +280,7 @@ func TestPatternSign(t *testing.T) {
 		Subject: "subject!",
 	}
 
-	j, err := p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
+	j, _, err := p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
 	assert.HasErr(t, err, ErrPatternMissingKey)
 	assert.Equal(t, j, "")
 
@@ -290,20 +290,20 @@ func TestPatternSign(t *testing.T) {
 		pub,
 	}
 
-	j, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
+	j, _, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, j != "", true)
 
-	jw, err := ParseJWT(ctx, c, j, "")
+	jw, r, err := ParseJWT(ctx, c, j, "")
 	assert.HasErr(t, err, nil)
-	assert.Equal(t, jw.Audience, p.Audience)
+	assert.Equal(t, r.Audience, p.Audience)
 	assert.Equal(t, jw.EtchaBuildManifest, "build")
 	assert.Equal(t, jw.EtchaPattern, p.Imports)
 	assert.Equal(t, jw.EtchaRunVars, map[string]any{"hello": "world"})
 	assert.Equal(t, jw.EtchaVersion, "v2023.10.02")
-	assert.Equal(t, time.Unix(jw.ExpiresAt, 0).Before(time.Now().Add(1*time.Minute)), true)
-	assert.Equal(t, jw.Issuer, p.Issuer)
-	assert.Equal(t, jw.Subject, p.Subject)
+	assert.Equal(t, time.Unix(r.ExpiresAt, 0).Before(time.Now().Add(1*time.Minute)), true)
+	assert.Equal(t, r.Issuer, p.Issuer)
+	assert.Equal(t, r.Subject, p.Subject)
 
 	c.CLI.RunMock()
 	c.CLI.RunMockErrors([]error{
@@ -323,17 +323,17 @@ func TestPatternSign(t *testing.T) {
 
 	cli.SetStdin("password")
 
-	j, err = p.Sign(ctx, c, "build", map[string]any{"world": "hello"})
+	j, _, err = p.Sign(ctx, c, "build", map[string]any{"world": "hello"})
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, j != "", true)
 
-	jw, err = ParseJWT(ctx, c, j, "")
+	jw, _, err = ParseJWT(ctx, c, j, "")
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, jw.EtchaRunVars, map[string]any{"world": "hello"})
 
 	cli.SetStdin("wrong")
 
-	j, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
+	j, _, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
 	assert.HasErr(t, err, ErrPatternMissingKey)
 	assert.Equal(t, j, "")
 
@@ -363,7 +363,7 @@ func TestPatternSign(t *testing.T) {
 		strings.Split(jw.Raw, ".")[2],
 	})
 
-	out, err := p.Sign(ctx, c, "", nil)
+	out, _, err := p.Sign(ctx, c, "", nil)
 	assert.HasErr(t, err, nil)
 
 	in := c.CLI.RunMockInputs()

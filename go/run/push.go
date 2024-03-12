@@ -64,7 +64,7 @@ func Push(ctx context.Context, c *config.Config, dest, cmd, path string) (r *Res
 		return r, logger.Error(ctx, err)
 	}
 
-	jwt, err := p.Sign(ctx, c, buildManifest, runVars)
+	jwt, _, err := p.Sign(ctx, c, buildManifest, runVars)
 	if err != nil {
 		return r, logger.Error(ctx, err)
 	}
@@ -144,7 +144,7 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	push, err := pattern.ParseJWT(ctx, s.Config, string(body), c)
+	push, _, err := pattern.ParseJWT(ctx, s.Config, string(body), c)
 	if err != nil {
 		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(errors.New("error parsing JWT"), err)) //nolint: errcheck
 		w.WriteHeader(http.StatusNotFound)

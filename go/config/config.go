@@ -137,7 +137,7 @@ func (c *Config) Parse(ctx context.Context, configArgs []string) errs.Err {
 }
 
 // ParseJWT parses a JWT token into a customClaims.
-func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, token string, source string) (key cryptolib.Key[cryptolib.KeyProviderPublic], err error) {
+func (c *Config) ParseJWT(ctx context.Context, customClaims any, token string, source string) (key cryptolib.Key[cryptolib.KeyProviderPublic], r *jwt.RegisteredClaims, err error) {
 	var payloadErr error
 
 	keys := c.Run.VerifyKeys
@@ -160,7 +160,7 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, to
 			"ETCHA_JWT": token,
 		}, ve, false, false)
 		if e != nil {
-			return key, e
+			return key, r, e
 		}
 
 		token = ""
@@ -174,7 +174,7 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, to
 		}
 
 		if token == "" {
-			return key, cryptolib.ErrVerify
+			return key, nil, cryptolib.ErrVerify
 		}
 
 		// The above hopefully validated the token.
@@ -184,26 +184,26 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims jwt.CustomClaims, to
 	}
 
 	if t != nil {
-		payloadErr = t.ParsePayload(customClaims, "", "", "")
+		r, payloadErr = t.ParsePayload(customClaims, "", "", "")
 	}
 
 	if err == nil && payloadErr != nil {
 		err = payloadErr
 	}
 
-	return key, err
+	return key, r, err
 }
 
 // ParseJWTFile reads a JWT file path and parses the token into customClaims.
-func (c *Config) ParseJWTFile(ctx context.Context, customClaims jwt.CustomClaims, path, source string) (key cryptolib.Key[cryptolib.KeyProviderPublic], err errs.Err) {
+func (c *Config) ParseJWTFile(ctx context.Context, customClaims any, path, source string) (key cryptolib.Key[cryptolib.KeyProviderPublic], r *jwt.RegisteredClaims, err errs.Err) {
 	s, e := os.ReadFile(path)
 	if e != nil {
-		return key, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrParseJWT, e))
+		return key, r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrParseJWT, e))
 	}
 
-	if key, e = c.ParseJWT(ctx, customClaims, string(s), source); e != nil {
-		return key, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing JWT %s", path), e))
+	if key, r, e = c.ParseJWT(ctx, customClaims, string(s), source); e != nil {
+		return key, r, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing JWT %s", path), e))
 	}
 
-	return key, logger.Error(ctx, nil)
+	return key, r, logger.Error(ctx, nil)
 }

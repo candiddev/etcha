@@ -27,31 +27,30 @@ type JWT struct {
 	EtchaRunVars       map[string]any   `json:"etchaRunVars"`
 	EtchaVersion       string           `json:"etchaVersion,omitempty"`
 	Raw                string           `json:"-"`
-
-	jwt.RegisteredClaims
 }
 
 // ParseJWT renders a JWT from content.
-func ParseJWT(ctx context.Context, c *config.Config, token, source string) (*JWT, errs.Err) {
+func ParseJWT(ctx context.Context, c *config.Config, token, source string) (*JWT, *jwt.RegisteredClaims, errs.Err) {
 	j := JWT{
 		Raw: token,
 	}
 
-	if _, err := c.ParseJWT(ctx, &j, token, source); err != nil {
-		return &j, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+	_, r, err := c.ParseJWT(ctx, &j, token, source)
+	if err != nil {
+		return &j, r, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 
-	return &j, nil
+	return &j, r, nil
 }
 
 // ParseJWTFromPath reads a path and parse a JWT.
-func ParseJWTFromPath(ctx context.Context, c *config.Config, configSource, path string) (*JWT, errs.Err) {
+func ParseJWTFromPath(ctx context.Context, c *config.Config, configSource, path string) (*JWT, *jwt.RegisteredClaims, errs.Err) {
 	ca := filepath.Join(c.Run.StateDir, configSource+".jwt")
 
 	b := bytes.Buffer{}
 
 	if err := get.FileCache(ctx, path, &b, ca); err != nil {
-		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error reading JWT: %w", err)))
+		return nil, nil, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error reading JWT: %w", err)))
 	}
 
 	return ParseJWT(ctx, c, b.String(), configSource)
@@ -61,7 +60,7 @@ func ParseJWTFromPath(ctx context.Context, c *config.Config, configSource, path 
 func ParseJWTFromSource(ctx context.Context, source string, c *config.Config) *JWT {
 	if s, ok := c.Sources[source]; ok {
 		for _, target := range s.PullPaths {
-			j, err := ParseJWTFromPath(ctx, c, source, target)
+			j, _, err := ParseJWTFromPath(ctx, c, source, target)
 			if err == nil {
 				logger.Error(ctx, nil) //nolint: errcheck
 
@@ -95,11 +94,6 @@ func (j *JWT) Equal(j2 *JWT, ignoreVersion bool) error {
 	return nil
 }
 
-// GetRegisteredClaims satisfies the JWT interface.
-func (j *JWT) GetRegisteredClaims() *jwt.RegisteredClaims {
-	return &j.RegisteredClaims
-}
-
 // Pattern returns a Pattern from the JWT.
 func (j *JWT) Pattern(ctx context.Context, c *config.Config, configSource string) (*Pattern, errs.Err) {
 	p, err := ParsePatternFromImports(ctx, c, configSource, j.EtchaPattern, j.EtchaRunVars)
@@ -111,8 +105,4 @@ func (j *JWT) Pattern(ctx context.Context, c *config.Config, configSource string
 	p.RunVars = j.EtchaRunVars
 
 	return p, logger.Error(ctx, nil)
-}
-
-func (*JWT) Valid() error {
-	return nil
 }
