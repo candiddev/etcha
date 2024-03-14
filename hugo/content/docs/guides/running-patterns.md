@@ -73,6 +73,17 @@ Etcha can run Patterns via one-off applies using the [CLI]({{< ref "/docs/refere
 - [`etcha local change [pattern path]`]({{< ref "/docs/references/cli#local" >}}), executes the `run` in [**Change Mode**]({{< ref "/docs/references/commands#change-mode" >}}).
 - [`etcha local remove [pattern path]`]({{< ref "/docs/references/cli#local" >}})), executes the `run` in [**Remove Mode**]({{< ref "/docs/references/commands#remove-mode" >}}).
 
+
+### Render and Run
+
+Local can also be passed raw Jsonnet that it will wrap in a `{run: [<your jsonnet>]}` string and render a Pattern on the fly.  You can use this to run [Libraries]({{< ref "/docs/references/libraries" >}}) or test other Jsonnet things:
+
+```bash
+$ etcha local change "(import 'lib/etcha/etchaInstall.libsonnet')(dst='/tmp/etcha')"
+INFO  Changing download Etcha to /tmp/etcha...
+INFO  Always changing etcha version...
+```
+
 ## Remote Run
 
 Etcha can push and pull [Pattern]({{< ref "/docs/references/patterns" >}}) [JWTs]({{< ref "/docs/references/jwt" >}}) to/from remote instances.  In order for this to work, we need to have a way to verify the JWT, and the remote Etcha instance needs to be configured to accept JWTs through a particular method via [`sources`]({{< ref "/docs/references/config#sources" >}}).

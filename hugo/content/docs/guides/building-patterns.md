@@ -60,7 +60,7 @@ This example looks a little intense, lets walk through it:
 
 ### `signingCommands`
 
-Some organizations may need to perform signing in a more secure, restrictive manner, like delegating signing to a HSM or HashiCorp Vault.  We can use `signingCommands` for this.  `signingCommands` are a list of Commands that will use environment variables to sign a Token and return the signed Token to Etcha.
+Some organizations may need to perform signing in a more secure, restrictive manner, like delegating signing to a HSM or another key provider.  We can use `signingCommands` for this.  `signingCommands` are a list of Commands that will use environment variables to sign a Token and return the signed Token to Etcha.
 
 Etcha will set the [Environment Variable]({{< ref "/docs/references/commands#environment-variables" >}}) [`ETCHA_PAYLOAD`]({{< ref "/docs/references/commands#etcha_jwt" >}}) containing the base64 raw URL encoded string that needs to be signed.
 
