@@ -202,6 +202,12 @@ String, the group or GID to run the commands with.  Using this is typically priv
 
 **Default:** `""`
 
+### `sudo`
+
+Bool, will check if user is root and run the Commands using `sudo -E` if the user is not root.
+
+**Default:** `false`
+
 ### `user`
 
 String, the user or UID to run the commands with.  Using this is typically privileged and requires root or extra capabilities.

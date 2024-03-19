@@ -36,7 +36,7 @@ local user = import '../lib/etcha/user.libsonnet';
     rotInstall(cacheDir='testdata/test', dst='testdata/rot'),
     rotInstall(dst='testdata/rot1'),
     file(contents=|||
-      HOME=${HOME}
+      HOME=${HOMEDIR}
     |||, expand=true, path='testdata/home'),
     file(contents=|||
       HOME=/root
@@ -108,7 +108,11 @@ local user = import '../lib/etcha/user.libsonnet';
   ],
   runExec: {
     allowOverride: true,
-    command: '/usr/bin/sudo /usr/bin/bash -e -o pipefail -c',
+    command: std.native('getConfig')().exec.command,
+    env: [
+      'HOMEDIR=/root',
+    ],
     envInherit: true,
+    sudo: true,
   },
 }

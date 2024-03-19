@@ -29,6 +29,7 @@ type Exec struct {
 	Env                 []string `json:"env"`
 	EnvInherit          bool     `json:"envInherit"`
 	Group               string   `json:"group"`
+	Sudo                bool     `json:"sudo"`
 	User                string   `json:"user"`
 	WorkDir             string   `json:"workDir"`
 }
@@ -89,6 +90,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		EnvironmentInherit:  e.EnvInherit,
 		Group:               e.Group,
 		NoErrorLog:          true,
+		Sudo:                e.Sudo,
 		Stdin:               stdin,
 		User:                e.User,
 		WorkDir:             e.WorkDir,
