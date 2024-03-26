@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/errs"
@@ -49,7 +50,15 @@ func ParseJWTFromPath(ctx context.Context, c *config.Config, configSource, path 
 
 	b := bytes.Buffer{}
 
-	if err := get.FileCache(ctx, path, &b, ca); err != nil {
+	var err error
+
+	if configSource == "" {
+		_, err = get.File(ctx, path, &b, time.Time{})
+	} else {
+		err = get.FileCache(ctx, path, &b, ca)
+	}
+
+	if err != nil {
 		return nil, nil, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error reading JWT: %w", err)))
 	}
 
