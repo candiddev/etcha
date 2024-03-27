@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/types"
@@ -16,11 +17,13 @@ const (
 )
 
 // Test runs Commands in Test mode.
-func (cmds Commands) Test(ctx context.Context, c cli.Config, exec *Exec, runEnv types.EnvVars) types.Results { //nolint:gocognit
+func (cmds Commands) Test(ctx context.Context, c cli.Config, exec *Exec, parentIDFilter *regexp.Regexp) types.Results { //nolint:gocognit
 	r := types.Results{}
 
 	// Run everything
-	outChange, _ := cmds.Run(ctx, c, runEnv, exec, false, false)
+	outChange, _ := cmds.Run(ctx, c, exec, CommandsRunOpts{
+		ParentIDFilter: parentIDFilter,
+	})
 	changes := []string{}
 	removes := []string{}
 
@@ -35,7 +38,10 @@ func (cmds Commands) Test(ctx context.Context, c cli.Config, exec *Exec, runEnv 
 	}
 
 	// Run check
-	outCheck, _ := cmds.Run(ctx, c, runEnv, exec, true, false)
+	outCheck, _ := cmds.Run(ctx, c, exec, CommandsRunOpts{
+		Check:          true,
+		ParentIDFilter: parentIDFilter,
+	})
 
 	for _, o := range outCheck {
 		for j := range changes {
@@ -46,7 +52,10 @@ func (cmds Commands) Test(ctx context.Context, c cli.Config, exec *Exec, runEnv 
 	}
 
 	// Run remove
-	outRemove, _ := cmds.Run(ctx, c, runEnv, exec, false, true)
+	outRemove, _ := cmds.Run(ctx, c, exec, CommandsRunOpts{
+		ParentIDFilter: parentIDFilter,
+		Remove:         true,
+	})
 
 	for _, o := range outRemove {
 		if o.Removed && o.Checked {
@@ -59,7 +68,11 @@ func (cmds Commands) Test(ctx context.Context, c cli.Config, exec *Exec, runEnv 
 	}
 
 	// Run check remove
-	outCheck, _ = cmds.Run(ctx, c, runEnv, exec, true, true)
+	outCheck, _ = cmds.Run(ctx, c, exec, CommandsRunOpts{
+		Check:          true,
+		ParentIDFilter: parentIDFilter,
+		Remove:         true,
+	})
 
 	for _, o := range outCheck {
 		for j := range removes {
@@ -70,7 +83,10 @@ func (cmds Commands) Test(ctx context.Context, c cli.Config, exec *Exec, runEnv 
 	}
 
 	// Run check again
-	outCheck, _ = cmds.Run(ctx, c, runEnv, exec, true, false)
+	outCheck, _ = cmds.Run(ctx, c, exec, CommandsRunOpts{
+		Check:          true,
+		ParentIDFilter: parentIDFilter,
+	})
 
 	for _, o := range outCheck {
 		for j := range changes {

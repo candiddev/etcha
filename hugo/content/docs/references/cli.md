@@ -94,7 +94,7 @@ Lint all `.jsonnet` and `.libsonnet` files in the path, checking the syntax and 
 
 ### `local`
 
-Import [Pattern]({{< ref "/docs/references/patterns" >}}) [Jsonnet]({{< ref "/docs/references/jsonnet" >}}) files from path, execute all [Commands]({{< ref "/docs/references/commands" >}}) in the specified mode locally.  Can optionally specify a [Config Source]({{< ref "/docs/references/config#sources" >}}).
+Import [Pattern]({{< ref "/docs/references/patterns" >}}) [Jsonnet]({{< ref "/docs/references/jsonnet" >}}) files from path, execute all [Commands]({{< ref "/docs/references/commands" >}}) in the specified mode locally.  Can optionally specify a [Config Source]({{< ref "/docs/references/config#sources" >}}) and a Parent ID to filter Commands with.
 
 ### `push`
 
@@ -118,4 +118,4 @@ Show the rendered pattern of a JWT or pattern file.
 
 ### `test`
 
-Test all patterns in path.  See [Testing Patterns]({{< ref "/docs/guides/testing-patterns" >}}) for more information.
+Test all patterns in path, optionally filtering for specific Command Parent IDs.  See [Testing Patterns]({{< ref "/docs/guides/testing-patterns" >}}) for more information.

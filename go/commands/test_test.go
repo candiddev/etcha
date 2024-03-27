@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"regexp"
 	"testing"
 
 	"github.com/candiddev/shared/go/assert"
@@ -78,9 +79,43 @@ func TestTest(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			c.RunMockErrors(tc)
-			assert.Equal(t, cmds.Test(ctx, c, &Exec{}, types.EnvVars{}), types.Results{
+			assert.Equal(t, cmds.Test(ctx, c, &Exec{}, nil), types.Results{
 				"a": []string{name},
 			})
 		})
 	}
+
+	cmds = Commands{
+		{
+			ID: "a",
+			Commands: Commands{
+				{
+					ID: "b",
+					Commands: Commands{
+						{
+							ID:     "c",
+							Change: "c",
+							Check:  "c",
+							Remove: "c",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	c.RunMockErrors([]error{
+		ErrCommandsEmpty, // check
+		nil,              // change
+		nil,              // check
+		nil,              // check
+		nil,              // remove
+		ErrCommandsEmpty, // check
+		nil,              // check
+	})
+
+	assert.Equal(t, cmds.Test(ctx, c, &Exec{}, regexp.MustCompile("^a > b$")), types.Results{
+		"c": []string{testCheck},
+	})
+	assert.Equal(t, cmds.Test(ctx, c, &Exec{}, regexp.MustCompile("a$")), types.Results{})
 }

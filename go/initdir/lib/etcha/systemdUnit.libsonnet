@@ -17,28 +17,33 @@ function(contents='', dir='/etc/systemd/system', enable=true, name, reload=true,
     },
   ];
 
-  systemd + (
-    if reload then [
-      {
-        id: 'systemctl daemon-reload %s' % name,
-        change: 'systemctl daemon-reload',
-      },
-    ] else []
-  ) + (
-    if enable then [
-      {
-        change: 'systemctl enable --now %s' % name,
-        check: 'systemctl is-enabled %s' % name,
-        id: 'systemctl enable %s' % name,
-        remove: 'systemctl disable --now %s' % name,
-      },
-    ] else []
-  ) + (
-    if restart then [
-      {
-        change: 'systemctl restart %s' % name,
-        id: 'systemctl restart %s' % name,
-        remove: 'systemctl stop %s' % name,
-      },
-    ] else []
-  )
+  {
+    id: 'systemdUnit %s' % name,
+    commands: [
+      systemd + (
+        if reload then [
+          {
+            id: 'systemctl daemon-reload %s' % name,
+            change: 'systemctl daemon-reload',
+          },
+        ] else []
+      ) + (
+        if enable then [
+          {
+            change: 'systemctl enable --now %s' % name,
+            check: 'systemctl is-enabled %s' % name,
+            id: 'systemctl enable %s' % name,
+            remove: 'systemctl disable --now %s' % name,
+          },
+        ] else []
+      ) + (
+        if restart then [
+          {
+            change: 'systemctl restart %s' % name,
+            id: 'systemctl restart %s' % name,
+            remove: 'systemctl stop %s' % name,
+          },
+        ] else []
+      ),
+    ],
+  }

@@ -56,14 +56,16 @@ func (s *state) handleEvents(ctx context.Context, o commands.Outputs, source *co
 					continue
 				}
 
-				env := types.EnvVars{}
-				env["ETCHA_EVENT_ID"] = event.Outputs[i].ID
-				env["ETCHA_EVENT_NAME"] = event.Name
-				env["ETCHA_EVENT_OUTPUT"] = event.Outputs[i].Change.String()
-				env["ETCHA_SOURCE_NAME"] = source
-				env["ETCHA_SOURCE_TRIGGER"] = "event"
-
-				_, err := p.Run.Run(ctx, s.Config.CLI, env, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), false, false)
+				_, err := p.Run.Run(ctx, s.Config.CLI, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), commands.CommandsRunOpts{
+					Env: types.EnvVars{
+						"ETCHA_EVENT_ID":       event.Outputs[i].ID,
+						"ETCHA_EVENT_NAME":     event.Name,
+						"ETCHA_EVENT_OUTPUT":   event.Outputs[i].Change.String(),
+						"ETCHA_SOURCE_NAME":    source,
+						"ETCHA_SOURCE_TRIGGER": "event",
+					},
+					ParentID: source,
+				})
 
 				logger.Error(ctx, err) //nolint:errcheck
 			}
@@ -140,15 +142,18 @@ func (s *state) initHandlers(ctx context.Context) errs.Err { //nolint:gocognit
 
 				sort.Strings(headers)
 
-				out, err := p.Run.Run(ctx, s.Config.CLI, types.EnvVars{
-					"ETCHA_SOURCE_NAME":     source,
-					"ETCHA_SOURCE_TRIGGER":  "webhook",
-					"ETCHA_WEBHOOK_BODY":    base64.StdEncoding.EncodeToString(body),
-					"ETCHA_WEBHOOK_HEADERS": strings.Join(headers, "\n"),
-					"ETCHA_WEBHOOK_METHOD":  r.Method,
-					"ETCHA_WEBHOOK_PATH":    r.URL.Path,
-					"ETCHA_WEBHOOK_QUERY":   r.URL.Query().Encode(),
-				}, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), false, false)
+				out, err := p.Run.Run(ctx, s.Config.CLI, s.Config.Exec.Override(s.Config.Sources[source].Exec, p.RunExec), commands.CommandsRunOpts{
+					Env: types.EnvVars{
+						"ETCHA_SOURCE_NAME":     source,
+						"ETCHA_SOURCE_TRIGGER":  "webhook",
+						"ETCHA_WEBHOOK_BODY":    base64.StdEncoding.EncodeToString(body),
+						"ETCHA_WEBHOOK_HEADERS": strings.Join(headers, "\n"),
+						"ETCHA_WEBHOOK_METHOD":  r.Method,
+						"ETCHA_WEBHOOK_PATH":    r.URL.Path,
+						"ETCHA_WEBHOOK_QUERY":   r.URL.Query().Encode(),
+					},
+					ParentID: source,
+				})
 				if err == nil {
 					for _, event := range out.Events() {
 						if event.Name == "webhookBody" && len(event.Outputs) > 0 {

@@ -21,7 +21,7 @@ var link = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"dst",
 	},
 	Run: func(ctx context.Context, args []string, _ cli.Flags, config *config.Config) errs.Err {
-		mode, e := parseMode(args[1], true)
+		mode, e := parseMode(args[1])
 		if e != nil {
 			return logger.Error(ctx, e)
 		}

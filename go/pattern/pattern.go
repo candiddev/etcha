@@ -89,7 +89,8 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 	r.Import(imports)
 
 	if !exec.EnvInherit {
-		r.SetEnv(&exec.Env)
+		e := exec.Env.GetEnv()
+		r.SetEnv(&e)
 	}
 
 	if err := r.Render(ctx, &p); err != nil {
@@ -101,18 +102,6 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 
 	if len(p.Build) == 0 && len(p.Run) == 0 {
 		return nil, logger.Error(ctx, errs.ErrReceiver.Wrap(commands.ErrCommandsEmpty))
-	}
-
-	if len(p.Build) != 0 {
-		if err := p.Build.Validate(ctx); err != nil {
-			return nil, logger.Error(ctx, err)
-		}
-	}
-
-	if len(p.Run) != 0 {
-		if err := p.Run.Validate(ctx); err != nil {
-			return nil, logger.Error(ctx, err)
-		}
 	}
 
 	return &p, nil
@@ -170,7 +159,10 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 			"ETCHA_PAYLOAD": t.PayloadBase64,
 		}
 
-		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, e, c.Exec.Override(c.Build.SigningExec), false, false)
+		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, c.Exec.Override(c.Build.SigningExec), commands.CommandsRunOpts{
+			Env:      e,
+			ParentID: "signingCommands",
+		})
 		if err != nil {
 			return "", r, logger.Error(ctx, err)
 		}

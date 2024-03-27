@@ -18,8 +18,13 @@ Given a Pattern like this:
 local app_name = 'myapp';
 local restart = function(name)
   {
-    change: 'systemctl restart %s' % name,
-    id: 'restart %s' % name,
+    id: 'my app',
+    commands: [
+      {
+        change: 'systemctl restart %s' % name,
+        id: 'restart %s' % name,
+      },
+    ],
   };
 
 {
@@ -70,8 +75,8 @@ Etcha will always perform the following during the run phase:
 
 Etcha can run Patterns via one-off applies using the [CLI]({{< ref "/docs/references/cli" >}}).  These runs will always be local to the current Etcha instance.  They're performed using the following CLI commands:
 
-- [`etcha local change [pattern path]`]({{< ref "/docs/references/cli#local" >}}), executes the `run` in [**Change Mode**]({{< ref "/docs/references/commands#change-mode" >}}).
-- [`etcha local remove [pattern path]`]({{< ref "/docs/references/cli#local" >}})), executes the `run` in [**Remove Mode**]({{< ref "/docs/references/commands#remove-mode" >}}).
+- [`etcha local [pattern path]`]({{< ref "/docs/references/cli#local" >}}), executes the `run` in [**Change Mode**]({{< ref "/docs/references/commands#change-mode" >}}).
+- [`etcha local -r [pattern path]`]({{< ref "/docs/references/cli#local" >}})), executes the `run` in [**Remove Mode**]({{< ref "/docs/references/commands#remove-mode" >}}).
 
 
 ### Render and Run
@@ -79,7 +84,7 @@ Etcha can run Patterns via one-off applies using the [CLI]({{< ref "/docs/refere
 Local can also be passed raw Jsonnet that it will wrap in a `{run: [<your jsonnet>]}` string and render a Pattern on the fly.  You can use this to run [Libraries]({{< ref "/docs/references/libraries" >}}) or test other Jsonnet things:
 
 ```bash
-$ etcha local change "(import 'lib/etcha/etchaInstall.libsonnet')(dst='/tmp/etcha')"
+$ etcha local "(import 'lib/etcha/etchaInstall.libsonnet')(dst='/tmp/etcha')"
 INFO  Changing download Etcha to /tmp/etcha...
 INFO  Always changing etcha version...
 ```

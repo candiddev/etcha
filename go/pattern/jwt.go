@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"path/filepath"
 	"time"
 
@@ -105,6 +106,13 @@ func (j *JWT) Equal(j2 *JWT, ignoreVersion bool) error {
 
 // Pattern returns a Pattern from the JWT.
 func (j *JWT) Pattern(ctx context.Context, c *config.Config, configSource string) (*Pattern, errs.Err) {
+	vars := maps.Clone(j.EtchaRunVars)
+	if vars == nil {
+		vars = map[string]any{}
+	}
+
+	vars["jwt"] = j.Raw
+
 	p, err := ParsePatternFromImports(ctx, c, configSource, j.EtchaPattern, j.EtchaRunVars)
 	if err != nil {
 		return nil, logger.Error(ctx, err)

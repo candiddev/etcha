@@ -115,7 +115,6 @@ func TestStateDiffExec(t *testing.T) {
 		mockErrors  []error
 		name        string
 		noRestore   bool
-		runAll      bool
 		triggerOnly bool
 		wantErr     error
 		wantInputs  []cli.RunMockInput
@@ -161,7 +160,7 @@ func TestStateDiffExec(t *testing.T) {
 				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
 			},
 			wantResult: &Result{
-				Err: "error changing id a: error running commands: " + ErrNilJWT.Error() + ": ",
+				Err: "error changing id etcha > a: error running commands: " + ErrNilJWT.Error() + ": ",
 			},
 		},
 		{
@@ -253,25 +252,10 @@ func TestStateDiffExec(t *testing.T) {
 				},
 				Raw: "anew",
 			},
-			wantJWT:    "anew",
-			wantResult: &Result{},
-		},
-		{
-			name: "good_runAll",
-			j: &pattern.JWT{
-				EtchaPattern: &jsonnet.Imports{
-					Entrypoint: "/main.jsonnet",
-					Files: map[string]string{
-						"/main.jsonnet": `{run:[{change:"changeA",check:"checkA",id:"a",remove:"removeA"}]}`,
-					},
-				},
-				Raw: "anew2",
-			},
-			runAll: true,
+			wantJWT: "anew",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "checkA"},
 			},
-			wantJWT:    "anew2",
 			wantResult: &Result{},
 		},
 		{
@@ -315,10 +299,12 @@ func TestStateDiffExec(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s.Config.CLI.RunMockErrors(tc.mockErrors)
 			s.Config.Sources["etcha"].NoRestore = tc.noRestore
-			s.Config.Sources["etcha"].RunAll = tc.runAll
 			s.Config.Sources["etcha"].TriggerOnly = tc.triggerOnly
 
-			r, err := s.diffExec(ctx, tc.check, "etcha", tc.j, tc.init)
+			r, err := s.diffExec(ctx, "etcha", tc.j, diffExecOpts{
+				check: tc.check,
+				init:  tc.init,
+			})
 
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, r, tc.wantResult)
@@ -492,7 +478,7 @@ func TestStateRunSource(t *testing.T) {
 			},
 			wantErr: ErrNilJWT,
 			wantResults: &Result{
-				Err: "error changing id b: error running commands: received an empty JWT, this is probably a bug: b",
+				Err: "error changing id 1 > b: error running commands: received an empty JWT, this is probably a bug: b",
 			},
 		},
 		{
@@ -512,7 +498,10 @@ func TestStateRunSource(t *testing.T) {
 			},
 		},
 		{
-			name:        "no_diff",
+			name: "repeat",
+			mockInputs: []cli.RunMockInput{
+				{Exec: "checkA"},
+			},
 			wantResults: &Result{},
 		},
 		{

@@ -58,18 +58,22 @@ func TestLib(t *testing.T) {
 
 	os.WriteFile("lib/etcha/native.libsonnet", []byte(jsonnet.Native), 0600)
 
-	res, err := pattern.Lint(ctx, c, ".", true)
-	assert.HasErr(t, err, nil)
+	t.Run("lint", func(t *testing.T) {
+		res, err := pattern.Lint(ctx, c, ".", true)
+		assert.HasErr(t, err, nil)
 
-	if len(res) != 0 {
-		t.Errorf(strings.Join(res.Show(), "\n"))
-	}
+		if len(res) != 0 {
+			t.Errorf(strings.Join(res.Show(), "\n"))
+		}
 
-	os.Remove("lib/etcha/native.libsonnet")
+		os.Remove("lib/etcha/native.libsonnet")
+	})
 
-	p, err := pattern.ParsePatternFromImports(ctx, c, "", &i, nil)
-	assert.HasErr(t, err, nil)
+	t.Run("test", func(t *testing.T) {
+		p, err := pattern.ParsePatternFromImports(ctx, c, "", &i, nil)
+		assert.HasErr(t, err, nil)
 
-	res = p.Test(ctx, c, false)
-	assert.Equal(t, res, types.Results{})
+		res := p.Test(ctx, c, false, nil)
+		assert.Equal(t, res, types.Results{})
+	})
 }

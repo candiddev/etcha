@@ -6,8 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
+	"regexp"
 	"strings"
 
+	"github.com/candiddev/etcha/go/metrics"
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
@@ -25,29 +28,16 @@ var (
 // Commands are multiple Commands.
 type Commands []*Command
 
-// Diff compares two commands and returns the differences.
-func (cmds Commands) Diff(old Commands) (change Commands, remove Commands) {
-	change = Commands{}
+// Diff compares two commands and returns the removed Commands.
+func (cmds Commands) Diff(old Commands) (remove Commands) {
 	remove = Commands{}
-
-	// Copy cmds
-	for _, cmd := range cmds {
-		if cmd != nil {
-			c := *cmd
-			change = append(change, &c)
-		}
-	}
 
 	// Figure out what changed
 	for _, cmd := range old {
 		match := false
 
-		for _, newV := range change {
+		for _, newV := range cmds {
 			if cmd.ID == newV.ID {
-				if cmd.Change == newV.Change && cmd.Check == newV.Check && !newV.Always {
-					newV.Check = ""
-				}
-
 				match = true
 
 				break
@@ -59,11 +49,29 @@ func (cmds Commands) Diff(old Commands) (change Commands, remove Commands) {
 		}
 	}
 
-	return change, remove
+	return remove
+}
+
+// CommandsRunOpts is a list of options for Commands.Run.
+type CommandsRunOpts struct { //nolint:revive
+	/* Run Commands in Check mode */
+	Check bool
+
+	/* A list of EnvVars to add to Command */
+	Env types.EnvVars
+
+	/* ParentID of Commands */
+	ParentID string
+
+	/* ParentIDFilter to limit Commands being ran */
+	ParentIDFilter *regexp.Regexp
+
+	/* Run in Remove mode */
+	Remove bool
 }
 
 // Run the commands, either as change (default) or remove, and optionally as check only.
-func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, exe *Exec, check bool, remove bool) (out Outputs, err errs.Err) { //nolint:gocognit,gocyclo,revive
+func (cmds Commands) Run(ctx context.Context, c cli.Config, exe *Exec, opts CommandsRunOpts) (out Outputs, err errs.Err) { //nolint:gocognit,gocyclo
 	cout := Outputs{}
 
 	var exec Exec
@@ -71,7 +79,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 		exec = *exe
 	}
 
-	if remove {
+	if opts.Remove {
 		c := Commands{}
 
 		for i := range cmds {
@@ -82,104 +90,152 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, env types.EnvVars, e
 	}
 
 	for i, cmd := range cmds {
-		var out *Output
+		if len(cmd.Commands) > 0 {
+			var o Outputs
 
-		out, env, err = cmd.Run(ctx, c, env, exec, check, remove)
-		cout = append(cout, out)
+			if opts.ParentID == "" {
+				opts.ParentID = cmd.ID
+			} else {
+				opts.ParentID = fmt.Sprintf("%s > %s", opts.ParentID, cmd.ID)
+			}
 
-		if err != nil {
-			if !check && !remove {
-				// Parse events
-				for k := range cmd.OnFail {
-					if strings.HasPrefix(cmd.OnFail[k], "etcha:") {
-						out.Events = append(out.Events, strings.ReplaceAll(cmd.OnFail[k], "etcha:", ""))
+			ctx = metrics.SetCommandParentID(ctx, opts.ParentID)
 
-						continue
+			o, err = cmd.Commands.Run(ctx, c, exe, opts)
+
+			cout = append(cout, o...)
+
+			if err != nil {
+				return cout, logger.Error(ctx, err)
+			}
+		} else {
+			if opts.ParentIDFilter != nil && opts.ParentIDFilter.String() != "" && !opts.ParentIDFilter.MatchString(opts.ParentID) {
+				continue
+			}
+
+			var out *Output
+
+			out, opts.Env, err = cmd.Run(ctx, c, exec, CommandRunOpts{
+				Check:    opts.Check,
+				Env:      opts.Env,
+				ParentID: opts.ParentID,
+				Remove:   opts.Remove,
+			})
+
+			cout = append(cout, out)
+
+			if err != nil {
+				if !opts.Check && !opts.Remove {
+					// Parse events
+					for k := range cmd.OnFail {
+						if strings.HasPrefix(cmd.OnFail[k], "etcha:") {
+							out.Events = append(out.Events, strings.ReplaceAll(cmd.OnFail[k], "etcha:", ""))
+
+							continue
+						}
 					}
-				}
 
-				// Match commands
-				for j := i + 1; j < len(cmds); j++ {
-					cfg := exec.Override(cmds[j].Exec)
+					// Match commands
+					for j := i + 1; j < len(cmds); j++ {
+						cfg := exec.Override(cmds[j].Exec)
+						if cfg.Env == nil {
+							cfg.Env = types.EnvVars{}
+						}
 
-					cfg.Env = append(env.GetEnv(), cfg.Env...)
+						maps.Copy(cfg.Env, opts.Env)
 
-					run := cmds[j].Always
-					if run {
-						logger.Info(ctx, fmt.Sprintf("Always changing %s...", cmds[j].ID))
-					} else {
-						for k := range cmd.OnFail {
-							if cmds[j].ID == cmd.OnFail[k] {
-								run = true
-								logger.Info(ctx, fmt.Sprintf("Triggering %s via %s.onFail...", cmds[j].ID, cmd.ID))
+						run := cmds[j].Always
+						if run {
+							logger.Info(ctx, fmt.Sprintf("Always changing %s...", cmds[j].ID))
+						} else {
+							for k := range cmd.OnFail {
+								r, err := regexp.Compile(cmd.OnFail[k])
+								if err != nil {
+									return cout, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing onFail %s for %s: %w", cmd.OnFail[k], cmd.ID, err)))
+								}
 
-								break
+								if r.MatchString(cmds[j].ID) {
+									run = true
+									logger.Info(ctx, fmt.Sprintf("Triggering %s via %s.onFail...", cmds[j].ID, cmd.ID))
+
+									break
+								}
+							}
+						}
+
+						if run {
+							var e errs.Err
+
+							out := &Output{
+								Changed: true,
+								ID:      cmds[j].ID,
+							}
+
+							cout = append(cout, out)
+
+							if out.Change, e = cfg.Run(ctx, c, cmds[j].Change, ""); e != nil {
+								logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(e.Errors()...), out.Change.String()) //nolint:errcheck
 							}
 						}
 					}
+				}
 
-					if run {
-						var e errs.Err
+				return cout, logger.Error(ctx, err)
+			}
 
-						out := &Output{
-							Changed: true,
-							ID:      cmds[j].ID,
+			if !opts.Check {
+				if !opts.Remove && out.Changed {
+					for _, id := range cmd.OnChange {
+						if strings.HasPrefix(id, "etcha:") {
+							switch id {
+							case "etcha:stderr":
+								fmt.Fprintln(logger.Stderr, out.Change) //nolint:forbidigo
+							case "etcha:stdout":
+								fmt.Fprintln(logger.Stdout, out.Change) //nolint:forbidigo
+							}
+
+							out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
+
+							continue
 						}
 
-						cout = append(cout, out)
+						r, err := regexp.Compile(id)
+						if err != nil {
+							return cout, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing onChange %s for %s: %w", id, cmd.ID, err)))
+						}
 
-						if out.Change, e = cfg.Run(ctx, c, cmds[j].Change, ""); e != nil {
-							logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(e.Errors()...), out.Change.String()) //nolint:errcheck
+						for i := range cmds {
+							if r.MatchString(cmds[i].ID) {
+								cmds[i].ChangedBy = append(cmds[i].ChangedBy, cmd.ID)
+							}
 						}
 					}
 				}
-			}
 
-			return cout, logger.Error(ctx, err)
-		}
+				if opts.Remove && out.Removed {
+					for _, id := range cmd.OnRemove {
+						if strings.HasPrefix(id, "etcha:") {
+							switch id {
+							case "etcha:stderr":
+								fmt.Fprint(logger.Stderr, out.Remove) //nolint:forbidigo
+							case "etcha:stdout":
+								fmt.Fprint(logger.Stdout, out.Remove) //nolint:forbidigo
+							}
 
-		if !check {
-			if !remove && out.Changed {
-				for _, id := range cmd.OnChange {
-					if strings.HasPrefix(id, "etcha:") {
-						switch id {
-						case "etcha:stderr":
-							fmt.Fprintln(logger.Stderr, out.Change) //nolint:forbidigo
-						case "etcha:stdout":
-							fmt.Fprintln(logger.Stdout, out.Change) //nolint:forbidigo
+							out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
+
+							continue
 						}
 
-						out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
-
-						continue
-					}
-
-					for i := range cmds {
-						if cmds[i].ID == id {
-							cmds[i].ChangedBy = append(cmds[i].ChangedBy, cmd.ID)
-						}
-					}
-				}
-			}
-
-			if remove && out.Removed {
-				for _, id := range cmd.OnRemove {
-					if strings.HasPrefix(id, "etcha:") {
-						switch id {
-						case "etcha:stderr":
-							fmt.Fprint(logger.Stderr, out.Remove) //nolint:forbidigo
-						case "etcha:stdout":
-							fmt.Fprint(logger.Stdout, out.Remove) //nolint:forbidigo
+						r, err := regexp.Compile(id)
+						if err != nil {
+							return cout, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing onRemove %s for %s: %w", id, cmd.ID, err)))
 						}
 
-						out.Events = append(out.Events, strings.ReplaceAll(id, "etcha:", ""))
-
-						continue
-					}
-
-					for i := range cmds {
-						if cmds[i].ID == id {
-							cmds[i].RemovedBy = append(cmds[i].RemovedBy, cmd.ID)
+						for i := range cmds {
+							if r.MatchString(cmds[i].ID) {
+								cmds[i].RemovedBy = append(cmds[i].RemovedBy, cmd.ID)
+							}
 						}
 					}
 				}
@@ -212,15 +268,11 @@ func (cmds *Commands) UnmarshalJSON(v []byte) error {
 
 	*cmds = Commands(tmp)
 
-	return nil
+	return cmds.validate()
 }
 
 // Validate checks a list of Commands for formatting errors.
-func (cmds Commands) Validate(ctx context.Context) errs.Err { //nolint:gocognit
-	if len(cmds) == 0 {
-		return logger.Error(ctx, errs.ErrReceiver.Wrap(ErrCommandsEmpty))
-	}
-
+func (cmds Commands) validate() error { //nolint:gocognit
 	r := types.Results{}
 
 	// Loop through Commands and sanity check them
@@ -256,8 +308,15 @@ func (cmds Commands) Validate(ctx context.Context) errs.Err { //nolint:gocognit
 
 			match := false
 
+			reg, err := regexp.Compile(id)
+			if err != nil {
+				r[cmd.ID] = append(r[cmd.ID], fmt.Sprintf("error compiling target %s: %s", id, err))
+
+				continue
+			}
+
 			for j, cmd := range cmds {
-				if cmd.ID == id {
+				if reg.MatchString(cmd.ID) {
 					if (j < i && target != "onRemove") || (i > j && target == "onRemove") {
 						r[cmd.ID] = append(r[cmd.ID], fmt.Sprintf("%s target %s has been ran already", target, id))
 					}
@@ -275,8 +334,8 @@ func (cmds Commands) Validate(ctx context.Context) errs.Err { //nolint:gocognit
 	}
 
 	if len(r) > 0 {
-		return logger.Error(ctx, errs.ErrReceiver.Wrap(ErrCommandsValidate), strings.Join(r.Show(), "\n"))
+		return fmt.Errorf("%w: %s", ErrCommandsValidate, strings.Join(r.Show(), "\n"))
 	}
 
-	return logger.Error(ctx, nil)
+	return nil
 }

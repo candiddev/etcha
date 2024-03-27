@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
@@ -22,7 +23,9 @@ func (p *Pattern) BuildRun(ctx context.Context, c *config.Config) (buildManifest
 	}
 
 	if len(p.Build) > 0 {
-		out, err := p.Build.Run(ctx, c.CLI, nil, p.BuildExec, false, false)
+		out, err := p.Build.Run(ctx, c.CLI, p.BuildExec, commands.CommandsRunOpts{
+			ParentID: "build",
+		})
 		if err != nil {
 			return "", nil, logger.Error(ctx, err)
 		}

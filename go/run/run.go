@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"sync"
 	"time"
@@ -70,10 +71,16 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 	return nil
 }
 
-func (s *state) diffExec(ctx context.Context, check bool, source string, j *pattern.JWT, init bool) (*Result, errs.Err) {
+type diffExecOpts struct {
+	check          bool
+	init           bool
+	parentIDFilter *regexp.Regexp
+}
+
+func (s *state) diffExec(ctx context.Context, source string, j *pattern.JWT, opts diffExecOpts) (*Result, errs.Err) {
 	ctx = metrics.SetSourceName(ctx, source)
 
-	if !init && j == nil {
+	if !opts.init && j == nil {
 		metrics.CollectSources(ctx, true)
 
 		return &Result{
@@ -124,7 +131,12 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 			defer l.Unlock()
 		}
 
-		o, err = p.DiffRun(ctx, s.Config, pOld, src.CheckOnly || check, src.NoRemove, src.RunAll)
+		o, err = p.DiffRun(ctx, s.Config, pOld, pattern.DiffRunOpts{
+			Check:          src.CheckOnly || opts.check,
+			NoRemove:       src.NoRemove,
+			ParentIDFilter: opts.parentIDFilter,
+			Source:         source,
+		})
 		if err != nil {
 			metrics.CollectSources(ctx, true)
 
@@ -148,7 +160,7 @@ func (s *state) diffExec(ctx context.Context, check bool, source string, j *patt
 		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeChange), len(r.ChangedIDs))
 		metrics.CollectSourcesCommands(metrics.SetCommandMode(ctx, metrics.CommandModeRemove), len(r.RemovedIDs))
 
-		if check {
+		if opts.check {
 			r.ChangedIDs = o.CheckFail(false)
 			r.RemovedIDs = o.CheckFail(true)
 
@@ -291,32 +303,25 @@ func (s *state) loadExecJWTs(ctx context.Context) {
 func (s *state) runSource(ctx context.Context, source string, init bool) (*Result, errs.Err) {
 	var err errs.Err
 
-	r := &Result{}
-
-	oldJ := s.JWTs.Get(source)
-
-	var newJ *pattern.JWT
-
-	diff := false
+	j := s.JWTs.Get(source)
 
 	if len(s.Config.Sources[source].PullPaths) > 0 {
-		if j := pattern.ParseJWTFromSource(ctx, source, s.Config); j != nil && (j.Equal(oldJ, s.Config.Sources[source].PullIgnoreVersion) != nil) {
-			diff = true
-			newJ = j
+		if n := pattern.ParseJWTFromSource(ctx, source, s.Config); j != nil && (j.Equal(n, s.Config.Sources[source].PullIgnoreVersion) != nil) {
+			j = n
 		}
 	}
 
-	if diff || init || s.Config.Sources[source].RunAll {
-		if init {
-			ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerInit)
-		} else {
-			ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPull)
-		}
+	if init {
+		ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerInit)
+	} else {
+		ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPull)
+	}
 
-		r, err = s.diffExec(ctx, false, source, newJ, init)
-		if err != nil {
-			return r, logger.Error(ctx, err)
-		}
+	r, err := s.diffExec(ctx, source, j, diffExecOpts{
+		init: init,
+	})
+	if err != nil {
+		return r, logger.Error(ctx, err)
 	}
 
 	return r, nil

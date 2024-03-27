@@ -18,6 +18,7 @@ func TestCommandRun(t *testing.T) {
 		env          types.EnvVars
 		execOverride bool
 		mockErrs     []error
+		parentID     string
 		remove       bool
 		wantErr      error
 		wantEnv      types.EnvVars
@@ -35,7 +36,8 @@ func TestCommandRun(t *testing.T) {
 			mockErrs: []error{
 				ErrCommandsSelfTarget,
 			},
-			remove: true,
+			parentID: "test",
+			remove:   true,
 			wantEnv: types.EnvVars{
 				"a":           "output",
 				"a_CHECK":     "0",
@@ -47,9 +49,10 @@ func TestCommandRun(t *testing.T) {
 				},
 			},
 			wantOutput: Output{
-				Check:   "output",
-				Checked: true,
-				ID:      "a",
+				Check:    "output",
+				Checked:  true,
+				ID:       "a",
+				ParentID: "test",
 			},
 		},
 		"remove_no_remove": {
@@ -421,9 +424,14 @@ func TestCommandRun(t *testing.T) {
 			c.RunMockErrors(tc.mockErrs)
 			c.RunMockOutputs([]string{"output", "output2"})
 
-			out, env, err := tc.cmd.Run(ctx, c, tc.env, Exec{
+			out, env, err := tc.cmd.Run(ctx, c, Exec{
 				AllowOverride: tc.execOverride,
-			}, tc.check, tc.remove)
+			}, CommandRunOpts{
+				Check:    tc.check,
+				Env:      tc.env,
+				ParentID: tc.parentID,
+				Remove:   tc.remove,
+			})
 
 			assert.Equal(t, out, &tc.wantOutput)
 			assert.Equal(t, env, tc.wantEnv)

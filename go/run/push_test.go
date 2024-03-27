@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -89,8 +90,10 @@ func TestPush(t *testing.T) {
 	}
 
 	tests := []struct {
+		check       bool
 		command     string
 		destination string
+		filter      *regexp.Regexp
 		mockErrors  []error
 		name        string
 		path        string
@@ -215,7 +218,7 @@ func TestPush(t *testing.T) {
 				},
 			},
 			wantResult: &Result{
-				Err: "error changing id 1: error running commands: error running commands: no verify keys specified: b",
+				Err: "error changing id etcha > 1: error running commands: error running commands: no verify keys specified: b",
 			},
 			wantErr: errs.ErrReceiver,
 		},
@@ -245,7 +248,8 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "good-check",
-			destination: ts.URL + "/etcha/v1/push/etcha?check",
+			check:       true,
+			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
 				ErrNoVerifyKeys,
 			},
@@ -295,6 +299,14 @@ func TestPush(t *testing.T) {
 				RemovedOutputs: []string{"b"},
 			},
 		},
+		{
+			name:        "good-filter",
+			command:     "ls",
+			destination: ts.URL + "/etcha/v1/push/etcha",
+			filter:      regexp.MustCompile("^123$"),
+			signingKey:  prv1,
+			wantResult:  &Result{},
+		},
 	}
 
 	for _, tc := range tests {
@@ -303,7 +315,10 @@ func TestPush(t *testing.T) {
 			c.CLI.RunMockErrors(tc.mockErrors)
 			c.CLI.RunMockOutputs([]string{"1", "a", "b", "c", "d", "e"})
 
-			r, err := Push(ctx, c, tc.destination, tc.command, tc.path)
+			r, err := Push(ctx, c, tc.destination, tc.command, tc.path, PushOpts{
+				Check:          tc.check,
+				ParentIDFilter: tc.filter,
+			})
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, r, tc.wantResult)
 			assert.Equal(t, c.CLI.RunMockInputs(), tc.wantInputs)

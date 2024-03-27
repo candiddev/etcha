@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"regexp"
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/etcha/go/metrics"
@@ -35,8 +37,14 @@ type Result struct {
 	RemovedOutputs []string `json:"removedOutputs"`
 }
 
+// PushOpts are options for Push.
+type PushOpts struct {
+	Check          bool
+	ParentIDFilter *regexp.Regexp
+}
+
 // Push sends content to the dest.
-func Push(ctx context.Context, c *config.Config, dest, cmd, path string) (r *Result, err errs.Err) {
+func Push(ctx context.Context, c *config.Config, dest, cmd, path string, opts PushOpts) (r *Result, err errs.Err) { //nolint:revive
 	logger.Debug(ctx, fmt.Sprintf("Pushing config to %s...", dest))
 
 	r = &Result{}
@@ -67,6 +75,20 @@ func Push(ctx context.Context, c *config.Config, dest, cmd, path string) (r *Res
 	jwt, _, err := p.Sign(ctx, c, buildManifest, runVars)
 	if err != nil {
 		return r, logger.Error(ctx, err)
+	}
+
+	q := url.Values{}
+
+	if opts.Check {
+		q.Add("check", "")
+	}
+
+	if opts.ParentIDFilter != nil && opts.ParentIDFilter.String() != "" {
+		q.Add("filter", opts.ParentIDFilter.String())
+	}
+
+	if e := q.Encode(); e != "" {
+		dest += "?" + e
 	}
 
 	req, e := http.NewRequestWithContext(ctx, http.MethodPost, dest, bytes.NewReader([]byte(jwt)))
@@ -136,9 +158,9 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(errors.New("error reading body"), err)) //nolint: errcheck
+	body, e := io.ReadAll(r.Body)
+	if e != nil {
+		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(errors.New("error reading body"), e)) //nolint: errcheck
 		w.WriteHeader(http.StatusNotFound)
 
 		return
@@ -146,38 +168,42 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 
 	push, _, err := pattern.ParseJWT(ctx, s.Config, string(body), c)
 	if err != nil {
-		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(errors.New("error parsing JWT"), err)) //nolint: errcheck
+		logger.Error(ctx, err) //nolint: errcheck
 		w.WriteHeader(http.StatusNotFound)
 
 		return
 	}
 
-	if old := s.JWTs.Get(c); old == nil || old.Equal(push, src.PullIgnoreVersion) != nil || src.RunAll {
-		ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPush)
+	ctx = metrics.SetSourceTrigger(ctx, metrics.SourceTriggerPush)
 
-		r, err := s.diffExec(ctx, r.URL.Query().Has("check"), c, push, false)
-		if err != nil {
-			w.WriteHeader(errs.ErrReceiver.Status())
-			logger.Error(ctx, err) //nolint:errcheck
-		}
+	reg, e := regexp.Compile(r.URL.Query().Get("filter"))
+	if e != nil {
+		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(errors.New("error parsing filter"), e)) //nolint:errcheck
+		w.WriteHeader(http.StatusBadRequest)
+	}
 
-		j, e := json.MarshalIndent(r, "", "  ")
-		if e != nil {
-			logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error rending JSON"), e)) //nolint:errcheck
+	res, err := s.diffExec(ctx, c, push, diffExecOpts{
+		check:          r.URL.Query().Has("check"),
+		parentIDFilter: reg,
+	})
 
-			return
-		}
+	if err != nil {
+		w.WriteHeader(errs.ErrReceiver.Status())
+		logger.Error(ctx, err) //nolint:errcheck
+	}
 
-		w.Header().Set("Content-Type", "application/json")
-
-		if _, e := w.Write(j); e != nil {
-			logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error writing JSON"), e)) //nolint:errcheck
-
-			return
-		}
+	j, e := json.MarshalIndent(res, "", "  ")
+	if e != nil {
+		logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error rending JSON"), e)) //nolint:errcheck
 
 		return
 	}
 
-	w.WriteHeader(http.StatusNotModified)
+	w.Header().Set("Content-Type", "application/json")
+
+	if _, e := w.Write(j); e != nil {
+		logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error writing JSON"), e)) //nolint:errcheck
+
+		return
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/candiddev/etcha/go/metrics"
@@ -19,6 +20,7 @@ type Command struct {
 	Change    string            `json:"change,omitempty"`
 	ChangedBy []string          `json:"-"`
 	Check     string            `json:"check,omitempty"`
+	Commands  Commands          `json:"commands,omitempty"`
 	EnvPrefix string            `json:"envPrefix"`
 	Exec      *Exec             `json:"exec,omitempty"`
 	ID        string            `json:"id"`
@@ -30,29 +32,51 @@ type Command struct {
 	Stdin     string            `json:"stdin"`
 }
 
+// CommandRunOpts is options for Command.Run.
+type CommandRunOpts struct {
+	/* Run in Check mode */
+	Check bool
+
+	/* A list of EnvVars to add to Command */
+	Env types.EnvVars
+
+	/* ParentID of Command */
+	ParentID string
+
+	/* Run in Remove mode */
+	Remove bool
+}
+
 // Run will run the Command script for the given Mode.
-func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars, exec Exec, check bool, remove bool) (out *Output, newEnv types.EnvVars, err errs.Err) { //nolint:revive,gocognit,gocyclo
+func (cmd *Command) Run(ctx context.Context, c cli.Config, exec Exec, opts CommandRunOpts) (out *Output, newEnv types.EnvVars, err errs.Err) { //nolint:gocognit,gocyclo
 	cfg := exec.Override(cmd.Exec)
-	cfgEnv := cfg.Env
 	ctx = metrics.SetCommandID(ctx, cmd.ID)
 
-	if e := oldEnv.GetEnv(); len(e) > 0 {
-		cfg.Env = append(e, cfg.Env...)
+	if cfg.Env == nil {
+		cfg.Env = types.EnvVars{}
 	}
 
-	if oldEnv == nil {
+	if opts.Env == nil {
 		newEnv = types.EnvVars{}
 	} else {
-		newEnv = oldEnv
+		newEnv = opts.Env
 	}
 
+	maps.Copy(cfg.Env, opts.Env)
+
 	out = &Output{
-		ID: cmd.ID,
+		ID:       cmd.ID,
+		ParentID: opts.ParentID,
+	}
+
+	id := cmd.ID
+	if opts.ParentID != "" {
+		id = fmt.Sprintf("%s > %s", opts.ParentID, cmd.ID)
 	}
 
 	ctx = metrics.SetCommandMode(ctx, metrics.CommandModeCheck)
 
-	if cmd.Check == "" && !cmd.Always && ((!remove && len(cmd.ChangedBy) == 0) || (remove && len(cmd.RemovedBy) == 0)) {
+	if cmd.Check == "" && !cmd.Always && ((!opts.Remove && len(cmd.ChangedBy) == 0) || (opts.Remove && len(cmd.RemovedBy) == 0)) {
 		newEnv[cmd.EnvPrefix+"_CHECK"] = "0" //nolint:goconst
 
 		metrics.CollectCommands(ctx, false)
@@ -60,25 +84,25 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		return out, newEnv, nil
 	}
 
-	ch := fmt.Sprintf("Changing %s...", cmd.ID)
-	if remove {
-		ch = fmt.Sprintf("Removing %s...", cmd.ID)
+	ch := fmt.Sprintf("Changing %s...", id)
+	if opts.Remove {
+		ch = fmt.Sprintf("Removing %s...", id)
 	}
 
 	switch {
 	case cmd.Always:
-		ch = fmt.Sprintf("Always changing %s...", cmd.ID)
-		if remove {
-			ch = fmt.Sprintf("Always removing %s...", cmd.ID)
+		ch = fmt.Sprintf("Always changing %s...", id)
+		if opts.Remove {
+			ch = fmt.Sprintf("Always removing %s...", id)
 		}
-	case !remove && len(cmd.ChangedBy) > 0:
-		ch = fmt.Sprintf("Triggering %s via %s...", cmd.ID, strings.Join(cmd.ChangedBy, ", "))
-	case remove && len(cmd.RemovedBy) > 0:
-		ch = fmt.Sprintf("Triggering %s via %s...", cmd.ID, strings.Join(cmd.RemovedBy, ", "))
+	case !opts.Remove && len(cmd.ChangedBy) > 0:
+		ch = fmt.Sprintf("Triggering %s via %s...", id, strings.Join(cmd.ChangedBy, ", "))
+	case opts.Remove && len(cmd.RemovedBy) > 0:
+		ch = fmt.Sprintf("Triggering %s via %s...", id, strings.Join(cmd.RemovedBy, ", "))
 	default:
 		out.Checked = true
 
-		logger.Debug(ctx, fmt.Sprintf("Checking %s...", cmd.ID))
+		logger.Debug(ctx, fmt.Sprintf("Checking %s...", id))
 
 		out.Check, err = cfg.Run(ctx, c, cmd.Check, cmd.Stdin)
 
@@ -87,7 +111,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 			newEnv[cmd.EnvPrefix] = out.Check.String()
 		}
 
-		if (!remove && err == nil) || (remove && err != nil) {
+		if (!opts.Remove && err == nil) || (opts.Remove && err != nil) {
 			newEnv[cmd.EnvPrefix+"_CHECK"] = "0"
 
 			metrics.CollectCommands(ctx, false)
@@ -98,7 +122,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		logger.Debug(ctx, out.Check.String())
 	}
 
-	if remove {
+	if opts.Remove {
 		out.CheckFailRemove = true
 	} else {
 		out.CheckFailChange = true
@@ -111,15 +135,15 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 
 	newEnv[cmd.EnvPrefix+"_CHECK"] = "1"
 
-	if check || (!remove && cmd.Change == "") || (remove && cmd.Remove == "") {
-		if check && ((!remove && cmd.Change != "") || (remove && cmd.Remove != "")) {
+	if opts.Check || (!opts.Remove && cmd.Change == "") || (opts.Remove && cmd.Remove == "") {
+		if opts.Check && ((!opts.Remove && cmd.Change != "") || (opts.Remove && cmd.Remove != "")) {
 			logger.Info(ctx, "Check mode: "+ch)
 		}
 
 		return out, newEnv, nil
 	}
 
-	if remove {
+	if opts.Remove {
 		ctx = metrics.SetCommandMode(ctx, metrics.CommandModeRemove)
 		out.Removed = true
 	} else {
@@ -129,29 +153,29 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 
 	logger.Info(ctx, ch)
 
-	cfg.Env = append(cfgEnv, newEnv.GetEnv()...) //nolint:gocritic
+	maps.Copy(cfg.Env, newEnv)
 
 	s := cmd.Change
-	if remove {
+	if opts.Remove {
 		s = cmd.Remove
 	}
 
 	o, err := cfg.Run(ctx, c, s, cmd.Stdin)
 	if err != nil {
-		if remove {
+		if opts.Remove {
 			out.Remove = o
 			out.RemoveFail = true
 			newEnv[cmd.EnvPrefix+"_REMOVE"] = "1"
 			newEnv[cmd.EnvPrefix+"_REMOVE_OUT"] = out.Remove.String()
 
-			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error removing id %s", cmd.ID)).Wrap(err.Errors()...), out.Remove.String())
+			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error removing id %s", id)).Wrap(err.Errors()...), out.Remove.String())
 		} else {
 			out.Change = o
 			out.ChangeFail = true
 			newEnv[cmd.EnvPrefix+"_CHANGE"] = "1"
 			newEnv[cmd.EnvPrefix+"_CHANGE_OUT"] = out.Change.String()
 
-			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmd.ID)).Wrap(err.Errors()...).Wrap(errors.New(out.Change.String())))
+			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", id)).Wrap(err.Errors()...).Wrap(errors.New(out.Change.String())))
 		}
 
 		metrics.CollectCommands(ctx, true)
@@ -159,7 +183,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, oldEnv types.EnvVars,
 		return out, newEnv, err
 	}
 
-	if remove {
+	if opts.Remove {
 		out.Remove = o
 		newEnv[cmd.EnvPrefix+"_REMOVE"] = "0"
 		newEnv[cmd.EnvPrefix+"_REMOVE_OUT"] = out.Remove.String()

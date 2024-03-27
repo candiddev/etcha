@@ -77,7 +77,6 @@ type Source struct {
 	NoRestore         bool                                        `json:"noRestore"`
 	PullIgnoreVersion bool                                        `json:"pullIgnoreVersion"`
 	PullPaths         types.SliceString                           `json:"pullPaths"`
-	RunAll            bool                                        `json:"runAll"`
 	RunFrequencySec   int                                         `json:"runFrequencySec"`
 	RunMulti          bool                                        `json:"runMulti"`
 	TriggerOnly       bool                                        `json:"triggerOnly"`
@@ -156,9 +155,13 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims any, token string, s
 	var t *jwt.Token
 
 	if len(vc) > 0 {
-		out, e := vc.Run(ctx, c.CLI, types.EnvVars{
+		ve.Env = types.EnvVars{
 			"ETCHA_JWT": token,
-		}, ve, false, false)
+		}
+
+		out, e := vc.Run(ctx, c.CLI, ve, commands.CommandsRunOpts{
+			ParentID: fmt.Sprintf("%s > verifyCommands", source),
+		})
 		if e != nil {
 			return key, r, e
 		}

@@ -13,6 +13,7 @@ import (
 	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
+	"github.com/candiddev/shared/go/types"
 )
 
 func TestParsePatternFromImports(t *testing.T) {
@@ -232,9 +233,9 @@ local config = std.native('getConfig')();
 		t.Run(name, func(t *testing.T) {
 			c.Exec.AllowOverride = tc.override
 			c.Exec.EnvInherit = tc.envInherit
-			c.Exec.Env = []string{
-				"hello=world",
-				"a=b",
+			c.Exec.Env = types.EnvVars{
+				"hello": "world",
+				"a":     "b",
 			}
 			p, err := ParsePatternFromImports(ctx, c, tc.source, &jsonnet.Imports{
 				Entrypoint: "/main.jsonnet",
