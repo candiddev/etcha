@@ -56,10 +56,14 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 		return nil
 	}
 
-	if len(c.Sources) != 0 {
-		logger.Info(ctx, "Starting source runner...")
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	defer s.WaitGroup.Wait()
 
-		go s.sourceRunner(ctx)
+	if len(c.Sources) != 0 {
+		logger.Info(ctx, "Starting source runners...")
+
+		s.sourceRunner(ctx, cancel)
 	}
 
 	if !once && s.Config.Run.ListenAddress != "" {
@@ -214,9 +218,12 @@ func (s *state) listen(ctx context.Context) errs.Err {
 		ReadHeaderTimeout: 60 * time.Second,
 	}
 
+	s.WaitGroup.Add(1)
+
 	go func(ctx context.Context, srv *http.Server) {
 		<-ctx.Done()
 		srv.Shutdown(ctx) //nolint:errcheck
+		s.WaitGroup.Done()
 	}(ctx, &srv)
 
 	var c tls.Certificate
@@ -327,7 +334,7 @@ func (s *state) runSource(ctx context.Context, source string, init bool) (*Resul
 	return r, nil
 }
 
-func (s *state) sourceRunner(ctx context.Context) {
+func (s *state) sourceRunner(ctx context.Context, cancel context.CancelFunc) {
 	d := 0
 
 	if s.Config.Run.RandomizedStartDelaySec > 0 {
@@ -338,11 +345,13 @@ func (s *state) sourceRunner(ctx context.Context) {
 
 	time.Sleep(time.Duration(d) * time.Second)
 
-	pull := make(chan string)
-
 	for k, v := range s.Config.Sources {
 		if v.RunFrequencySec > 0 {
-			go func(ctx context.Context, id string, frequency int, pull chan string) {
+			s.WaitGroup.Add(1)
+
+			go func(ctx context.Context, id string, frequency int) {
+				defer s.WaitGroup.Done()
+
 				t := time.NewTicker(time.Duration(frequency) * time.Second)
 
 				for {
@@ -350,26 +359,17 @@ func (s *state) sourceRunner(ctx context.Context) {
 					case <-ctx.Done():
 						return
 					case <-t.C:
-						pull <- id
+						r, err := s.runSource(ctx, id, false)
+						if err != nil {
+							logger.Error(ctx, err) //nolint: errcheck
+						}
+
+						if r.Exit {
+							cancel()
+						}
 					}
 				}
-			}(ctx, k, v.RunFrequencySec, pull)
-		}
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case source := <-pull:
-			r, err := s.runSource(ctx, source, false)
-			if err != nil {
-				logger.Error(ctx, err) //nolint: errcheck
-			}
-
-			if r.Exit {
-				os.Exit(1) //nolint:revive
-			}
+			}(ctx, k, v.RunFrequencySec)
 		}
 	}
 }

@@ -66,10 +66,10 @@ func TestRun(t *testing.T) {
 			switch {
 			case tc.address != "":
 				time.Sleep(500 * time.Millisecond)
-				assert.Equal(t, runtime.NumGoroutine(), g+4) // pulltargets + shutdown watch + http.server + rate limiter
+				assert.Equal(t, runtime.NumGoroutine(), g+3) // pulltargets + shutdown watch + http.server + rate limiter
 			case tc.check:
 				time.Sleep(700 * time.Millisecond)
-				assert.Equal(t, runtime.NumGoroutine(), g+1)
+				assert.Equal(t, runtime.NumGoroutine(), g)
 			default:
 				time.Sleep(500 * time.Millisecond)
 				assert.Equal(t, runtime.NumGoroutine(), g)

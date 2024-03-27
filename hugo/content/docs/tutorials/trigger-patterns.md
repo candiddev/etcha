@@ -109,7 +109,6 @@ $ docker run -d --name etcha_listen \
         "exec": {
           "allowOverride": true
         },
-        "runAll": true
       }
     }' run-listen
 ```

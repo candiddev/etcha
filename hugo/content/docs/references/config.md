@@ -263,7 +263,7 @@ String, the maximum number of requests to allow from an IP address before rate l
 
 **Default:** `"10-M"`
 
-### `stateDir` (recommended)
+### `stateDir` (recommended) {#statedir}
 
 String, path to a writeable directory where Etcha can store patterns for future diffing.  Used during [etcha run]({{< ref "/docs/references/cli#run" >}}).  Defaults to current working directory if unset.
 
@@ -341,7 +341,7 @@ Boolean, prevents patterns received on this source from running change commands.
 
 **Default:** `false`
 
-### `commands`
+### `commands` {#sourcecommands}
 
 List of static [Commands]({{< ref "/docs/references/commands" >}}) to run for this source.  If allowed, Pattern pushes and pulls will override the list of Commands.  Commands will use the source's `exec` config, if allowed by the main `exec` config.  Commands will be ran at startup unless `triggerOnly` is set to true.  See [Running Commands]({{< ref "/docs/guides/running-commands#static-source-commands" >}}) for more information.
 
@@ -385,7 +385,7 @@ Boolean, don't consider `etchaVersion` property differences in [JWTs]({{< ref "/
 
 **Default:** `false`
 
-### `pullPaths` (required)
+### `pullPaths` (required) {#pullpaths}
 
 List of paths to pull JWTs from for this source.  Can be local disk paths or http/https paths.  For http/https paths, HTTP headers can be specified by appending `#header:value` and separating headers using `\r\n`, e.g. `#header1:value1\r\nheader2:value2`.  A special header, `skipVerify`, can also be added to ignore certificate verification errors.
 
@@ -393,21 +393,15 @@ See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more inf
 
 **Default:** `[]`
 
-### `runAll`
-
-Boolean, instead of only running differences, run all [Commands]({{< ref "/docs/references/commands" >}}) for a [Pattern]({{< ref "/docs/references/patterns" >}}) [source](#sources).  Commands that are not present in a new Pattern will still be removed, set [`noRemove`](#noremove) to change this behavior.
-
-**Default:** `false`
-
 ### `runFrequencySec`
 
-Integer, the number of seconds between pulling and running the source pattern.  Setting this to 0 means the source will never be pulled/ran except at startup.
+Integer, the number of seconds between (optionally pulling) and running the source pattern.  Setting this to 0 means the source will never be pulled/ran except at startup.
 
 **Default:** `0`
 
 ### `runMulti`
 
-Boolean, allows for multiple runs to of the source to happen at the same time.  By default, multiple runs will queue.  Some scenarios where this might occur include repeated pushes, especially with [`runAll`](#runAll), or pulls with too low of a [`runFrequencySec`](#runfrequencysec).  Use with caution.
+Boolean, allows for multiple runs to of the source to happen at the same time.  By default, multiple runs will queue.  Some scenarios where this might occur include repeated pushes, or pulls with too low of a [`runFrequencySec`](#runfrequencysec).  Use with caution.
 
 **Default:** `false`
 

@@ -21,6 +21,7 @@ type state struct {
 	Patterns       *types.MapLock[pattern.Pattern]
 	PatternLocks   map[string]*sync.Mutex
 	RateLimiter    *limiter.Limiter
+	WaitGroup      sync.WaitGroup
 	WebhookHandler http.Handler
 }
 

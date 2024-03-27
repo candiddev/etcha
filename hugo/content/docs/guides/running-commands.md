@@ -37,10 +37,11 @@ Static source Commands allow Etcha to run Commands for sources without having th
 
 When using Source Commands:
 
-- Etcha will run Source Commands at startup unless the source is set to `triggerOnly`.
+- Etcha will run Source Commands at startup unless the source is set to [`triggerOnly`]({{< ref "/docs/references/config#triggeronly">}}).
 - Source Commands will be overwritten by any Patterns Etcha has cached from a previous pull/push before being ran at startup.
-- Source Commands obey `checkOnly`.
-- Patterns can be pulled/pushed with Source Commands, and Commands will be diffed unless `runAll` is set.
+- Source Commands obey [`checkOnly`]({{< ref "/docs/references/config#checkonly" >}}).
+- Patterns can be pulled/pushed with Source Commands.  These will overwrite the Source Commands and trigger Remove (unless [`noRemove`]({{< ref "/docs/references/config#noremove" >}}) is set)
+- Source Commands will run periodically using [`runFrequencySec`]({{< ref "/docs/references/config#runfrequencysec" >}})
 
 ## Push Commands
 
@@ -59,7 +60,6 @@ The receiver of Push Commands needs to have certain configuration values set:
   - **Recommended**:
     - [`noRemove`]({{< ref "/docs/references/config#noRemove" >}}) set to `true`, this prevents `remove` from being ran.
     - [`noRestore`]({{< ref "/docs/references/config#noRestore" >}}) set to `true`, this prevents Etcha from running your most recently pushed Command at every startup.
-    - [`runAll`]({{< ref "/docs/references/config#runAll" >}}) set to `true`, this forces Etcha to always run your push Command (otherwise repeated Commands will only run once).
   - **Optional**:
     - [`runMulti`]({{< ref "/docs/references/config#runMulti" >}}) set to `true`, this allows Etcha to run multiple push Command  requests concurrently, otherwise they will be queued.
 

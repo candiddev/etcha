@@ -188,7 +188,11 @@ Our verify Commands need to verify the [JWT]({{< ref "/docs/references/jwt" >}})
 
 Sources can have their own [`exec configuration`]({{< ref "/docs/references/config#exec" >}}), `verifyKeys`(#verifykeys), and other options.  Sources can also be configured to always run in [**Check Mode**]({{< ref "/docs/references/commands#check-mode" >}}) via [`checkOnly`]({{< ref "/docs/references/config#checkonly" >}}).
 
-During push/pull mode, Etcha will perform a diff against the current Pattern and the new Pattern.  **Only Commands that have changed will be `checked`, and any Commands not in the new Pattern will be `removed`**.  This behavior can be overriden using [`runAll`]({{< ref "/docs/references/config#runall" >}}).
+During push/pull mode, Etcha will perform a diff against the current Pattern and the new Pattern.  **Any Commands not in the new Pattern will be `removed`**.  This behavior can be overriden using [`noRemove`]({{< ref "/docs/references/config#noremove" >}}).
+
+After a source receives a push or a pull, it will cache the JWT in the [`stateDir`]({{< ref "/docs/references/config#statedir" >}}).  On startup, Etcha will restore these JWTs after validating them.  You can disable this behavior using [`noRestore`]({{< ref "/docs/references/config#norestore" >}}).
+
+Sources will periodically pull (if [pullPaths]({{< ref "/docs/references/config#pullpaths" >}}) are set) and run Commands (either from the Source's [commands]({{< ref "/docs/references/config#sourcecommands" >}}), `pullPaths`, or via pushes) if [`runFrequencySec`]({{< ref "/docs/references/config#runfrequencysec" >}}) is defined.
 
 Etcha can be configured for multiple sources:
 
