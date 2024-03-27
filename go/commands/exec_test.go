@@ -7,6 +7,7 @@ import (
 	"github.com/candiddev/shared/go/assert"
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/logger"
+	"github.com/candiddev/shared/go/types"
 )
 
 func TestExecOverride(t *testing.T) {
@@ -72,8 +73,8 @@ func TestExecRun(t *testing.T) {
 			"volume",
 		},
 		ContainerWorkDir: "work2",
-		Env: []string{
-			"hello=world",
+		Env: types.EnvVars{
+			"hello": "world",
 		},
 		WorkDir: "work1",
 	}
@@ -84,7 +85,7 @@ func TestExecRun(t *testing.T) {
 
 	inputs := c.RunMockInputs()
 
-	assert.Equal(t, inputs[0].Environment, e.Env)
+	assert.Equal(t, inputs[0].Environment, e.Env.GetEnv())
 
 	cr, _ := cli.GetContainerRuntime()
 
@@ -95,7 +96,7 @@ func TestExecRun(t *testing.T) {
 	e.Run(ctx, c, "script", "stdin")
 	inputs = c.RunMockInputs()
 
-	assert.Equal(t, inputs[0].Environment, e.Env)
+	assert.Equal(t, inputs[0].Environment, e.Env.GetEnv())
 	assert.Equal(t, inputs[0].Exec, "a long command hello world script")
 	assert.Equal(t, inputs[0].WorkDir, e.WorkDir)
 }

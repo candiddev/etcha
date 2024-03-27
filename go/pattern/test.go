@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/errs"
@@ -14,7 +15,7 @@ import (
 )
 
 // Test performs build and run testing against directory or single pattern.
-func Test(ctx context.Context, c *config.Config, path string, testBuild bool) (types.Results, errs.Err) {
+func Test(ctx context.Context, c *config.Config, path string, testBuild bool, parentIDFilter *regexp.Regexp) (types.Results, errs.Err) {
 	l := types.Results{}
 
 	f, e := os.Stat(path)
@@ -34,7 +35,7 @@ func Test(ctx context.Context, c *config.Config, path string, testBuild bool) (t
 					return err
 				}
 
-				r := p.Test(ctx, c, testBuild)
+				r := p.Test(ctx, c, testBuild, parentIDFilter)
 				for k, v := range r {
 					l[path+":"+k] = v
 				}
@@ -54,7 +55,7 @@ func Test(ctx context.Context, c *config.Config, path string, testBuild bool) (t
 			return nil, logger.Error(ctx, err)
 		}
 
-		r := p.Test(ctx, c, testBuild)
+		r := p.Test(ctx, c, testBuild, parentIDFilter)
 		for k, v := range r {
 			l[path+":"+k] = v
 		}
@@ -64,7 +65,7 @@ func Test(ctx context.Context, c *config.Config, path string, testBuild bool) (t
 }
 
 // Test performs build and run testing against a Pattern.
-func (p *Pattern) Test(ctx context.Context, c *config.Config, testBuild bool) types.Results {
+func (p *Pattern) Test(ctx context.Context, c *config.Config, testBuild bool, parentIDFilter *regexp.Regexp) types.Results {
 	r := types.Results{}
 
 	if logger.GetLevel(ctx) != logger.LevelDebug {
@@ -72,14 +73,14 @@ func (p *Pattern) Test(ctx context.Context, c *config.Config, testBuild bool) ty
 	}
 
 	if !testBuild {
-		l := p.Build.Test(ctx, c.CLI, p.BuildExec, nil)
+		l := p.Build.Test(ctx, c.CLI, p.BuildExec, parentIDFilter)
 
 		for k, v := range l {
 			r[k] = v
 		}
 	}
 
-	l := p.Run.Test(ctx, c.CLI, p.RunExec, nil)
+	l := p.Run.Test(ctx, c.CLI, p.RunExec, parentIDFilter)
 
 	if len(l) > 0 {
 		for k, v := range l {

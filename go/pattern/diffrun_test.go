@@ -102,6 +102,7 @@ func TestPatternDiffRun(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				ErrBuildEmpty,
 			},
 			wantErr: ErrBuildEmpty,
@@ -112,6 +113,10 @@ func TestPatternDiffRun(t *testing.T) {
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
 					Exec:        "checkB",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
+					Exec:        "checkD",
 				},
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
@@ -132,7 +137,8 @@ func TestPatternDiffRun(t *testing.T) {
 					ID:      "b",
 				},
 				{
-					ID: "d",
+					Checked: true,
+					ID:      "d",
 				},
 				{
 					Checked:         true,
@@ -155,6 +161,10 @@ func TestPatternDiffRun(t *testing.T) {
 				},
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
+					Exec:        "checkD",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
 					Exec:        "checkC",
 				},
 			},
@@ -168,7 +178,8 @@ func TestPatternDiffRun(t *testing.T) {
 					ID:      "b",
 				},
 				{
-					ID: "d",
+					Checked: true,
+					ID:      "d",
 				},
 				{
 					Checked:         true,
@@ -185,6 +196,10 @@ func TestPatternDiffRun(t *testing.T) {
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
 					Exec:        "checkB",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
+					Exec:        "checkD",
 				},
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
@@ -205,7 +220,8 @@ func TestPatternDiffRun(t *testing.T) {
 					ID:      "b",
 				},
 				{
-					ID: "d",
+					Checked: true,
+					ID:      "d",
 				},
 				{
 					ID:              "c",
@@ -224,6 +240,9 @@ func TestPatternDiffRun(t *testing.T) {
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="}, Exec: "checkB",
 				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="}, Exec: "checkD",
+				},
 			},
 			wantOutputs: commands.Outputs{
 				{
@@ -235,7 +254,8 @@ func TestPatternDiffRun(t *testing.T) {
 					ID:      "b",
 				},
 				{
-					ID: "d",
+					Checked: true,
+					ID:      "d",
 				},
 			},
 		},
@@ -289,7 +309,10 @@ func TestPatternDiffRun(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			c.CLI.RunMockErrors(tc.mockError)
 
-			o, err := pNew.DiffRun(ctx, c, &pOld, tc.check, tc.noRemove, tc.runAll)
+			o, err := pNew.DiffRun(ctx, c, &pOld, DiffRunOpts{
+				Check:    tc.check,
+				NoRemove: tc.noRemove,
+			})
 
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, o, tc.wantOutputs)

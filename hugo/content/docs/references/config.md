@@ -186,9 +186,9 @@ String, override the WorkDir of a container.
 
 ### `env`
 
-List of strings in the format `ENVIRONMENT=value`, will set these as environment variables.
+Map of strings in the format `"ENVIRONMENT": "value"`, will set these as environment variables.
 
-**Default:** `[]`
+**Default:** `{}`
 
 ### `envInheirt`
 
@@ -423,7 +423,7 @@ See [Run > verifyCommands](#verifycommands).  Setting this value overrides `run.
 
 **Default:** `[]`
 
-## `vars`
+## `vars` {#sourcevars}
 
 A map of strings and any type of value.  Can be used during rendering to get/set values.  Will be combined with the top-level rendering--the values set here will override top-level ones.  See [Patterns - Variables]({{< ref "/docs/references/patterns#variables" >}}), [Building Patterns]({{< ref "/docs/guides/building-patterns" >}}), and [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
 
@@ -451,15 +451,30 @@ List of HTTP paths to listen for webhooks.  See [Running Patterns]({{< ref "/doc
 
 A map of strings and any type of value.  Can be used during rendering to get/set values.  See [Patterns - Variables]({{< ref "/docs/references/patterns#variables" >}}), [Building Patterns]({{< ref "/docs/guides/building-patterns" >}}), and [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
 
+Vars are combined in this order:
+
+- [Pattern `etchaRunVars`]({{< ref "/docs/references/patterns#runvars" >}})
+- Top level `vars` (this value)
+- [Source `vars`](#sourcevars)
+
+Vars can be retrieved in Patterns using [`getConfig`]({{< ref "/docs/references/patterns#runvars" >}}).
+
 **Default:** `{}`
 
-During a Pattern [`build`]({{< ref "/docs/guides/building-patterns" >}}), the following additional `vars` will be set: 
+The following `vars` are added to all Patterns:
+
+- `source`: String, the source name of the Pattern.
+- `test`: Boolean, will be `true` if a Pattern is in [test mode]({{< ref "/docs/guides/testing-patterns" >}}).
+
+
+During a Pattern [`build`]({{< ref "/docs/guides/building-patterns" >}}), the following additional `vars` will be set:
 
 - `dstDir`: String, the directory of the output JWT file.
 - `dstPath`: String, the path of the output JWT file.
 - `srcDir`: String, the directory of the Pattern being built.
 - `srcPath`: String, the path of the Pattern being built.
 
-During a Pattern [`test`]({{< ref "/docs/guides/testing-patterns" >}}), the following additional `vars` will be set:
+During a Pattern [`run`]{{< ref "/docs/guides/running-patterns" >}}, the following additional `vars` will be set:
 
-- `test`: Boolean, will be `true`
+- `jwt`: String, the contents of the original JWT if the Pattern was run from a JWT.
+

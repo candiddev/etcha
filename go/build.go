@@ -19,8 +19,10 @@ var build = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		source := args[1]
 		destination := args[2]
 
-		c.Vars["buildDir"] = filepath.Dir(source)
-		c.Vars["buildPath"] = source
+		c.Vars["dstDir"] = filepath.Dir(destination)
+		c.Vars["dstPath"] = destination
+		c.Vars["srcDir"] = filepath.Dir(source)
+		c.Vars["srcPath"] = source
 
 		p, err := pattern.ParsePatternFromPath(ctx, c, "", source)
 		if err != nil {

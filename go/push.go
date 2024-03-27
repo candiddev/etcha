@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/candiddev/etcha/go/config"
@@ -17,7 +18,22 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"destination URL",
 		"command or pattern path",
 	},
-	Run: func(ctx context.Context, args []string, _ cli.Flags, c *config.Config) errs.Err {
+	Flags: cli.Flags{
+		"c": {
+			Usage: "Check mode",
+		},
+		"f": {
+			Placeholder: "regexp",
+			Usage:       "Filter parent Command IDs",
+		},
+	},
+	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
+		re, _ := flags.Value("f")
+		reg, e := regexp.Compile(re)
+		if e != nil {
+			return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing filter: %w", e)))
+		}
+
 		var cmd string
 
 		var path string
@@ -28,7 +44,12 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			cmd = args[2]
 		}
 
-		r, err := run.Push(ctx, c, args[1], cmd, path)
+		_, check := flags.Value("c")
+
+		r, err := run.Push(ctx, c, args[1], cmd, path, run.PushOpts{
+			Check:          check,
+			ParentIDFilter: reg,
+		})
 		if r == nil && err != nil {
 			return err
 		}

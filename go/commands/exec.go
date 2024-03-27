@@ -8,6 +8,7 @@ import (
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/logger"
+	"github.com/candiddev/shared/go/types"
 )
 
 var (
@@ -16,22 +17,22 @@ var (
 
 // Exec configures top-level Exec options.
 type Exec struct {
-	AllowOverride       bool     `json:"allowOverride"`
-	Command             string   `json:"command"`
-	ContainerEntrypoint string   `json:"containerEntrypoint"`
-	ContainerImage      string   `json:"containerImage"`
-	ContainerNetwork    string   `json:"containerNetwork"`
-	ContainerPrivileged bool     `json:"containerPrivileged"`
-	ContainerPull       string   `json:"containerPull"`
-	ContainerUser       string   `json:"containerUser"`
-	ContainerVolumes    []string `json:"containerVolumes"`
-	ContainerWorkDir    string   `json:"containerWorkDir"`
-	Env                 []string `json:"env"`
-	EnvInherit          bool     `json:"envInherit"`
-	Group               string   `json:"group"`
-	Sudo                bool     `json:"sudo"`
-	User                string   `json:"user"`
-	WorkDir             string   `json:"workDir"`
+	AllowOverride       bool          `json:"allowOverride"`
+	Command             string        `json:"command"`
+	ContainerEntrypoint string        `json:"containerEntrypoint"`
+	ContainerImage      string        `json:"containerImage"`
+	ContainerNetwork    string        `json:"containerNetwork"`
+	ContainerPrivileged bool          `json:"containerPrivileged"`
+	ContainerPull       string        `json:"containerPull"`
+	ContainerUser       string        `json:"containerUser"`
+	ContainerVolumes    []string      `json:"containerVolumes"`
+	ContainerWorkDir    string        `json:"containerWorkDir"`
+	Env                 types.EnvVars `json:"env"`
+	EnvInherit          bool          `json:"envInherit"`
+	Group               string        `json:"group"`
+	Sudo                bool          `json:"sudo"`
+	User                string        `json:"user"`
+	WorkDir             string        `json:"workDir"`
 }
 
 // Override will return the absolute Exec from an ordered list of Execs.
@@ -86,7 +87,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		ContainerUser:       e.ContainerUser,
 		ContainerVolumes:    e.ContainerVolumes,
 		ContainerWorkDir:    e.ContainerWorkDir,
-		Environment:         e.Env,
+		Environment:         e.Env.GetEnv(),
 		EnvironmentInherit:  e.EnvInherit,
 		Group:               e.Group,
 		NoErrorLog:          true,

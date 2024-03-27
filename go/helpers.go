@@ -119,7 +119,7 @@ func dirFileRun(file bool, usage string) cli.Command[*config.Config] { //nolint:
 		},
 		Run: func(ctx context.Context, args []string, flags cli.Flags, _ *config.Config) errs.Err {
 			dir := args[0] == "dir"
-			mode, e := parseMode(args[1], true)
+			mode, e := parseMode(args[1])
 			if e != nil {
 				return logger.Error(ctx, e)
 			}
@@ -223,13 +223,9 @@ func dirFileRun(file bool, usage string) cli.Command[*config.Config] { //nolint:
 	}
 }
 
-func parseMode(mode string, check bool) (metrics.CommandMode, errs.Err) {
+func parseMode(mode string) (metrics.CommandMode, errs.Err) {
 	switch mode {
 	case "check":
-		if !check {
-			break
-		}
-
 		return metrics.CommandModeCheck, nil
 	case "change":
 		return metrics.CommandModeChange, nil

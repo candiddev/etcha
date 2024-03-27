@@ -4,15 +4,18 @@ local file = import './file.libsonnet';
 local systemdUnit = import './systemdUnit.libsonnet';
 
 function(enable=true, expand=false, files, path='/etc/systemd/network', restart=true)
-  [
-    [
-      file(contents=files[f], expand=expand, group='systemd-network', mode='0600', owner='systemd-network', path='%s/%s' % [path, f]) + if restart then {
-        onChange: [
-          'systemctl restart systemd-networkd',
-        ],
-      } else {}
+  {
+    id: 'systemdNetwork',
+    commands: [
+      [
+        file(contents=files[f], expand=expand, group='systemd-network', mode='0600', owner='systemd-network', path='%s/%s' % [path, f]) + if restart then {
+          onChange: [
+            'systemctl restart systemd-networkd',
+          ],
+        } else {}
 
-      for f in std.objectFields(files)
+        for f in std.objectFields(files)
+      ],
+      systemdUnit(enable=enable, name='systemd-networkd'),
     ],
-    systemdUnit(enable=enable, name='systemd-networkd'),
-  ]
+  }

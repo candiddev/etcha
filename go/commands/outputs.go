@@ -17,6 +17,7 @@ type Output struct {
 	CheckFailRemove bool
 	Events          []string
 	ID              string
+	ParentID        string
 	Remove          cli.CmdOutput
 	Removed         bool
 	RemoveFail      bool

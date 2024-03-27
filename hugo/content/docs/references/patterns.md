@@ -51,7 +51,9 @@ See [`exec`]({{< ref "/docs/references/config#exec" >}}).  Specifies a custom ex
 
 ### `runVars`
 
-A map of values that will be combined with [Vars]({{< ref "/docs/references/config#vars" >}}) when the Pattern is rendered.  These are exposed using the [Jsonnet native function, `getConfig`]({{< ref "/docs/references/jsonnet#getConfig" >}}), for rendering these values during a run:
+A map of values that will be combined with [Vars]({{< ref "/docs/references/config#vars" >}}) when the Pattern is rendered.  These can be set for Patterns by specifying them in the Pattern config, or by using the [`runVar_` build event]({{ ref "/docs/references/events#runvar" }}).
+
+These are exposed using the [Jsonnet native function, `getConfig`]({{< ref "/docs/references/jsonnet#getConfig" >}}), for rendering these values during a run:
 
 ```
 {

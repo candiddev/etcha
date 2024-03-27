@@ -43,6 +43,14 @@ func SetCommandMode(ctx context.Context, mode CommandMode) context.Context {
 	return logger.SetAttribute(ctx, "commandMode", mode)
 }
 
+func GetCommandParentID(ctx context.Context) string {
+	return logger.GetAttribute[string](ctx, "commandParentID")
+}
+
+func SetCommandParentID(ctx context.Context, parentID string) context.Context {
+	return logger.SetAttribute(ctx, "commandParentID", parentID)
+}
+
 func GetSourceName(ctx context.Context) string {
 	return logger.GetAttribute[string](ctx, "sourceName")
 }
@@ -72,7 +80,7 @@ func init() { //nolint:gochecknoinits
 			Help: "Counter of Commands that have ran",
 			Name: "etcha_commands_total",
 		},
-		[]string{"error", "id", "mode", "source"},
+		[]string{"error", "id", "mode", "source", "parentID"},
 	)
 	prometheus.MustRegister(commands)
 
@@ -96,7 +104,7 @@ func init() { //nolint:gochecknoinits
 }
 
 func CollectCommands(ctx context.Context, err bool) {
-	commands.WithLabelValues(metrics.ParseBool(err), GetCommandID(ctx), string(GetCommandMode(ctx)), GetSourceName(ctx)).Inc()
+	commands.WithLabelValues(metrics.ParseBool(err), GetCommandID(ctx), string(GetCommandMode(ctx)), GetSourceName(ctx), GetCommandParentID(ctx)).Inc()
 }
 
 func CollectSources(ctx context.Context, err bool) {

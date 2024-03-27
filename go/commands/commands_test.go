@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -19,7 +20,7 @@ var cmdA = &Command{
 	Remove: "removeA",
 	ID:     "a",
 	OnChange: []string{
-		"e",
+		"[e|f]",
 		"etcha:hello",
 		"etcha:stderr",
 		"etcha:stdout",
@@ -66,6 +67,21 @@ var cmdG = &Command{
 	ID:        "g",
 	Remove:    "removeG",
 }
+var cmdH = &Command{
+	Commands: Commands{
+		{
+			Commands: Commands{
+				{
+					ID:     "j",
+					Change: "changeJ",
+					Check:  "checkJ",
+				},
+			},
+			ID: "i",
+		},
+	},
+	ID: "h",
+}
 
 func TestCommandsDiff(t *testing.T) {
 	a := *cmdA
@@ -73,38 +89,13 @@ func TestCommandsDiff(t *testing.T) {
 	c := *cmdC
 	g := *cmdG
 
-	change, remove := Commands{
+	remove := Commands{
 		&a,
 		&b,
 		&g,
 	}.Diff(Commands{
 		&a,
 		&c,
-		&g,
-	})
-	assert.Equal(t, change, Commands{
-		&Command{
-			Change: "changeA",
-			Remove: "removeA",
-			ID:     "a",
-			OnChange: []string{
-				"e",
-				"etcha:hello",
-				"etcha:stderr",
-				"etcha:stdout",
-			},
-			OnFail: []string{
-				"f",
-				"etcha:fail",
-			},
-			OnRemove: []string{
-				"e",
-				"etcha:hello",
-				"etcha:stderr",
-				"etcha:stdout",
-			},
-		},
-		&b,
 		&g,
 	})
 	assert.Equal(t, remove, Commands{
@@ -116,17 +107,19 @@ func TestCommandsRun(t *testing.T) {
 	logger.UseTestLogger(t)
 
 	tests := map[string]struct {
-		check        bool
-		cmds         Commands
-		env          types.EnvVars
-		execOverride bool
-		mockErrs     []error
-		mockOutputs  []string
-		remove       bool
-		wantErr      error
-		wantInputs   []cli.RunMockInput
-		wantOut      string
-		wantOutputs  Outputs
+		check          bool
+		cmds           Commands
+		env            types.EnvVars
+		execOverride   bool
+		mockErrs       []error
+		mockOutputs    []string
+		parentID       string
+		parentIDFilter *regexp.Regexp
+		remove         bool
+		wantErr        error
+		wantInputs     []cli.RunMockInput
+		wantOut        string
+		wantOutputs    Outputs
 	}{
 		"remove": {
 			cmds: Commands{
@@ -214,12 +207,16 @@ func TestCommandsRun(t *testing.T) {
 					Exec:        "changeE",
 				},
 				{
-					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=0", "_CHECK_OUT=",
+					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT="},
+					Exec:        "changeF",
+				},
+				{
+					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT=",
 						"g_CHECK=1"},
 					Exec: "changeG",
 				},
 			},
-			wantOut: "INFO  Changing a...\na\na\nINFO  Triggering e via a...\nINFO  Always changing g...\n",
+			wantOut: "INFO  Changing a...\na\na\nINFO  Triggering e via a...\nINFO  Triggering f via a...\nINFO  Always changing g...\n",
 			wantOutputs: Outputs{
 				&Output{
 					Change:          "a",
@@ -240,7 +237,9 @@ func TestCommandsRun(t *testing.T) {
 					ID:              "e",
 				},
 				&Output{
-					ID: "f",
+					Changed:         true,
+					CheckFailChange: true,
+					ID:              "f",
 				},
 				&Output{
 					CheckFailChange: true,
@@ -299,6 +298,52 @@ func TestCommandsRun(t *testing.T) {
 				},
 			},
 		},
+		"nested_no_filter": {
+			cmds: Commands{
+				cmdA,
+				cmdH,
+			},
+			wantInputs: []cli.RunMockInput{
+				{
+					Exec: "checkA",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
+					Exec:        "checkJ",
+				},
+			},
+			wantOutputs: Outputs{
+				&Output{
+					Checked: true,
+					ID:      "a",
+				},
+				&Output{
+					Checked:  true,
+					ID:       "j",
+					ParentID: "h > i",
+				},
+			},
+		},
+		"nested_filter1": {
+			cmds: Commands{
+				cmdA,
+				cmdH,
+			},
+			parentID:       "k",
+			parentIDFilter: regexp.MustCompile("^k$"),
+			wantInputs: []cli.RunMockInput{
+				{
+					Exec: "checkA",
+				},
+			},
+			wantOutputs: Outputs{
+				{
+					Checked:  true,
+					ID:       "a",
+					ParentID: "k",
+				},
+			},
+		},
 	}
 
 	for name, tc := range tests {
@@ -309,9 +354,15 @@ func TestCommandsRun(t *testing.T) {
 			c.RunMockErrors(tc.mockErrs)
 			c.RunMockOutputs(tc.mockOutputs)
 
-			out, err := tc.cmds.Run(ctx, c, tc.env, &Exec{
+			out, err := tc.cmds.Run(ctx, c, &Exec{
 				AllowOverride: tc.execOverride,
-			}, tc.check, tc.remove)
+			}, CommandsRunOpts{
+				Check:          tc.check,
+				Env:            tc.env,
+				ParentID:       tc.parentID,
+				ParentIDFilter: tc.parentIDFilter,
+				Remove:         tc.remove,
+			})
 
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, out, tc.wantOutputs)
@@ -366,9 +417,6 @@ func TestCommandsValidate(t *testing.T) {
 		wantErr    error
 		wantOutput string
 	}{
-		"no_commands": {
-			wantErr: ErrCommandsEmpty,
-		},
 		"empty_command_id": {
 			cmds: Commands{
 				&Command{
@@ -465,9 +513,11 @@ func TestCommandsValidate(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			logger.SetStd()
-			assert.HasErr(t, tc.cmds.Validate(ctx), tc.wantErr)
-			assert.Equal(t, strings.Contains(logger.ReadStd(), tc.wantOutput), true)
+			err := tc.cmds.validate()
+			assert.HasErr(t, err, tc.wantErr)
+			if tc.wantErr != nil {
+				assert.Equal(t, strings.Contains(err.Error(), tc.wantOutput), true)
+			}
 		})
 	}
 }

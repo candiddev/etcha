@@ -62,11 +62,11 @@ func TestTest(t *testing.T) {
 		ErrBuildEmpty,
 	})
 
-	r, err := Test(ctx, c, "/asdfasdjzcbjzxkbjxcb", true)
+	r, err := Test(ctx, c, "/asdfasdjzcbjzxkbjxcb", true, nil)
 	assert.HasErr(t, err, errs.ErrReceiver)
 	assert.Equal(t, r, nil)
 
-	r, err = Test(ctx, c, "testdata", true)
+	r, err = Test(ctx, c, "testdata", true, nil)
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, r, types.Results{
 		"testdata/main.jsonnet:a": {
@@ -75,7 +75,7 @@ func TestTest(t *testing.T) {
 		},
 	})
 
-	r, err = Test(ctx, c, "testdata/main.jsonnet", true)
+	r, err = Test(ctx, c, "testdata/main.jsonnet", true, nil)
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, r, types.Results{})
 

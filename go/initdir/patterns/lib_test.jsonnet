@@ -109,9 +109,9 @@ local user = import '../lib/etcha/user.libsonnet';
   runExec: {
     allowOverride: true,
     command: std.native('getConfig')().exec.command,
-    env: [
-      'HOMEDIR=/root',
-    ],
+    env: {
+      HOMEDIR: '/root',
+    },
     envInherit: true,
     sudo: true,
   },

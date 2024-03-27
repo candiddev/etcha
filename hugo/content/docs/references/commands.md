@@ -131,6 +131,10 @@ String, the commands or executable to run during [Change Mode](#change-mode).  C
 
 String, the commands or executable to run during [Change Mode](#change-mode) or [Check Mode](#check-mode).  Can be multiple lines.  Will be appended to `exec.command`.  If this returns 0, [`remove`](#remove) will be ran in [Remove Mode](#remove-mode).  If this does not return 0, [`change`](#change) will be ran in [Change Mode](#change-mode).  If omitted, [`change`](#change) or [`remove`](#remove) will never run unless [`always`](#always) is `true` or [`id`](#id) is changed by another Command via [`onChange`](#onChange) or removed by another Command via [`onRemove`](#onRemove)
 
+### `commands`
+
+A list of sub Commands.  Other properties for this Command will be ignored except `id`.  These Commands will be ran in a group and not affect other groups.
+
 ### `envPrefix`
 
 String, an environment variable name prefix to add to all [Environment Variables](#environment-variables) created by this command.  Must be a valid environment variable (does not start with a number, must only contain word characters or _).
@@ -145,7 +149,35 @@ An ID for the Command.  Must be specified.  Can overlap with other Commands.
 
 ### `onChange`, `onFail`, `onRemove` {#on}
 
-A list of other Command [`id`s](#id) to run, or a list of [Events]({{< ref "/docs/references/events" >}}) to trigger, if this Command changes, removes or fails.  Event names must be prefixed with `etcha:`.  Cannot specify the current command ID (can't target self).  For onChange, targets must exist and occur after the current Command in the Command list (onRemove is the opposite, must occur before), or there will be an error during compilation.
+A list of:
+- Other Command [`id`s](#id) to run
+- Regular expressions to match Command [`id`s](#id) to run
+- [Events]({{< ref "/docs/references/events" >}}) to trigger, if this Command changes, removes or fails.  Event names must be prefixed with `etcha:`.
+
+Cannot specify the current command ID (can't target self).  For onChange, targets must exist and occur after the current Command in the Command list (onRemove is the opposite, must occur before), or there will be an error during compilation.
+
+These IDs can only target IDs within the current Command list:
+
+```json
+[
+  {
+    id: "a",
+    commands: [
+      {
+        id: "b"
+      },
+      {
+        id: "c"
+      },
+    ],
+  },
+  {
+    id: "d"
+  }
+]
+```
+
+In this example, `b` can target `c` but cannot target `d`.
 
 ### `remove`
 
