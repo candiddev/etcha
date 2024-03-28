@@ -11,6 +11,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/prometheus/client_golang v1.18.0
 	github.com/ulule/limiter/v3 v3.11.2
+	golang.org/x/sync v0.4.0
 )
 
 require (
@@ -48,7 +49,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/grpc v1.60.1 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
