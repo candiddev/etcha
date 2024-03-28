@@ -72,15 +72,17 @@ The sender of Push Commands needs to have a corresponding [`signingKey`]({{< ref
 Here is an example push from the Sender:
 
 ```bash
-$ etcha push ls https://etcha.local:4000/etcha/v1/mysource
-README.md
+$ etcha -x build_pushTLSSkipVerify=true push -h etcha.local mysource ls
+etcha.local:
+    README.md
 ```
 
 In this example:
 
-- `ls` is the command we want to run on the remote instance
-- `https://etcha.local:4000` is the address of the remote instance
+- `build_pushTLSSKipVerify=true` skips TLS certificate checking (Etcha uses self signed certificates by default)
+- `etcha.local` is the address of the remote instance
 - `mysource` is the source on the remote instance we should push to
+- `ls` is the command we want to run on the remote instance
 - `README.md` is the output of the `ls` command __on the remote instnace__
 
 ### Precautions

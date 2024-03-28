@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -35,10 +36,14 @@ type Config struct {
 
 // Build configures Etcha's build behavior.
 type Build struct {
-	PushTLSSkipVerify bool              `json:"pushTLSSkipVerify"`
-	SigningCommands   commands.Commands `json:"signingCommands"`
-	SigningExec       *commands.Exec    `json:"signingExec,omitempty"`
-	SigningKey        string            `json:"signingKey"`
+	PushMaxWorkers    int                   `json:"pushMaxWorkers"`
+	PushTLSSkipVerify bool                  `json:"pushTLSSkipVerify"`
+	PushTargets       map[string]PushTarget `json:"pushTargets"`
+	SigningCommands   commands.Commands     `json:"signingCommands"`
+	SigningExec       *commands.Exec        `json:"signingExec,omitempty"`
+
+	/* This is a string as it may be a KDF key or plaintext key */
+	SigningKey string `json:"signingKey"`
 }
 
 // Lint are config values for linters.
@@ -62,6 +67,16 @@ type Run struct {
 	VerifyCommands          commands.Commands                           `json:"verifyCommands"`
 	VerifyExec              *commands.Exec                              `json:"verifyExec,omitempty"`
 	VerifyKeys              cryptolib.Keys[cryptolib.KeyProviderPublic] `json:"verifyKeys"`
+}
+
+// PushTarget is a target that can be pushed.
+type PushTarget struct {
+	Hostname string         `json:"hostname"`
+	Insecure bool           `json:"insecure"`
+	Path     string         `json:"path"`
+	Port     int            `json:"port"`
+	Sources  []string       `json:"sources"`
+	Vars     map[string]any `json:"vars"`
 }
 
 // Source contains configurations for a source.
@@ -93,6 +108,9 @@ func (c *Config) CLIConfig() *cli.Config {
 
 func Default() *Config {
 	return &Config{
+		Build: Build{
+			PushMaxWorkers: runtime.NumCPU(),
+		},
 		Lint: Lint{
 			Exclude: *regexp.MustCompile("etcha.jsonnet"),
 			Linters: map[string]*commands.Exec{
@@ -130,6 +148,22 @@ func (c *Config) Parse(ctx context.Context, configArgs []string) errs.Err {
 
 	if !strings.HasPrefix(c.Run.StateDir, "/") {
 		c.Run.StateDir = filepath.Join(wd, c.Run.StateDir)
+	}
+
+	for k, v := range c.Build.PushTargets {
+		if v.Hostname == "" {
+			v.Hostname = k
+		}
+
+		if v.Path == "" {
+			v.Path = "/etcha/v1/push"
+		}
+
+		if v.Port == 0 {
+			v.Port = 4000
+		}
+
+		c.Build.PushTargets[k] = v
 	}
 
 	return logger.Error(ctx, nil)

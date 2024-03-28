@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"maps"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/candiddev/etcha/go/config"
@@ -15,7 +17,7 @@ import (
 
 var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	ArgumentsRequired: []string{
-		"destination URL",
+		"source name",
 		"command or pattern path",
 	},
 	Flags: cli.Flags{
@@ -26,29 +28,69 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			Placeholder: "regexp",
 			Usage:       "Filter parent Command IDs",
 		},
+		"h": {
+			Placeholder: "host",
+			Usage:       "Push to a specific host address",
+		},
+		"n": {
+			Placeholder: "regexp",
+			Usage:       "Filter PushTarget",
+		},
+		"p": {
+			Default:     []string{"4000"},
+			Placeholder: "port",
+			Usage:       "Push to a specific host port",
+		},
+		"u": {
+			Default:     []string{"/etcha/v1/push"},
+			Placeholder: "path",
+			Usage:       "Push to a specific host path",
+		},
 	},
 	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
+		source := args[1]
+		cmd := strings.Join(args[2:], " ")
 		re, _ := flags.Value("f")
-		reg, e := regexp.Compile(re)
+		f, e := regexp.Compile(re)
 		if e != nil {
 			return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing filter: %w", e)))
 		}
 
-		var cmd string
-
-		var path string
-
-		if strings.HasSuffix(args[2], ".jsonnet") {
-			path = args[2]
-		} else {
-			cmd = args[2]
+		re, _ = flags.Value("t")
+		t, e := regexp.Compile(re)
+		if e != nil {
+			return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing filter: %w", e)))
 		}
 
 		_, check := flags.Value("c")
 
-		r, err := run.Push(ctx, c, args[1], cmd, path, run.PushOpts{
+		targets := maps.Clone(c.Build.PushTargets)
+
+		if host, ok := flags.Value("h"); ok {
+			po, _ := flags.Value("p")
+			p, err := strconv.Atoi(po)
+			if err != nil {
+				return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing host port: %w", err)))
+			}
+
+			u, _ := flags.Value("u")
+
+			targets = map[string]config.PushTarget{
+				host: {
+					Hostname: host,
+					Path:     u,
+					Port:     p,
+					Sources: []string{
+						source,
+					},
+				},
+			}
+		}
+
+		r, err := run.PushTargets(ctx, c, targets, source, cmd, run.PushOpts{
 			Check:          check,
-			ParentIDFilter: reg,
+			ParentIDFilter: f,
+			TargetFilter:   t,
 		})
 		if r == nil && err != nil {
 			return err
@@ -58,20 +100,8 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			return nil
 		}
 
-		if cmd != "" {
-			logger.Raw(r.ChangedOutputs...)
-			logger.Raw("\n")
-
-			return nil
-		}
-
-		if len(r.ChangedIDs) != 0 {
-			logger.Info(ctx, fmt.Sprintf("Changed: %s", strings.Join(r.ChangedIDs, ", ")))
-		}
-
-		if len(r.RemovedIDs) != 0 {
-			logger.Info(ctx, fmt.Sprintf("Removed: %s", strings.Join(r.RemovedIDs, ", ")))
-		}
+		logger.Raw(r...)
+		logger.Raw("\n")
 
 		return err
 	},

@@ -157,7 +157,7 @@ $ etcha render patterns/helloworld.jsonnet
 We can filter to just see the build config using [`etcha jq`]({{< ref "/docs/references/cli#jq" >}}):
 
 ```bash
-$ etcha show-pattern patterns/helloworld.jsonnet | etcha jq -r '.build'
+$ etcha render patterns/helloworld.jsonnet | etcha jq -r '.build'
 [
   {
     "always": true,

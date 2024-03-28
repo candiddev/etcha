@@ -12,6 +12,10 @@ type: blog
 
 ## Features
 
+### Push Targets
+
+[Push Targets]({{< ref "/docs/references/config#pushtargets" >}}) can now be configured to create groups of push endpoints, similar to Ansible inventories or Puppet targets.
+
 ### Sub Commands
 
 [Commands]({{< ref "/docs/references/commands" >}}) can now contain sub Commands.  These Commands are executed within their own scope for `onChange/Fail/Remove`.

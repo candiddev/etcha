@@ -11,7 +11,7 @@ weight: 30
 
 **Etcha** is a Source Available, fully featured platform for running distributed applications.  There are no features in a separate enterprise edition.
 
-In order to ensure Etcha's sustainability, it's available **free for Personal or Non-Production use**.  For other uses, a separate license is required.
+In order to ensure Etcha's sustainability, it's available **free for Personal or Noncommercial use**.  For other uses, a separate license is required.
 
 Please [contact us](mailto:info@candid.dev?subject=Etcha%20Pricing) for more information regarding:
 - Solo Dev Pricing

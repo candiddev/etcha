@@ -110,7 +110,7 @@ $ docker run -d --name etcha_listen \
           "allowOverride": true
         },
       }
-    }' run-listen
+    }' run
 ```
 
 This config has a lot going on, lets break it down:
@@ -151,7 +151,7 @@ We should see a bunch of [metrics]({{< ref "/docs/guides/monitoring" >}}).  Noth
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push-pattern patterns/handler.jsonnet https://etcha_listen:4000/etcha/v1/push/handler
+    -x build_pushTLSSkipVerify=true push -h localhost handler patterns/handler.jsonnet 
 ```
 
 This shouldn't have ran any Commands:
@@ -169,11 +169,9 @@ level="INFO" function="etcha/go/run/run.go:97" status=200 success=true path="/et
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push-pattern patterns/trigger.jsonnet https://etcha_listen:4000/etcha/v1/push/trigger
-INFO  etcha/go/run/push.go:37
-Pushing config to https://etcha_listen:4000/etcha/v1/push/trigger...
-INFO  candiddev/etcha/go/push.go:25
-Changed: trigger event
+    -x build_pushTLSSkipVerify=true push -h localhost trigger patterns/trigger.jsonnet
+localhost:
+        Changed 1: trigger event
 ```
 
 The Command `trigger event` range, did it trigger `handler`?

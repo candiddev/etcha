@@ -49,9 +49,54 @@ You can view the rendered configuration by running [`etcha show-config`]({{< ref
 
 ## `build`
 
+### `pushMaxWorkers`
+
+Integer, the number of worker threads to use for pushing Patterns to targets.
+
+**Default:** Number of CPUs
+
 ### `pushTLSSkipVerify`
 
 Boolean, skip TLS verification when running [`etcha push`]({{< ref "/docs/references/cli#push" >}}).
+
+**Default:** `false`
+
+### `pushTargets`
+
+A map of target names to these target options:
+
+- `hostname`: String, the hostname or IP address of the target (default: the target name).
+- `insecure`: Boolean, whether to access to the target using http (`true`) or https (`false`).
+- `path`: String, optional path to the push API endpoint (default: `"/etcha/v1/push"`).
+- `port`: Integer, optional port of the target (default: `4000`).
+- `sources`: List of strings, the sources that will be pushed to the target (and the sources that will be targeted).
+- `vars`: Target specific [`vars`](#vars).
+
+Example pushTargets:
+
+```json
+{
+  "build": {
+    "pushTargets": {
+      "server1": {
+        "hostname": "server1.example.com",
+        "insecure": true,
+        "port": 4001,
+        "sources": [
+          "core",
+          "nginx"
+        ],
+        "vars": {
+          "selinux": true
+        }
+      }
+    }
+  }
+}
+```
+
+See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
+
 
 **Default:** `false`
 
@@ -450,6 +495,7 @@ Vars are combined in this order:
 - [Pattern `etchaRunVars`]({{< ref "/docs/references/patterns#runvars" >}})
 - Top level `vars` (this value)
 - [Source `vars`](#sourcevars)
+- [Host `vars` (push only)](#pushtargets)
 
 Vars can be retrieved in Patterns using [`getConfig`]({{< ref "/docs/references/patterns#runvars" >}}).
 
@@ -468,7 +514,7 @@ During a Pattern [`build`]({{< ref "/docs/guides/building-patterns" >}}), the fo
 - `srcDir`: String, the directory of the Pattern being built.
 - `srcPath`: String, the path of the Pattern being built.
 
-During a Pattern [`run`]{{< ref "/docs/guides/running-patterns" >}}, the following additional `vars` will be set:
+During a Pattern [`run`]({{< ref "/docs/guides/running-patterns" >}}), the following additional `vars` will be set:
 
 - `jwt`: String, the contents of the original JWT if the Pattern was run from a JWT.
 

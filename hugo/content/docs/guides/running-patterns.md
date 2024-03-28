@@ -221,7 +221,32 @@ Etcha can be configured for multiple sources:
 
 Etcha can push Patterns to remote Etcha instances.  This is similar to tools like Ansible, however it uses HTTPS instead of SSH.
 
-For this to work, the remote instance needs to allow pushes via [`allowPush`]({{< ref "/docs/references/config#allowpush" >}}).  From there, we can push Patterns using [`etcha push pattern/myapp.jsonnet https://server:4000/etcha/v1/push/myapp1`].  The path `/etcha/v1/push/myapp1` is the push path, where `myapp1` is the name of a valid source on the remote Etcha instance.  Etcha will run the build commands, create the JWT, and sign the JWT from the Pattern file `pattern/myapp.pattern`.
+For this to work, the remote instance needs to allow pushes via [`allowPush`]({{< ref "/docs/references/config#allowpush" >}}).  From there, we can push Patterns using [`etcha push`]({{< ref "/docs/references/cli#push" >}}).  Push can use adhoc targets provided on the command line using `-h hostname`, or you can defined a list of targets in the Etcha config and target them instead:
+
+```json
+{
+  "build": {
+    "pushTargets": {
+      "server1": {
+        "sources": [
+          "core",
+          "nginx"
+        ]
+      },
+      "server2": {
+        "sources": [
+          "core",
+          "mysql"
+        ]
+      }
+    }
+  }
+}
+```
+
+We can run `etcha push core patterns/core.jsonnet` and it will push to both `server1` and `server2`, or we can target the mysql source (`etcha push core mysql patterns/mysql.jsonnet`) and only target `server2`.
+
+**You don't have to use multiple sources**.  With how flexible Patterns are, the `core` pattern could contain the `mysql` Pattern and only run it if a [host's var]({{< ref "/docs/references/config#pushtargets" >}}) has `mysql: true`.
 
 On the remote Etcha instance, all JWTs pushed are validated, rendered into a Pattern, and then the Pattern's `run` is executed according to the [Sources](#sources) configuration.  The client that sent the push will receive a 404 if the Source doesn't exist or didn't validate the JWT.  A successful validation by a source will return a Result object, containing information on what was changed or removed, if Etcha will exit after sending the response via [`exitEtcha`]({{< ref "/docs/references/config#exitetcha" >}}), as well as any errors:
 
