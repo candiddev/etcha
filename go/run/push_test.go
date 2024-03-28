@@ -2,9 +2,14 @@ package run
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -18,7 +23,167 @@ import (
 	"github.com/candiddev/shared/go/logger"
 )
 
-func TestPush(t *testing.T) {
+func TestPushTargets(t *testing.T) {
+	logger.UseTestLogger(t)
+
+	ts1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		j, _ := json.MarshalIndent(Result{
+			ChangedIDs:     []string{"2"},
+			ChangedOutputs: []string{"a"},
+			RemovedIDs:     []string{"1"},
+		}, "", "")
+
+		w.Write(j)
+	}))
+	p1, _ := strconv.Atoi(strings.Split(ts1.URL, ":")[2])
+
+	ts2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		j, _ := json.MarshalIndent(Result{
+			Err: "error",
+		}, "", "")
+
+		w.Write(j)
+	}))
+	p2, _ := strconv.Atoi(strings.Split(ts2.URL, ":")[2])
+
+	ts3 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		j, _ := json.MarshalIndent(Result{
+			ChangedIDs:     []string{"3"},
+			ChangedOutputs: []string{"b"},
+			RemovedIDs:     []string{"2"},
+		}, "", "")
+
+		w.Write(j)
+	}))
+	p3, _ := strconv.Atoi(strings.Split(ts3.URL, ":")[2])
+
+	ts4 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusBadGateway)
+	}))
+	p4, _ := strconv.Atoi(strings.Split(ts4.URL, ":")[2])
+
+	os.WriteFile("a.jsonnet", []byte(`{
+		run: [
+			{
+				id: 'a',
+				change: 'a',
+				check: 'a',
+			}
+		]
+	}`), 0600)
+
+	ctx := context.Background()
+	c := config.Default()
+	c.Build.PushMaxWorkers = 2
+	prv, _, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	c.Build.SigningKey = prv.String()
+	tgt := map[string]config.PushTarget{
+		"1": {
+			Hostname: "127.0.0.1",
+			Insecure: true,
+			Path:     "/etcha/v1/push",
+			Port:     p1,
+			Sources: []string{
+				"a",
+				"b",
+			},
+			Vars: map[string]any{
+				"1": 2,
+			},
+		},
+		"2": {
+			Hostname: "127.0.0.1",
+			Insecure: true,
+			Path:     "/etcha/v1/push",
+			Port:     p2,
+			Sources: []string{
+				"a",
+				"c",
+			},
+		},
+		"3": {
+			Hostname: "localhost",
+			Insecure: true,
+			Path:     "/etcha/v1/push",
+			Port:     p3,
+			Sources: []string{
+				"a",
+				"c",
+			},
+		},
+		"4": {
+			Hostname: "localhost",
+			Insecure: true,
+			Path:     "/etcha/v1/push",
+			Port:     p4,
+			Sources: []string{
+				"a",
+				"d",
+			},
+		},
+	}
+
+	// PushTargets
+	s, err := PushTargets(ctx, c, tgt, "a", "ls", PushOpts{})
+	assert.HasErr(t, err, ErrPushDecode)
+	assert.Equal(t, s, []string{
+		"1:\n    a",
+		fmt.Sprintf("2:\n    %sERROR: error%s", logger.ColorRed, logger.ColorReset),
+		"3:\n    b",
+		fmt.Sprintf("4:\n    %sERROR: error decoding response: unexpected end of JSON input%s", logger.ColorRed, logger.ColorReset),
+	})
+
+	ctx = logger.SetNoColor(ctx, true)
+
+	s, err = PushTargets(ctx, c, tgt, "c", "a.jsonnet", PushOpts{})
+	assert.Equal(t, err.Error(), "error")
+	assert.Equal(t, s, []string{
+		"2:\n    ERROR: error\n    No changes",
+		"3:\n    Changed 1: 3\n    Removed 1: 2",
+	})
+
+	s, err = PushTargets(ctx, c, tgt, "c", "a.jsonnet", PushOpts{
+		TargetFilter: regexp.MustCompile("^[1|3]$"),
+	})
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, s, []string{
+		"3:\n    Changed 1: 3\n    Removed 1: 2",
+	})
+
+	// getPushDestJWT
+	d, j, err := getPushDestJWT(ctx, c, tgt["1"], &pattern.Pattern{}, "", "test", map[string]any{
+		"1": 1,
+		"2": 2,
+	}, PushOpts{
+		Check:          true,
+		ParentIDFilter: regexp.MustCompile("^1$"),
+	})
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, d, ts1.URL+"/etcha/v1/push/test")
+
+	jw, _, _ := pattern.ParseJWT(ctx, c, j, "")
+	assert.Equal(t, jw.EtchaRunVars, map[string]any{
+		"1": float64(2),
+		"2": float64(2),
+	})
+
+	d, _, _ = getPushDestJWT(ctx, c, config.PushTarget{
+		Hostname: "a",
+		Path:     "/b",
+		Port:     123,
+	}, &pattern.Pattern{}, "", "test", map[string]any{
+		"1": 1,
+		"2": 2,
+	}, PushOpts{
+		Check:          true,
+		ParentIDFilter: regexp.MustCompile("^1$"),
+	})
+	assert.Equal(t, d, "https://a:123/b/test")
+
+	os.Remove("a.jsonnet")
+}
+
+func TestPushTargetPostPush(t *testing.T) {
 	logger.UseTestLogger(t)
 
 	ctx := context.Background()
@@ -90,29 +255,24 @@ func TestPush(t *testing.T) {
 	}
 
 	tests := []struct {
-		check       bool
 		command     string
 		destination string
-		filter      *regexp.Regexp
 		mockErrors  []error
 		name        string
-		path        string
 		signingKey  cryptolib.Key[cryptolib.KeyProviderPrivate]
 		wantErr     error
 		wantInputs  []cli.RunMockInput
 		wantResult  *Result
 	}{
 		{
-			name:       "bad_path",
-			path:       "testdata/not.jsonnet",
-			wantErr:    jsonnet.ErrImport,
-			wantResult: &Result{},
+			name:    "bad_path",
+			command: "testdata/not.jsonnet",
+			wantErr: jsonnet.ErrImport,
 		},
 		{
-			name:       "bad_sign",
-			path:       "testdata/good1.jsonnet",
-			wantErr:    pattern.ErrPatternMissingKey,
-			wantResult: &Result{},
+			name:    "bad_sign",
+			command: "testdata/good1.jsonnet",
+			wantErr: pattern.ErrPatternMissingKey,
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{
@@ -124,9 +284,9 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "no_source",
+			command:     "testdata/good1.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/nowhere",
 			signingKey:  prv2,
-			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
 			wantResult:  &Result{},
 			wantInputs: []cli.RunMockInput{
@@ -140,9 +300,9 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "denied_source",
+			command:     "testdata/good1.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/denied",
 			signingKey:  prv2,
-			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
 			wantResult:  &Result{},
 			wantInputs: []cli.RunMockInput{
@@ -156,9 +316,9 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "bad_private_key",
+			command:     "testdata/good1.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			signingKey:  prv2,
-			path:        "testdata/good1.jsonnet",
 			wantErr:     ErrPushSourceMismatch,
 			wantResult:  &Result{},
 			wantInputs: []cli.RunMockInput{
@@ -172,14 +332,13 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "error_build",
+			command:     "testdata/good1.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
 				ErrPushSourceMismatch,
 			},
 			signingKey: prv1,
-			path:       "testdata/good1.jsonnet",
 			wantErr:    ErrPushSourceMismatch,
-			wantResult: &Result{},
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{
@@ -191,6 +350,7 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "error_exec",
+			command:     "testdata/good1.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
 				nil,
@@ -198,7 +358,6 @@ func TestPush(t *testing.T) {
 				ErrNoVerifyKeys,
 			},
 			signingKey: prv1,
-			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{
@@ -224,13 +383,13 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "good",
+			command:     "testdata/good1.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			mockErrors: []error{
 				nil,
 				ErrNoVerifyKeys,
 			},
 			signingKey: prv1,
-			path:       "testdata/good1.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{
@@ -248,13 +407,12 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "good-check",
-			check:       true,
-			destination: ts.URL + "/etcha/v1/push/etcha",
+			command:     "testdata/good2.jsonnet",
+			destination: ts.URL + "/etcha/v1/push/etcha?check=",
 			mockErrors: []error{
 				ErrNoVerifyKeys,
 			},
 			signingKey: prv1,
-			path:       "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check2"},
 				{Environment: []string{"_CHECK=1", "_CHECK_OUT=1"}, Exec: "check1"},
@@ -266,9 +424,9 @@ func TestPush(t *testing.T) {
 		},
 		{
 			name:        "good-2",
+			command:     "testdata/good2.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			signingKey:  prv1,
-			path:        "testdata/good2.jsonnet",
 			wantInputs: []cli.RunMockInput{
 				{Exec: "check2"},
 				{Environment: []string{"_CHECK=0", "_CHECK_OUT=1"}, Exec: "check1"},
@@ -302,8 +460,7 @@ func TestPush(t *testing.T) {
 		{
 			name:        "good-filter",
 			command:     "ls",
-			destination: ts.URL + "/etcha/v1/push/etcha",
-			filter:      regexp.MustCompile("^123$"),
+			destination: ts.URL + "/etcha/v1/push/etcha?filter=^123$",
 			signingKey:  prv1,
 			wantResult:  &Result{},
 		},
@@ -315,10 +472,30 @@ func TestPush(t *testing.T) {
 			c.CLI.RunMockErrors(tc.mockErrors)
 			c.CLI.RunMockOutputs([]string{"1", "a", "b", "c", "d", "e"})
 
-			r, err := Push(ctx, c, tc.destination, tc.command, tc.path, PushOpts{
-				Check:          tc.check,
-				ParentIDFilter: tc.filter,
-			})
+			var err errs.Err
+
+			var p *pattern.Pattern
+
+			var r *Result
+
+			p, _, err = getPushPattern(ctx, c, tc.command)
+			if err == nil {
+				var buildManifest string
+
+				var runVars map[string]any
+
+				buildManifest, runVars, err = p.BuildRun(ctx, c)
+				if err == nil {
+					var jwt string
+
+					jwt, _, err = p.Sign(ctx, c, buildManifest, runVars)
+
+					if err == nil {
+						r, err = pushTarget(ctx, c, tc.destination, jwt)
+					}
+				}
+			}
+
 			assert.HasErr(t, err, tc.wantErr)
 			assert.Equal(t, r, tc.wantResult)
 			assert.Equal(t, c.CLI.RunMockInputs(), tc.wantInputs)

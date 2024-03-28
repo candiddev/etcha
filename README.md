@@ -21,7 +21,7 @@ Visit https://etcha.dev for more information.
 
 ## License
 
-The code in this repository is licensed under a personal, non-production [source-available license](./LICENSE.md).  Visit https://etcha.dev/pricing/ for additional licensing options.
+The code in this repository is licensed under the [Prosperity License](./LICENSE.md) and is free for personal and noncommercial use.  Visit https://etcha.dev/pricing/ for additional licensing options.
 
 ## Development
 

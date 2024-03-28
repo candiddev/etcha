@@ -43,7 +43,7 @@ local n = import '../lib/etcha/native.libsonnet';
   run: [
     {
       always: true,
-      change: 'echo %s > /work/hostname' % n.getEnv('HOSTNAME'),
+      change: 'echo %s > /work/hostname' % n.getEnv('HOSTNAME', 'fallback'),
       id: 'write a file',
       onChange: [
         'copy file',
@@ -81,7 +81,7 @@ $ docker run -d --name etcha_listen \
       "verifyKeys": [
         "ed25519public:MCowBQYDK2VwAyEAw7eTEuEH0+TfgtX3zB+JZVnYD0eskY6qn3n7ZCA7wWM=:reqYEklgP4"
       ]
-    }' run-listen
+    }' run
 ```
 
 The container should've started listening:
@@ -117,33 +117,28 @@ We should see a bunch of [metrics]({{< ref "/docs/guides/monitoring" >}}).  Noth
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    push-pattern patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
-INFO  etcha/go/run/push.go:36
-Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
-ERROR etcha/go/run/push.go:63
-error performing request: Post "https://etcha_listen:4000/etcha/v1/push/listen": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match etcha_listen
+    push -h localhost listen patterns/run.jsonnet
+ERROR error performing request: Post "https://localhost:4000/etcha/v1/push/listen": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+localhost:
+    ERROR: error performing request: Post "https://localhost:4000/etcha/v1/push/listen": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
 ```
 
 Etcha couldn't verify the remote instance certificate.  That's OK, we can specify an additional argument to skip verification:
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIE6dSkW4jnn3tx119BKw8+zOmhJyzTOsBlWcjqaHxMcX:ZcxoeWfSRt \
-    -x build_pushTLSSkipVerify=true push-pattern patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
-INFO  etcha/go/run/push.go:36
-Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
-ERROR etcha/go/run/push.go:69
-push didn't match any sources
+    -x build_pushTLSSkipVerify=true push -h localhost listen patterns/run.jsonnet
+localhost:
+    ERROR: push didn't match any sources
 ```
 
 What happened?  Well, we used the wrong `signingKey`--the remote Etcha instance couldn't verify our push.  Lets use the right one and try again:
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push-pattern patterns/run.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
-INFO  etcha/go/run/push.go:36
-Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
-INFO  candiddev/etcha/go/push.go:21
-Changed: write a file, copy file
+    -x build_pushTLSSkipVerify=true push -h localhost listen patterns/run.jsonnet
+localhost:
+    Changed 2: write a file, copy file
 ```
 
 That's better.  We successfully pushed our config!  We can see the files `hostname` and `hostname2` exists:
@@ -177,13 +172,10 @@ Lets push the file:
 
 ```bash
  $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push-pattern patterns/newfile.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
-INFO  etcha/go/run/push.go:36
-Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
-INFO  candiddev/etcha/go/push.go:21
-Changed: write a new file
-INFO  candiddev/etcha/go/push.go:25
-Removed: copy file, write a file
+    -x build_pushTLSSkipVerify=true push -h localhost listen patterns/newfile.jsonnet
+localhost:
+    Changed 1: write a new file
+    Removed 2: copy file, write a file
 ```
 
 This time, Etcha ran the `remove` commands from the two commands we removed, and then ran the `change` for `write a new file`.  Sure enough, the old files `hostname` and `hostname2` are gone, and only `newfile` remains:
@@ -197,11 +189,9 @@ etcha  lib  newfile  patterns  README.md
 
 ```bash
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
-    -x build_pushTLSSkipVerify=true push-pattern patterns/newfile.jsonnet https://etcha_listen:4000/etcha/v1/push/listen
-INFO  etcha/go/run/push.go:36
-Pushing config to https://etcha_listen:4000/etcha/v1/push/listen...
-INFO  etcha/go/run/push.go:79
-No changes
+    -x build_pushTLSSkipVerify=true push -h localhost listen patterns/newfile.jsonnet
+localhost:
+    No changes
 ```
 
 ## Pulling a Pattern
@@ -233,7 +223,7 @@ $ docker run -d --name etcha_listen \
       "verifyKeys": [
         "ed25519public:MCowBQYDK2VwAyEAw7eTEuEH0+TfgtX3zB+JZVnYD0eskY6qn3n7ZCA7wWM=:reqYEklgP4"
       ]
-    }' run-listen
+    }' run
 $ docker logs etcha_listen
 level="INFO" function="etcha/go/run/run.go:59" status=200 success=true  message="Starting source runner..."
 level="ERROR" function="etcha/go/pattern/jwt.go:56" status=500 success=false error="error reading JWT: error opening src: error opening src: open /work/etcha/listen.jwt: no such file or directory"

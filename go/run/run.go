@@ -81,6 +81,16 @@ type diffExecOpts struct {
 	parentIDFilter *regexp.Regexp
 }
 
+// Result is a list of changed and removed IDs.
+type Result struct {
+	ChangedIDs     []string `json:"changedIDs"`
+	ChangedOutputs []string `json:"changedOutputs"`
+	Err            string   `json:"err"`
+	Exit           bool     `json:"exit"`
+	RemovedIDs     []string `json:"removedIDs"`
+	RemovedOutputs []string `json:"removedOutputs"`
+}
+
 func (s *state) diffExec(ctx context.Context, source string, j *pattern.JWT, opts diffExecOpts) (*Result, errs.Err) {
 	ctx = metrics.SetSourceName(ctx, source)
 
