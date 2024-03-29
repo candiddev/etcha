@@ -105,8 +105,6 @@ A Command is ran within three different operating modes:
 
 The default, will always run [`check`](#check) if specified, and run [`change`](#change) if [`always`](#always) is true, `check` is non-zero, or the [`id`](#id) is [`changed by`](#on) another command.
 
-For push and pull, Etcha by default diff Patterns and run checks and changes for Commands that have a different [`change`](#change) or [`check`](#check) value, as well as the `change` value of any Command with [`always`](#always) set to `true`.
-
 ### Check {#check-mode}
 
 Will always run [`check`](#check) if specified only.  [Sources]({{< ref "/docs/references/config#sources" >}}) can be forced to run in check mode, and patterns can be ran in check mode using [`checkOnly`]({{< ref "/docs/references/config#checkonly" >}})
@@ -115,7 +113,7 @@ Will always run [`check`](#check) if specified only.  [Sources]({{< ref "/docs/r
 
 Will always run [`check`](#check) if specified, and run [`remove`](#remove) if [`always`](#always) is true, `check` is zero, or the [`id`](#id) is [`removed by`](#on) another command.
 
-For push and pull, Etcha by default diff Patterns and run checks and removes for Commands that are no longer present in the new Pattern.
+For push and pull, Etcha by default diff Patterns and run checks and removes for Commands that are no longer present in the new Pattern, as well as for any Commands that have a modified `change` values (unless `changeIgnore` is specified).
 
 ## Properties
 
@@ -126,6 +124,10 @@ Boolean, when true, [`change`](#change) will always be ran during [Change Mode](
 ### `change`
 
 String, the commands or executable to run during [Change Mode](#change-mode).  Can be multiple lines.  Will be appended to `exec.command`.  Should return 0 if successful, otherwise it will produce an error.
+
+### `changeIgnore`
+
+Boolean, will ignore changes to the `change` Command.  By default, `change` differences will trigger a `remove` and `change` cycle for the Command.
 
 ### `check`
 
@@ -182,6 +184,10 @@ In this example, `b` can target `c` but cannot target `d`.
 ### `remove`
 
 String, the commands or executable to run during [Remove Mode](#remove-mode).  Can be multiple lines.  Will be appended to `exec.command`.  Should return 0 if successful, otherwise it will produce an error.
+
+### `removeAfter`
+
+Boolean, will change the ordering of `remove` to be executed after the Command's `change` is ran.  By default, `remove` is executed before `change`.
 
 ### `stdin`
 

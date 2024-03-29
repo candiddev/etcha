@@ -42,9 +42,10 @@ var cmdB = &Command{
 	ID:     "b",
 }
 var cmdC = &Command{
-	Check:  "checkC",
-	Remove: "removeC",
-	ID:     "c",
+	Check:       "checkC",
+	Remove:      "removeC",
+	RemoveAfter: true,
+	ID:          "c",
 	OnChange: []string{
 		"f",
 	},
@@ -75,6 +76,7 @@ var cmdH = &Command{
 					ID:     "j",
 					Change: "changeJ",
 					Check:  "checkJ",
+					Remove: "removeJ",
 				},
 			},
 			ID: "i",
@@ -84,22 +86,65 @@ var cmdH = &Command{
 }
 
 func TestCommandsDiff(t *testing.T) {
-	a := *cmdA
-	b := *cmdB
-	c := *cmdC
-	g := *cmdG
-
-	remove := Commands{
-		&a,
-		&b,
-		&g,
+	before, after := Commands{
+		cmdA,
+		cmdB,
+		cmdG,
+		{
+			ID:     "k",
+			Check:  "checkL",
+			Change: "changeL",
+			Remove: "removeL",
+		},
+		{
+			ID: "l",
+			Commands: Commands{
+				{
+					ID:     "m",
+					Always: true,
+					Change: "removeN",
+					Remove: "removeN",
+				},
+			},
+		},
 	}.Diff(Commands{
-		&a,
-		&c,
-		&g,
+		cmdA,
+		cmdC,
+		cmdG,
+		cmdH,
+		{
+			ID:     "k",
+			Check:  "checkK",
+			Change: "changeK",
+			Remove: "removeL",
+		},
+		{
+			ID: "l",
+			Commands: Commands{
+				{
+					ID:     "m",
+					Always: true,
+					Remove: "removeM",
+				},
+			},
+		},
 	})
-	assert.Equal(t, remove, Commands{
-		&c,
+	assert.Equal(t, before, Commands{
+		cmdH.Commands[0].Commands[0],
+		{
+			ID:     "k",
+			Check:  "checkK",
+			Change: "changeK",
+			Remove: "removeL",
+		},
+		{
+			ID:     "m",
+			Always: true,
+			Remove: "removeM",
+		},
+	})
+	assert.Equal(t, after, Commands{
+		cmdC,
 	})
 }
 

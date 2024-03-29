@@ -22,6 +22,8 @@ type: blog
 
 ## Enhancements
 
+- Changed the ordering of change and remove.  By default, all removes will now happen **before changes**.  A Command can be configured for the old behavior (remove after change) using the property [`removeAfter`]({{< ref "/docs/references/commands#removeafter" >}}).
+- Changed Commands to trigger a `remove` and `change` cycle if the `change` value is modified for an ID.  See [`changeIgnore`]({{< ref "/docs/references/commands#changeignore" >}}) for details on how to disable this.
 - Changed [`exec.env`]({{< ref "/docs/references/config#env" >}}) to be a map of strings.
 - Changed [`onChange`, `onFail`, and `onRemove`]({{< ref "/docs/references/patterns#on" >}}) to support RegExp values.
 - Changed `etcha local`, `etcha push`, and `etcha test` to allow filtering for parent Command IDs for targeting and testing.

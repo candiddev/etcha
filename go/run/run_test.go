@@ -216,6 +216,8 @@ func TestStateDiffExec(t *testing.T) {
 		{
 			name: "good",
 			mockErrors: []error{
+				nil,
+				nil,
 				ErrNilJWT,
 			},
 			j: &pattern.JWT{
@@ -228,10 +230,10 @@ func TestStateDiffExec(t *testing.T) {
 				Raw: "hello",
 			},
 			wantInputs: []cli.RunMockInput{
-				{Exec: "checkA"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA"},
-				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT="}, Exec: "checkB"},
-				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=", "_CHECK=1", "_CHECK_OUT="}, Exec: "removeB"},
+				{Exec: "checkB"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "removeB"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=", "_REMOVE=0", "_REMOVE_OUT="}, Exec: "checkA"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=", "_REMOVE=0", "_REMOVE_OUT="}, Exec: "changeA"},
 			},
 			wantJWT: "hello",
 			wantResult: &Result{
@@ -275,6 +277,9 @@ func TestStateDiffExec(t *testing.T) {
 		},
 		{
 			name: "good_noRestore",
+			mockErrors: []error{
+				ErrNilJWT,
+			},
 			j: &pattern.JWT{
 				EtchaPattern: &jsonnet.Imports{
 					Entrypoint: "/main.jsonnet",
@@ -288,7 +293,11 @@ func TestStateDiffExec(t *testing.T) {
 			wantJWT:   "anew2",
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: "checkB",
+					Exec: "checkA",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
+					Exec:        "checkB",
 				},
 			},
 			wantResult: &Result{},

@@ -410,12 +410,13 @@ func TestPushTargetPostPush(t *testing.T) {
 			command:     "testdata/good2.jsonnet",
 			destination: ts.URL + "/etcha/v1/push/etcha?check=",
 			mockErrors: []error{
+				nil,
 				ErrNoVerifyKeys,
 			},
 			signingKey: prv1,
 			wantInputs: []cli.RunMockInput{
-				{Exec: "check2"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT=1"}, Exec: "check1"},
+				{Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=1"}, Exec: "check2"},
 			},
 			wantResult: &Result{
 				ChangedIDs: []string{"2"},
@@ -428,13 +429,13 @@ func TestPushTargetPostPush(t *testing.T) {
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			signingKey:  prv1,
 			wantInputs: []cli.RunMockInput{
-				{Exec: "check2"},
-				{Environment: []string{"_CHECK=0", "_CHECK_OUT=1"}, Exec: "check1"},
-				{Environment: []string{"_CHECK=1", "_CHECK_OUT=a"}, Exec: "remove1"},
+				{Exec: "check1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=1"}, Exec: "remove1"},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=1", "_REMOVE=0", "_REMOVE_OUT=a"}, Exec: "check2"},
 			},
 			wantResult: &Result{
 				RemovedIDs:     []string{"1"},
-				RemovedOutputs: []string{"b"},
+				RemovedOutputs: []string{"a"},
 			},
 		},
 		{
@@ -443,18 +444,18 @@ func TestPushTargetPostPush(t *testing.T) {
 			destination: ts.URL + "/etcha/v1/push/etcha",
 			signingKey:  prv1,
 			wantInputs: []cli.RunMockInput{
-				{Environment: []string{"_CHECK=1"}, Exec: "/usr/bin/ls"},
-				{Environment: []string{"_CHANGE=0", "_CHANGE_OUT=1", "_CHECK=1"}, Exec: "check2"},
+				{Exec: "check2"},
 				{
-					Environment: []string{"_CHANGE=0", "_CHANGE_OUT=1", "_CHECK=1", "_CHECK_OUT=a"},
+					Environment: []string{"_CHECK=1", "_CHECK_OUT=1"},
 					Exec:        "remove2",
 				},
+				{Environment: []string{"_CHECK=1", "_CHECK_OUT=1", "_REMOVE=0", "_REMOVE_OUT=a"}, Exec: "/usr/bin/ls"},
 			},
 			wantResult: &Result{
 				ChangedIDs:     []string{"etcha push"},
-				ChangedOutputs: []string{"1"},
+				ChangedOutputs: []string{"b"},
 				RemovedIDs:     []string{"2"},
-				RemovedOutputs: []string{"b"},
+				RemovedOutputs: []string{"a"},
 			},
 		},
 		{

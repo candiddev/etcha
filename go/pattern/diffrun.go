@@ -28,14 +28,12 @@ type DiffRunOpts struct {
 
 // DiffRun performs a diff against two patterns and runs the changes.
 func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, opts DiffRunOpts) (commands.Outputs, errs.Err) {
-	var remove commands.Commands
+	var removeBefore commands.Commands
 
-	if old != nil {
-		remove = p.Run.Diff(old.Run)
-	}
+	var removeAfter commands.Commands
 
-	if opts.NoRemove {
-		remove = commands.Commands{}
+	if old != nil && !opts.NoRemove {
+		removeBefore, removeAfter = p.Run.Diff(old.Run)
 	}
 
 	change := p.Run
@@ -51,7 +49,7 @@ func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, o
 		}
 	}
 
-	if !diff && len(remove) == 0 {
+	if !diff && len(removeBefore) == 0 && len(removeAfter) == 0 {
 		return o, nil
 	}
 
@@ -59,26 +57,39 @@ func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, o
 
 	var err errs.Err
 
-	o, err = change.Run(ctx, c.CLI, p.RunExec, commands.CommandsRunOpts{
-		Check:          opts.Check,
-		Env:            env,
-		ParentID:       opts.Source,
-		ParentIDFilter: opts.ParentIDFilter,
-	})
-
-	if err != nil {
-		return o, logger.Error(ctx, err)
-	}
-
-	removeOut, err := remove.Run(ctx, c.CLI, p.RunExec, commands.CommandsRunOpts{
+	out, err := removeBefore.Run(ctx, c.CLI, p.RunExec, commands.CommandsRunOpts{
 		Check:          opts.Check,
 		Env:            env,
 		ParentID:       opts.Source,
 		ParentIDFilter: opts.ParentIDFilter,
 		Remove:         true,
 	})
+	o = append(o, out...)
 
-	o = append(o, removeOut...)
+	if err != nil {
+		return o, logger.Error(ctx, err)
+	}
+
+	out, err = change.Run(ctx, c.CLI, p.RunExec, commands.CommandsRunOpts{
+		Check:          opts.Check,
+		Env:            env,
+		ParentID:       opts.Source,
+		ParentIDFilter: opts.ParentIDFilter,
+	})
+	o = append(o, out...)
+
+	if err != nil {
+		return o, logger.Error(ctx, err)
+	}
+
+	out, err = removeAfter.Run(ctx, c.CLI, p.RunExec, commands.CommandsRunOpts{
+		Check:          opts.Check,
+		Env:            env,
+		ParentID:       opts.Source,
+		ParentIDFilter: opts.ParentIDFilter,
+		Remove:         true,
+	})
+	o = append(o, out...)
 
 	if err != nil {
 		return o, logger.Error(ctx, err)

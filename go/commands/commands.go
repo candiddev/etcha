@@ -29,8 +29,9 @@ var (
 type Commands []*Command
 
 // Diff compares two commands and returns the removed Commands.
-func (cmds Commands) Diff(old Commands) (remove Commands) {
-	remove = Commands{}
+func (cmds Commands) Diff(old Commands) (removeBefore Commands, removeAfter Commands) {
+	removeBefore = Commands{}
+	removeAfter = Commands{}
 
 	// Figure out what changed
 	for _, cmd := range old {
@@ -38,18 +39,34 @@ func (cmds Commands) Diff(old Commands) (remove Commands) {
 
 		for _, newV := range cmds {
 			if cmd.ID == newV.ID {
-				match = true
+				match = newV.ChangeIgnore || cmd.Change == newV.Change
+				b, a := newV.Commands.Diff(cmd.Commands)
+				removeBefore = append(removeBefore, b...)
+				removeAfter = append(removeAfter, a...)
+				cmd.Commands = nil
 
 				break
 			}
 		}
 
-		if !match && cmd.Remove != "" {
-			remove = append(remove, cmd)
+		if !match {
+			if len(cmd.Commands) > 0 {
+				b, a := Commands{}.Diff(cmd.Commands)
+				removeBefore = append(removeBefore, b...)
+				removeAfter = append(removeAfter, a...)
+			}
+
+			if cmd.Remove != "" {
+				if cmd.RemoveAfter {
+					removeAfter = append(removeAfter, cmd)
+				} else {
+					removeBefore = append(removeBefore, cmd)
+				}
+			}
 		}
 	}
 
-	return remove
+	return removeBefore, removeAfter
 }
 
 // CommandsRunOpts is a list of options for Commands.Run.

@@ -44,10 +44,11 @@ func TestPatternDiffRun(t *testing.T) {
 	pOld := Pattern{
 		Run: commands.Commands{
 			{
-				Change: "changeb",
-				Check:  "checkb",
-				ID:     "b",
-				Remove: "removeb",
+				Change:      "changeb",
+				Check:       "checkb",
+				ID:          "b",
+				Remove:      "removeb",
+				RemoveAfter: true,
 			},
 			{
 				Change: "changeC",
@@ -67,7 +68,6 @@ func TestPatternDiffRun(t *testing.T) {
 	tests := map[string]struct {
 		check       bool
 		noRemove    bool
-		runAll      bool
 		mockError   []error
 		wantErr     error
 		wantInputs  []cli.RunMockInput
@@ -77,16 +77,24 @@ func TestPatternDiffRun(t *testing.T) {
 			mockError: []error{
 				ErrBuildEmpty,
 				ErrBuildEmpty,
+				ErrBuildEmpty,
 			},
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: "checkA",
+					Exec: "checkC",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="}, Exec: "checkA",
 				},
 				{
 					Environment: []string{"_CHECK=1", "_CHECK_OUT="}, Exec: "changeA",
 				},
 			},
 			wantOutputs: commands.Outputs{
+				{
+					Checked: true,
+					ID:      "c",
+				},
 				{
 					Changed:         true,
 					ChangeFail:      true,
@@ -99,16 +107,22 @@ func TestPatternDiffRun(t *testing.T) {
 		},
 		"remove_error": {
 			mockError: []error{
+				ErrBuildEmpty,
 				nil,
 				nil,
 				nil,
 				nil,
 				ErrBuildEmpty,
+				ErrBuildEmpty,
 			},
 			wantErr: ErrBuildEmpty,
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: "checkA",
+					Exec: "checkC",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
+					Exec:        "checkA",
 				},
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
@@ -120,14 +134,18 @@ func TestPatternDiffRun(t *testing.T) {
 				},
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkC",
+					Exec:        "checkb",
 				},
 				{
 					Environment: []string{"_CHECK=1", "_CHECK_OUT="},
-					Exec:        "removeC",
+					Exec:        "removeb",
 				},
 			},
 			wantOutputs: commands.Outputs{
+				{
+					Checked: true,
+					ID:      "c",
+				},
 				{
 					Checked: true,
 					ID:      "a",
@@ -143,7 +161,7 @@ func TestPatternDiffRun(t *testing.T) {
 				{
 					Checked:         true,
 					CheckFailRemove: true,
-					ID:              "c",
+					ID:              "b",
 					Removed:         true,
 					RemoveFail:      true,
 				},
@@ -153,7 +171,11 @@ func TestPatternDiffRun(t *testing.T) {
 			check: true,
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: "checkA",
+					Exec: "checkC",
+				},
+				{
+					Environment: []string{"_CHECK=1", "_CHECK_OUT="},
+					Exec:        "checkA",
 				},
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
@@ -165,10 +187,15 @@ func TestPatternDiffRun(t *testing.T) {
 				},
 				{
 					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkC",
+					Exec:        "checkb",
 				},
 			},
 			wantOutputs: commands.Outputs{
+				{
+					Checked:         true,
+					CheckFailRemove: true,
+					ID:              "c",
+				},
 				{
 					Checked: true,
 					ID:      "a",
@@ -184,33 +211,47 @@ func TestPatternDiffRun(t *testing.T) {
 				{
 					Checked:         true,
 					CheckFailRemove: true,
-					ID:              "c",
+					ID:              "b",
 				},
 			},
 		},
 		"good": {
 			wantInputs: []cli.RunMockInput{
 				{
-					Exec: "checkA",
-				},
-				{
-					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkB",
-				},
-				{
-					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkD",
-				},
-				{
-					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkC",
+					Exec: "checkC",
 				},
 				{
 					Environment: []string{"_CHECK=1", "_CHECK_OUT="},
 					Exec:        "removeC",
 				},
+				{
+					Environment: []string{"_CHECK=1", "_CHECK_OUT=", "_REMOVE=0", "_REMOVE_OUT="},
+					Exec:        "checkA",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT=", "_REMOVE=0", "_REMOVE_OUT="},
+					Exec:        "checkB",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT=", "_REMOVE=0", "_REMOVE_OUT="},
+					Exec:        "checkD",
+				},
+				{
+					Environment: []string{"_CHECK=0", "_CHECK_OUT=", "_REMOVE=0", "_REMOVE_OUT="},
+					Exec:        "checkb",
+				},
+				{
+					Environment: []string{"_CHECK=1", "_CHECK_OUT=", "_REMOVE=0", "_REMOVE_OUT="},
+					Exec:        "removeb",
+				},
 			},
 			wantOutputs: commands.Outputs{
+				{
+					ID:              "c",
+					Checked:         true,
+					CheckFailRemove: true,
+					Removed:         true,
+				},
 				{
 					Checked: true,
 					ID:      "a",
@@ -224,7 +265,7 @@ func TestPatternDiffRun(t *testing.T) {
 					ID:      "d",
 				},
 				{
-					ID:              "c",
+					ID:              "b",
 					Checked:         true,
 					CheckFailRemove: true,
 					Removed:         true,
@@ -256,50 +297,6 @@ func TestPatternDiffRun(t *testing.T) {
 				{
 					Checked: true,
 					ID:      "d",
-				},
-			},
-		},
-		"good_runAll": {
-			mockError: []error{
-				nil,
-				nil,
-				nil,
-				ErrBuildEmpty,
-			},
-			runAll: true,
-			wantInputs: []cli.RunMockInput{
-				{
-					Exec: "checkA",
-				},
-				{
-					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkB",
-				},
-				{
-					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkD",
-				},
-				{
-					Environment: []string{"_CHECK=0", "_CHECK_OUT="},
-					Exec:        "checkC",
-				},
-			},
-			wantOutputs: commands.Outputs{
-				{
-					Checked: true,
-					ID:      "a",
-				},
-				{
-					Checked: true,
-					ID:      "b",
-				},
-				{
-					Checked: true,
-					ID:      "d",
-				},
-				{
-					ID:      "c",
-					Checked: true,
 				},
 			},
 		},

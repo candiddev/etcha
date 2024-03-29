@@ -42,7 +42,7 @@ In this example, the Pattern contains build and run **Commands**.  Commands are 
 
 - **check** will always run, and is used to check if a command needs to be changed.
 - **change** will only run under certain conditions, like if check fails.
-- **remove** will only run if the command is removed in future Patterns.
+- **remove** will only run if the command is removed in future Patterns or the `change` value is modified.
 
 In the example above, the build configuration will always run the `change`, `make myapp`.  The run configuration will run the first Command's `check`, and if that doesn't exit 0, it will run the `change`.  If the `change` is run, it will also cause the command `restart myapp` to run its `change`, too, since it triggered it via `onChange`.
 

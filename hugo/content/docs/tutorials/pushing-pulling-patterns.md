@@ -276,11 +276,11 @@ etcha  hostname  hostname2  lib  listen.jwt  patterns  README.md
 $ etcha -x build_signingKey=ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4 \
     build patterns/newfile.jsonnet listen.jwt
 $ docker logs -n 5 etcha_listen
+level="INFO" function="etcha/go/commands/command.go:63" status=200 success=true sourceTrigger="pull" sourceName="listen" commandID="copy file" commandMode="remove" message="Removing copy file..."
+level="INFO" function="etcha/go/commands/command.go:63" status=200 success=true sourceTrigger="pull" sourceName="listen" commandID="write a file" commandMode="remove" message="Removing write a file..."
 level="INFO" function="etcha/go/commands/command.go:129" status=200 success=true sourceTrigger="pull" sourceName="listen" commandID="copy file" commandMode="check" commandMode="change" message="Changing copy file..."
 level="INFO" function="etcha/go/run/run.go:97" status=200 success=true sourceTrigger="pull" sourceName="listen" message="Updating config for listen..."
 level="INFO" function="etcha/go/commands/command.go:129" status=200 success=true sourceTrigger="pull" sourceName="listen" commandID="write a new file" commandMode="check" commandMode="change" message="Changing write a new file..."
-level="INFO" function="etcha/go/commands/command.go:63" status=200 success=true sourceTrigger="pull" sourceName="listen" commandID="copy file" commandMode="remove" message="Removing copy file..."
-level="INFO" function="etcha/go/commands/command.go:63" status=200 success=true sourceTrigger="pull" sourceName="listen" commandID="write a file" commandMode="remove" message="Removing write a file..."
 ```
 
 Just like with the push, Etcha diff'd the new Pattern, created `newfile`, and removed `hostname` and `hostname2`:
