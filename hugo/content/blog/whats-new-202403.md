@@ -22,10 +22,12 @@ type: blog
 
 ## Enhancements
 
+- Added `sysinfo` to [`vars`]({{< ref "/docs/references/config#vars" >}}), containing useful system information for Patterns and configurations to utilize.
 - Changed the ordering of change and remove.  By default, all removes will now happen **before changes**.  A Command can be configured for the old behavior (remove after change) using the property [`removeAfter`]({{< ref "/docs/references/commands#removeafter" >}}).
 - Changed Commands to trigger a `remove` and `change` cycle if the `change` value is modified for an ID.  See [`changeIgnore`]({{< ref "/docs/references/commands#changeignore" >}}) for details on how to disable this.
 - Changed [`exec.env`]({{< ref "/docs/references/config#env" >}}) to be a map of strings.
 - Changed [`onChange`, `onFail`, and `onRemove`]({{< ref "/docs/references/patterns#on" >}}) to support RegExp values.
+- Changed [`etcha init`]({{< ref "/docs/references/cli#init" >}}) to remove unrecognized files from `lib/etcha`.
 - Changed `etcha local`, `etcha push`, and `etcha test` to allow filtering for parent Command IDs for targeting and testing.
 - Changed [`etcha local`]({{< ref "/docs/references/cli#local" >}}) to support rendering and running ad-hoc Jsonnet.  See [Render and Run]({{< ref "/docs/guides/running-patterns#render-and-run" >}}) for more information.
 - Changed `etcha push` and `etcha run` to include the raw JWT as a var.

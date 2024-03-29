@@ -69,6 +69,16 @@ func TestConfigParse(t *testing.T) {
 	os.Remove("run")
 }
 
+func TestGetSysInfo(t *testing.T) {
+	s := GetSysInfo()
+
+	assert.Equal(t, s.CPULogical != 0, true)
+	assert.Equal(t, s.Hostname != "", true)
+	assert.Equal(t, s.MemoryTotal != 0, true)
+	assert.Equal(t, s.OSType != "", true)
+	assert.Equal(t, s.RuntimeArch != "", true)
+}
+
 func TestParseJWTFile(t *testing.T) {
 	logger.UseTestLogger(t)
 

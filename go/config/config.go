@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -132,8 +133,47 @@ func Default() *Config {
 			ListenAddress:   ":4000",
 			RateLimiterRate: "10-M",
 		},
-		Vars: map[string]any{},
+		Vars: map[string]any{
+			"sysinfo": GetSysInfo(),
+		},
 	}
+}
+
+// SysInfo is various details about the underlying system.
+type SysInfo struct {
+	CPULogical  int    `json:"cpuLogical,omitempty"`
+	Hostname    string `json:"hostname,omitempty"`
+	MemoryTotal int    `json:"memoryTotal,omitempty"`
+	OSType      string `json:"osType,omitempty"`
+	RuntimeArch string `json:"runtimeArch,omitempty"`
+}
+
+// GetSysInfo gathers SysInfo.
+func GetSysInfo() *SysInfo {
+	s := SysInfo{
+		CPULogical:  runtime.NumCPU(),
+		OSType:      runtime.GOOS,
+		RuntimeArch: runtime.GOARCH,
+	}
+
+	hostname, err := os.Hostname()
+	if err == nil {
+		s.Hostname = hostname
+	}
+
+	if s.OSType == "linux" {
+		// MemoryMB
+		if f, err := os.ReadFile("/proc/meminfo"); err == nil {
+			r := regexp.MustCompile(`^MemTotal:\s+(\S+)`).FindStringSubmatch(string(f))
+			if len(r) == 2 {
+				if n, err := strconv.Atoi(r[1]); err == nil {
+					s.MemoryTotal = n / 1024
+				}
+			}
+		}
+	}
+
+	return &s
 }
 
 func (c *Config) Parse(ctx context.Context, configArgs []string) errs.Err {

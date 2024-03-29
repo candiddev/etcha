@@ -2,12 +2,12 @@ local apt = import '../lib/etcha/apt.libsonnet';
 local aptKey = import '../lib/etcha/aptKey.libsonnet';
 local copy = import '../lib/etcha/copy.libsonnet';
 local dir = import '../lib/etcha/dir.libsonnet';
-local etchaInstall = import '../lib/etcha/etchaInstall.libsonnet';
+local etcha = import '../lib/etcha/etcha.libsonnet';
 local file = import '../lib/etcha/file.libsonnet';
 local group = import '../lib/etcha/group.libsonnet';
 local line = import '../lib/etcha/line.libsonnet';
 local mount = import '../lib/etcha/mount.libsonnet';
-local rotInstall = import '../lib/etcha/rotInstall.libsonnet';
+local rot = import '../lib/etcha/rot.libsonnet';
 local symlink = import '../lib/etcha/symlink.libsonnet';
 local systemdNetwork = import '../lib/etcha/systemdNetwork.libsonnet';
 local systemdUnit = import '../lib/etcha/systemdUnit.libsonnet';
@@ -31,10 +31,10 @@ local user = import '../lib/etcha/user.libsonnet';
     copy(src='https://candid.dev/sitemap.xml', dst='testdata/sitemap.xml'),
     copy(src='testdata/sitemap.xml', dst='testdata/sitemap2.xml'),
     dir(group='daemon', mode='0700', owner='daemon', path='testdata/test'),
-    etchaInstall(cacheDir='testdata/test', dst='testdata/etcha'),
-    etchaInstall(dst='testdata/etcha1'),
-    rotInstall(cacheDir='testdata/test', dst='testdata/rot'),
-    rotInstall(dst='testdata/rot1'),
+    etcha.install(cacheDir='testdata/test', dst='testdata/etcha'),
+    etcha.install(dst='testdata/etcha1'),
+    rot.install(cacheDir='testdata/test', dst='testdata/rot'),
+    rot.install(dst='testdata/rot1'),
     file(contents=|||
       HOME=${HOMEDIR}
     |||, expand=true, path='testdata/home'),

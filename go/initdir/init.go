@@ -84,5 +84,17 @@ func Init(ctx context.Context, path string) errs.Err {
 		return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
 
+	// Remove unknown lib files
+	if err := filepath.Walk(libetcha, func(path string, info fs.FileInfo, err error) error {
+		p := filepath.Join("lib/etcha", filepath.Base(path))
+		if _, err := lib.Open(p); err != nil && p != "lib/etcha/native.libsonnet" && path != libetcha {
+			return os.RemoveAll(path)
+		}
+
+		return nil
+	}); err != nil {
+		return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+	}
+
 	return logger.Error(ctx, nil)
 }

@@ -69,6 +69,7 @@ func ParsePatternFromImports(ctx context.Context, c *config.Config, configSource
 	}
 
 	vars["source"] = configSource
+	vars["sysinfo"] = config.GetSysInfo()
 
 	if configSource == "test" {
 		vars["test"] = true

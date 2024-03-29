@@ -19,7 +19,11 @@ func TestInit(t *testing.T) {
 
 	assert.HasErr(t, Init(ctx, "/"), errs.ErrReceiver)
 	assert.HasErr(t, Init(ctx, "init"), nil)
+	assert.HasErr(t, os.WriteFile("init/lib/etcha/oops.libsonnet", nil, 0600), nil)
 	assert.HasErr(t, Init(ctx, "init"), nil)
+
+	_, err := os.ReadFile("init/lib/etcha/oops.libsonnet")
+	assert.Equal(t, err != nil, true)
 
 	r, _ := os.ReadFile("init/lib/etcha/native.libsonnet")
 

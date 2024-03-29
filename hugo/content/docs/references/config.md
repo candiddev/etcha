@@ -504,8 +504,13 @@ Vars can be retrieved in Patterns using [`getConfig`]({{< ref "/docs/references/
 The following `vars` are added to all Patterns:
 
 - `source`: String, the source name of the Pattern.
+- `sysinfo`: Map of values containing useful system information:
+  - `cpuLogical`: Integer, count of logical CPUs
+  - `hostname`: String, hostname of the device
+  - `memoryTotal`: Integer, total system memory in MB
+  - `osType`: String, type of OS (like `linux`)
+  - `runtimeArch`: String, architecture of the Etcha binary (like `amd64`)
 - `test`: Boolean, will be `true` if a Pattern is in [test mode]({{< ref "/docs/guides/testing-patterns" >}}).
-
 
 During a Pattern [`build`]({{< ref "/docs/guides/building-patterns" >}}), the following additional `vars` will be set:
 
