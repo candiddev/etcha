@@ -8,6 +8,12 @@ menu:
       url: https://github.com/candiddev/etcha
       post: <sup><i class="ps-1 fa-solid fa-up-right-from-square fa-xs"
         aria-hidden="true"></i></sup>
+module:
+  mounts:
+    - source: content
+      target: content
+    - source: ../shared/hugo/pages/jsonnet.md
+      target: content/docs/references/jsonnet.md
 params:
   colorPrimary: red
   colorSecondary: black

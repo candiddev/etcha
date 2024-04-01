@@ -244,6 +244,7 @@ local config = std.native('getConfig')();
 				},
 			}, tc.runVars)
 			assert.Equal(t, err != nil, tc.wantErr)
+
 			if !tc.wantErr {
 				assert.Equal(t, p.BuildExec.Command, tc.wantBuildExecCommand)
 				assert.Equal(t, p.RunExec.Command, tc.wantRunExecCommand)

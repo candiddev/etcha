@@ -106,7 +106,7 @@ func PushTargets(ctx context.Context, c *config.Config, targets map[string]confi
 			}
 
 			if res.Err != "" {
-				e := fmt.Sprintf("ERROR: %s", res.Err)
+				e := "ERROR: " + res.Err
 				if !logger.GetNoColor(ctx) {
 					e = fmt.Sprintf("%s%s%s", logger.ColorRed, e, logger.ColorReset)
 				}

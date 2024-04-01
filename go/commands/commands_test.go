@@ -394,6 +394,7 @@ func TestCommandsRun(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			logger.SetStd()
+
 			c := cli.Config{}
 			c.RunMock()
 			c.RunMockErrors(tc.mockErrs)
@@ -560,6 +561,7 @@ func TestCommandsValidate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			err := tc.cmds.validate()
 			assert.HasErr(t, err, tc.wantErr)
+
 			if tc.wantErr != nil {
 				assert.Equal(t, strings.Contains(err.Error(), tc.wantOutput), true)
 			}

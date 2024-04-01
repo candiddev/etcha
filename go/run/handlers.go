@@ -171,6 +171,7 @@ func (s *state) initHandlers(ctx context.Context) errs.Err { //nolint:gocognit
 
 					break
 				}
+
 				logger.Error(ctx, err) //nolint:errcheck
 			}
 		}

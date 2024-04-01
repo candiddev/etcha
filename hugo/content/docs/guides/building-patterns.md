@@ -24,7 +24,7 @@ We need a way to sign Patterns before building them.  Out of the box, Etcha cann
 
 A `signingKey` will use a static, private key to sign the Pattern JWT.  This value can be hardcoded in your "builder", or you can retrieve it from environment variables, a remote URL, a DNS record, etc.  This text is like a password though and should be protected.
 
-We can generate keys appropriate for signing using [`etcha generate-keys sign-verify`]({{< ref "/docs/references/cli#generate-keys" >}}).  We'll use the `privateKey` value during build for the `signingKey`, and then we'll save the `publicKey` and use that for the [`verifyKeys`]({{< ref "/docs/references/config#verifykeys" >}}) when we push/pull.
+We can generate keys appropriate for signing using [`etcha gen-keys sign-verify`]({{< ref "/docs/references/cli#gen-keys" >}}).  We'll use the `privateKey` value during build for the `signingKey`, and then we'll save the `publicKey` and use that for the [`verifyKeys`]({{< ref "/docs/references/config#verifykeys" >}}) when we push/pull.
 
 Here is an example Etcha configuration showing a static `signingKey`:
 

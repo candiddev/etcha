@@ -167,12 +167,13 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, exe *Exec, opts Comm
 						} else {
 							for k := range cmd.OnFail {
 								r, err := regexp.Compile(cmd.OnFail[k])
-								if err != nil {
+								if err != nil { //nolint:revive
 									return cout, logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error parsing onFail %s for %s: %w", cmd.OnFail[k], cmd.ID, err)))
 								}
 
-								if r.MatchString(cmds[j].ID) {
+								if r.MatchString(cmds[j].ID) { //nolint:revive
 									run = true
+
 									logger.Info(ctx, fmt.Sprintf("Triggering %s via %s.onFail...", cmds[j].ID, cmd.ID))
 
 									break
@@ -190,7 +191,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, exe *Exec, opts Comm
 
 							cout = append(cout, out)
 
-							if out.Change, e = cfg.Run(ctx, c, cmds[j].Change, ""); e != nil {
+							if out.Change, e = cfg.Run(ctx, c, cmds[j].Change, ""); e != nil { //nolint:revive
 								logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(e.Errors()...), out.Change.String()) //nolint:errcheck
 							}
 						}

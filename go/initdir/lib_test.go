@@ -35,7 +35,7 @@ func TestLib(t *testing.T) {
 		"/initdir/lib/etcha/native.libsonnet": jsonnet.Native,
 	}
 
-	err = fs.WalkDir(lib, "lib", func(path string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(lib, "lib", func(path string, d fs.DirEntry, _ error) error {
 		if d != nil && !d.Type().IsDir() {
 			f, err := lib.ReadFile(path)
 			if err != nil {

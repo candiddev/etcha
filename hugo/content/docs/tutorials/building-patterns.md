@@ -220,7 +220,7 @@ Phew, the day is saved!
 1. We're almost ready to build.  Lets generate a signing key to use:
 
 ```bash
-$ etcha generate-keys sign-verify
+$ etcha gen-keys sign-verify
 {
   "privateKey": "ed25519private:MC4CAQAwBQYDK2VwBCIEIBq+BhDRYk8OJv1ksMwKtf0td5p3FGwypXq96gHKefGS:reqYEklgP4",
   "publicKey": "ed25519public:MCowBQYDK2VwAyEAw7eTEuEH0+TfgtX3zB+JZVnYD0eskY6qn3n7ZCA7wWM=:reqYEklgP4"

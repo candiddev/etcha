@@ -167,6 +167,7 @@ func TestDirFileRunMk(t *testing.T) {
 			f, err := dirFileRunMk(tc.change, tc.dir, []byte("hello"), tc.path, tc.permissions)
 
 			assert.Equal(t, err != nil, tc.wantErr)
+
 			if !tc.wantErr {
 				assert.Equal(t, f != nil, true)
 				assert.Equal(t, f.Mode(), tc.wantPermissions)

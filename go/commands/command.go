@@ -79,7 +79,7 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, exec Exec, opts Comma
 	ctx = metrics.SetCommandMode(ctx, metrics.CommandModeCheck)
 
 	if cmd.Check == "" && !cmd.Always && ((!opts.Remove && len(cmd.ChangedBy) == 0) || (opts.Remove && len(cmd.RemovedBy) == 0)) {
-		newEnv[cmd.EnvPrefix+"_CHECK"] = "0" //nolint:goconst
+		newEnv[cmd.EnvPrefix+"_CHECK"] = "0"
 
 		metrics.CollectCommands(ctx, false)
 

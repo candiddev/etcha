@@ -234,7 +234,7 @@ func (c *Config) ParseJWT(ctx context.Context, customClaims any, token string, s
 		}
 
 		out, e := vc.Run(ctx, c.CLI, ve, commands.CommandsRunOpts{
-			ParentID: fmt.Sprintf("%s > verifyCommands", source),
+			ParentID: source + " > verifyCommands",
 		})
 		if e != nil {
 			return key, r, e

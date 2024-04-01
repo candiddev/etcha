@@ -21,7 +21,7 @@ var line = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"match regexp",
 		"replacement text",
 	},
-	Run: func(ctx context.Context, args []string, _ cli.Flags, config *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, _ *config.Config) errs.Err {
 		mode, e := parseMode(args[1])
 		if e != nil {
 			return logger.Error(ctx, e)

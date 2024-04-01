@@ -67,6 +67,10 @@ func Init(ctx context.Context, path string) errs.Err {
 	}
 
 	if err := fs.WalkDir(lib, "lib", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return errors.New("error walking lib: %w")
+		}
+
 		if d != nil && !d.Type().IsDir() {
 			f, err := lib.ReadFile(path)
 			if err != nil {
@@ -85,7 +89,11 @@ func Init(ctx context.Context, path string) errs.Err {
 	}
 
 	// Remove unknown lib files
-	if err := filepath.Walk(libetcha, func(path string, info fs.FileInfo, err error) error {
+	if err := filepath.Walk(libetcha, func(path string, _ fs.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("error walking path %s: %w", libetcha, err)
+		}
+
 		p := filepath.Join("lib/etcha", filepath.Base(path))
 		if _, err := lib.Open(p); err != nil && p != "lib/etcha/native.libsonnet" && path != libetcha {
 			return os.RemoveAll(path)

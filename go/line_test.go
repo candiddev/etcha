@@ -188,6 +188,7 @@ PermitRootLogin yes$$`,
 			}, nil, c) != nil, tc.wantErr)
 
 			content := logger.ReadStd()
+
 			if !tc.wantErr && tc.stdin == "" {
 				o, _ := os.ReadFile("test")
 				content = string(o)

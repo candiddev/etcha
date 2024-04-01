@@ -52,7 +52,7 @@ func (p *Pattern) BuildRun(ctx context.Context, c *config.Config) (buildManifest
 
 // BuildSign runs the build commands in a template from path and creates a JWT.
 func (p *Pattern) BuildSign(ctx context.Context, c *config.Config, destination string) errs.Err {
-	f, e := os.Create(destination + ".tmp") //nolint:goconst
+	f, e := os.Create(destination + ".tmp")
 	if e != nil {
 		return logger.Error(ctx, errs.ErrReceiver.Wrap(ErrBuildWriteJWT, e))
 	}

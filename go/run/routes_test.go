@@ -63,7 +63,7 @@ func TestCheckRateLimiter(t *testing.T) {
 	var res *http.Response
 
 	for i := 0; i < 11; i++ {
-		res, _ = http.Get(fmt.Sprintf("%s/etcha/v1/system/metrics?key=12345", ts.URL))
+		res, _ = http.Get(ts.URL + "/etcha/v1/system/metrics?key=12345")
 	}
 
 	assert.Equal(t, res.StatusCode, errs.ErrSenderTooManyRequest.Status())
@@ -130,10 +130,10 @@ func TestHandlers(t *testing.T) {
 
 	c.CLI.RunMockOutputs([]string{`{"test":"world"}`, "application/json"})
 
-	res, _ := http.Get(fmt.Sprintf("%s/test3", ts.URL))
+	res, _ := http.Get(ts.URL + "/test3")
 	assert.Equal(t, res.StatusCode, http.StatusNotFound)
 
-	res, _ = http.Get(fmt.Sprintf("%s/test1", ts.URL))
+	res, _ = http.Get(ts.URL + "/test1")
 	b, _ := io.ReadAll(res.Body)
 	assert.Equal(t, string(b), `{"test":"world"}`)
 	assert.Equal(t, res.Header.Get("content-type"), "application/json")

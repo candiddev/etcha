@@ -125,7 +125,7 @@ Similar to [Signing Patterns]({{< ref "/docs/guides/building-patterns#signing-pa
 
 `verifyKeys` will use a list of static, public keys to verify the Pattern JWT.  These values can be hardcoded in the remote Etcha instance, or you can retrieve them from environment variables, a remote URL, a DNS record, etc.  These public keys **must match** the private key used to sign the JWT.  Unlike the private, `signingKey`, these keys do not need to be kept secret.
 
-These keys can be generated using [`etcha generate-keys sign-verify`]({{< ref "/docs/references/cli#generate-keys" >}}).  You can also bring your own keys, see [Cryptography]({{< ref "/docs/references/cryptography" >}}) for details on formatting.
+These keys can be generated using [`etcha gen-keys sign-verify`]({{< ref "/docs/references/cli#gen-keys" >}}).  You can also bring your own keys, see [Cryptography]({{< ref "/docs/references/cryptography" >}}) for details on formatting.
 
 Here is an example Etcha configuration showing static `verifyKeys`:
 

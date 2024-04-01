@@ -55,7 +55,7 @@ Manages a directory on the local machine using check/change/remove.  Can optiona
 
 Manages a file on the local machine using check/change/remove.  Can optionally provide contents directly or via stdin, or set permissions, owner, or group, otherwise permissions will be `0644` and the user and group will be inherited from the current user.
 
-### `generate-keys`
+### `gen-keys`
 
 Generate cryptographic keys for use with signing and encryption.  The keys will be output as JSON:
 

@@ -9,7 +9,7 @@ Etcha uses cryptographic signatures for signing [JWTs]({{< ref "/docs/references
 
 ## Generating Keys
 
-Etcha can generate well formatted, best choice cryptographic keys using [`etcha generate-keys`]({{< ref "/docs/references/cli#generate-keys" >}}).
+Etcha can generate well formatted, best choice cryptographic keys using [`etcha gen-keys`]({{< ref "/docs/references/cli#gen-keys" >}}).
 
 ## Verify Keys
 

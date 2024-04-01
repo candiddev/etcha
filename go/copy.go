@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -26,7 +25,7 @@ var copyCmd = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		"src path",
 		"dst path or - for stdout",
 	},
-	Run: func(ctx context.Context, args []string, _ cli.Flags, config *config.Config) errs.Err {
+	Run: func(ctx context.Context, args []string, _ cli.Flags, _ *config.Config) errs.Err {
 		mode, e := parseMode(args[1])
 		if e != nil {
 			return logger.Error(ctx, e)
@@ -81,12 +80,12 @@ var copyCmd = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			if checkByte != nil {
 				s, err := cryptolib.SHA256File(dstByte)
 				if err != nil {
-					return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error checksumming src"), err))
+					return logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error checksumming src"), err))
 				}
 
 				d, err := cryptolib.SHA256File(checkByte)
 				if err != nil {
-					return logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error checksumming dst"), err))
+					return logger.Error(ctx, errs.ErrReceiver.Wrap(errors.New("error checksumming dst"), err))
 				}
 
 				if s == d {

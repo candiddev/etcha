@@ -16,7 +16,7 @@ var runCmd = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 			Usage: "Run once",
 		},
 	},
-	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
+	Run: func(ctx context.Context, _ []string, flags cli.Flags, c *config.Config) errs.Err {
 		_, once := flags.Value("o")
 
 		if c.CLI.LogFormat == "" {

@@ -2,7 +2,6 @@ package run
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/pprof"
 	"strconv"
@@ -71,7 +70,7 @@ func (s *state) checkRateLimiter(next http.Handler) http.Handler {
 		w.Header().Add("x-rate-limit-reset", strconv.Itoa(int(limit.Reset)))
 
 		if limit.Reached {
-			logger.Info(ctx, fmt.Sprintf("Rate limiting remote address: %s", key))
+			logger.Info(ctx, "Rate limiting remote address: "+key)
 			w.WriteHeader(errs.ErrSenderTooManyRequest.Status())
 
 			return

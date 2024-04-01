@@ -4,7 +4,6 @@ package pattern
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -174,7 +173,7 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 			}
 		}
 
-		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, fmt.Errorf("no token returned from signingCommands")))
+		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, errors.New("no token returned from signingCommands")))
 	}
 
 	if err := t.Sign(key); err != nil {
