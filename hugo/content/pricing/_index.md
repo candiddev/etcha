@@ -22,13 +22,13 @@ Please [contact us](mailto:info@candid.dev?subject=Etcha%20Pricing) for more inf
 
 {{< cardpane >}}
 {{% card footer="<a href=https://github.com/candiddev/etcha/tree/main/LICENSE.md target=_blank>View License</a>" %}}
-### Personal or Non-Production
+### Personal or Noncommercial
 
 - Unlimited Devices
 - Community Support
 {{% /card %}}
 {{% card footer="<a href=https://docs.google.com/document/d/e/2PACX-1vQ5geUQtfTk4jriMuRozLzUeEjhuasaqNk_MhP31LrQOINeNO1DYSKHVMoxPbDWrMadGvcelaUBXn00/pub target=_blank>Example License</a>" %}}
-### Production
+### Commercial
 
 - Unlimited Devices
 - Email Support with best effort response time
