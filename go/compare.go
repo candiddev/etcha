@@ -40,7 +40,7 @@ var compare = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 
 			switch err {
 			case pattern.ErrEqualBuildManifest:
-				c = string(diff.Diff("old etchaManifest", []byte(j1.EtchaBuildManifest), "new etchaManifest", []byte(j2.EtchaBuildManifest)))
+				c = string(diff.Diff("old etchaManifest", []byte(j2.EtchaBuildManifest), "new etchaManifest", []byte(j1.EtchaBuildManifest)))
 			case pattern.ErrEqualEmpty:
 				c = "old JWT is empty"
 			case pattern.ErrEqualPattern:
