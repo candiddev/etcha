@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,10 +22,13 @@ import (
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/logger"
+	"github.com/candiddev/shared/go/types"
 )
 
 func TestPushTargets(t *testing.T) {
 	logger.UseTestLogger(t)
+
+	ctx := context.Background()
 
 	ts1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		j, _ := json.MarshalIndent(Result{
@@ -57,8 +61,23 @@ func TestPushTargets(t *testing.T) {
 	}))
 	p3, _ := strconv.Atoi(strings.Split(ts3.URL, ":")[2])
 
-	ts4 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusBadGateway)
+	c := config.Default()
+
+	cmd := ""
+
+	ts4 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		j, _ := io.ReadAll(r.Body)
+		o, _, _ := pattern.ParseJWT(ctx, c, string(j), "")
+
+		p, _ := o.Pattern(ctx, c, "")
+
+		cmd = p.Run[0].Change
+
+		if cmd != "test" {
+			w.WriteHeader(http.StatusBadGateway)
+		} else {
+			w.Write([]byte(types.JSONToString(&Result{})))
+		}
 	}))
 	p4, _ := strconv.Atoi(strings.Split(ts4.URL, ":")[2])
 
@@ -72,8 +91,6 @@ func TestPushTargets(t *testing.T) {
 		]
 	}`), 0600)
 
-	ctx := context.Background()
-	c := config.Default()
 	c.Build.PushMaxWorkers = 2
 	prv, _, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 	c.Build.SigningKey = prv.String()
@@ -83,9 +100,9 @@ func TestPushTargets(t *testing.T) {
 			Insecure: true,
 			Path:     "/etcha/v1/push",
 			Port:     p1,
-			Sources: []string{
-				"a",
-				"b",
+			SourcePatterns: map[string]string{
+				"a": "",
+				"b": "",
 			},
 			Vars: map[string]any{
 				"1": 2,
@@ -96,9 +113,9 @@ func TestPushTargets(t *testing.T) {
 			Insecure: true,
 			Path:     "/etcha/v1/push",
 			Port:     p2,
-			Sources: []string{
-				"a",
-				"c",
+			SourcePatterns: map[string]string{
+				"a": "",
+				"c": "",
 			},
 		},
 		"3": {
@@ -106,9 +123,9 @@ func TestPushTargets(t *testing.T) {
 			Insecure: true,
 			Path:     "/etcha/v1/push",
 			Port:     p3,
-			Sources: []string{
-				"a",
-				"c",
+			SourcePatterns: map[string]string{
+				"a": "",
+				"c": "",
 			},
 		},
 		"4": {
@@ -116,9 +133,9 @@ func TestPushTargets(t *testing.T) {
 			Insecure: true,
 			Path:     "/etcha/v1/push",
 			Port:     p4,
-			Sources: []string{
-				"a",
-				"d",
+			SourcePatterns: map[string]string{
+				"a": "",
+				"d": "test",
 			},
 		},
 	}
@@ -149,6 +166,14 @@ func TestPushTargets(t *testing.T) {
 	assert.Equal(t, s, []string{
 		"3:\n    Changed 1: 3\n    Removed 1: 2",
 	})
+
+	_, err = PushTargets(ctx, c, tgt, "d", "", PushOpts{})
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, cmd, "test")
+
+	_, err = PushTargets(ctx, c, tgt, "d", "a.jsonnet", PushOpts{})
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, cmd, "test")
 
 	// getPushDestJWT
 	d, j, err := getPushDestJWT(ctx, c, tgt["1"], &pattern.Pattern{}, "", "test", map[string]any{

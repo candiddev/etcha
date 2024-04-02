@@ -44,22 +44,12 @@ type PushOpts struct {
 
 // PushTargets pushes a cmd to a bunch of targets.
 func PushTargets(ctx context.Context, c *config.Config, targets map[string]config.PushTarget, source, cmd string, opts PushOpts) ([]string, errs.Err) { //nolint:gocognit,revive
-	p, path, err := getPushPattern(ctx, c, cmd)
-	if err != nil {
-		return nil, logger.Error(ctx, err)
-	}
-
-	buildManifest, runVars, err := p.BuildRun(ctx, c)
-	if err != nil {
-		return nil, logger.Error(ctx, err)
-	}
-
 	t := []string{}
 
 	for k := range targets {
 		if opts.TargetFilter == nil || opts.TargetFilter.MatchString(k) {
-			for i := range targets[k].Sources {
-				if targets[k].Sources[i] == source {
+			for s := range targets[k].SourcePatterns {
+				if s == source {
 					t = append(t, k)
 
 					break
@@ -84,18 +74,42 @@ func PushTargets(ctx context.Context, c *config.Config, targets map[string]confi
 		go func(target string) {
 			logger.Debug(ctx, fmt.Sprintf("Pushing config to %s...", target))
 
+			var err errs.Err
+
+			var p *pattern.Pattern
+
+			var path bool
+
 			var res *Result
 
-			dest, jwt, err := getPushDestJWT(ctx, c, targets[target], p, buildManifest, source, runVars, opts)
+			o := []string{}
+
+			if targets[target].SourcePatterns[source] != "" {
+				cmd = targets[target].SourcePatterns[source]
+			}
+
+			p, path, err = getPushPattern(ctx, c, cmd)
 			if err == nil {
-				res, err = pushTarget(ctx, c, dest, jwt)
+				var buildManifest string
+
+				var runVars map[string]any
+
+				buildManifest, runVars, err = p.BuildRun(ctx, c)
+				if err == nil {
+					var dest string
+
+					var jwt string
+
+					dest, jwt, err = getPushDestJWT(ctx, c, targets[target], p, buildManifest, source, runVars, opts)
+					if err == nil {
+						res, err = pushTarget(ctx, c, dest, jwt)
+					}
+				}
 			}
 
 			if res == nil {
 				res = &Result{}
 			}
-
-			o := []string{}
 
 			if err != nil {
 				terr = err

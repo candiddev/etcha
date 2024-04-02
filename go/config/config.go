@@ -72,12 +72,12 @@ type Run struct {
 
 // PushTarget is a target that can be pushed.
 type PushTarget struct {
-	Hostname string         `json:"hostname"`
-	Insecure bool           `json:"insecure"`
-	Path     string         `json:"path"`
-	Port     int            `json:"port"`
-	Sources  []string       `json:"sources"`
-	Vars     map[string]any `json:"vars"`
+	Hostname       string            `json:"hostname"`
+	Insecure       bool              `json:"insecure"`
+	Path           string            `json:"path"`
+	Port           int               `json:"port"`
+	SourcePatterns map[string]string `json:"sourcePatterns"`
+	Vars           map[string]any    `json:"vars"`
 }
 
 // Source contains configurations for a source.

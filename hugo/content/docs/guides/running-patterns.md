@@ -217,7 +217,7 @@ Etcha can be configured for multiple sources:
 }
 ```
 
-### Remote Run via Push
+### Remote Run via Push {#remote-push}
 
 Etcha can push Patterns to remote Etcha instances.  This is similar to tools like Ansible, however it uses HTTPS instead of SSH.
 
@@ -228,15 +228,17 @@ For this to work, the remote instance needs to allow pushes via [`allowPush`]({{
   "build": {
     "pushTargets": {
       "server1": {
-        "sources": [
-          "core",
-          "nginx"
+        "sourcePatterns": [
+          "core": "etcha/patterns/core.jsonnet",
+          "debug": "",
+          "nginx": "etcha/patterns/nginx.jsonnet",
         ]
       },
       "server2": {
         "sources": [
-          "core",
-          "mysql"
+          "core": "etcha/patterns/core.jsonnet",
+          "debug": "",
+          "mysql": "etcha/patterns/mysql.jsonnet",
         ]
       }
     }
@@ -244,7 +246,7 @@ For this to work, the remote instance needs to allow pushes via [`allowPush`]({{
 }
 ```
 
-We can run `etcha push core patterns/core.jsonnet` and it will push to both `server1` and `server2`, or we can target the mysql source (`etcha push core mysql patterns/mysql.jsonnet`) and only target `server2`.
+We can run `etcha push core patterns/core.jsonnet` and it will push to both `server1` and `server2`, or we can target the mysql source (`etcha push core mysql patterns/mysql.jsonnet`) and only target `server2`.  Both servers have an empty string Source, `debug`, that allows any Pattern or Command to be pushed.
 
 **You don't have to use multiple sources**.  With how flexible Patterns are, the `core` pattern could contain the `mysql` Pattern and only run it if a [host's var]({{< ref "/docs/references/config#pushtargets" >}}) has `mysql: true`.
 

@@ -69,7 +69,7 @@ A map of target names to these target options:
 - `insecure`: Boolean, whether to access to the target using http (`true`) or https (`false`).
 - `path`: String, optional path to the push API endpoint (default: `"/etcha/v1/push"`).
 - `port`: Integer, optional port of the target (default: `4000`).
-- `sources`: List of strings, the sources that will be pushed to the target (and the sources that will be targeted).
+- `sourcePatterns`: A map of source names to Pattern paths or Commands.  Etcha will push to this target if the source is specified with `etcha push`.  If the Pattern is an empty string, Etcha will allow any Pattern or Command to be pushed if the Source is matched.
 - `vars`: Target specific [`vars`](#vars).
 
 Example pushTargets:

@@ -12,4 +12,5 @@ type: blog
 
 ## Enhancements
 
+- Changed push to map target's Source and Patterns for easier reusability.  See [Running Patterns]({{< ref "/docs/guides/running-patterns#remote-push" >}}) for more information.
 - Updated Go to 1.22.1.

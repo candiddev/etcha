@@ -18,6 +18,8 @@ import (
 var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	ArgumentsRequired: []string{
 		"source name",
+	},
+	ArgumentsOptional: []string{
 		"command or pattern path",
 	},
 	Flags: cli.Flags{
@@ -80,8 +82,8 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 					Hostname: host,
 					Path:     u,
 					Port:     p,
-					Sources: []string{
-						source,
+					SourcePatterns: map[string]string{
+						source: "",
 					},
 				},
 			}
@@ -105,5 +107,5 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 
 		return err
 	},
-	Usage: "Push signed commands or patterns to a destination URL.",
+	Usage: "Push signed commands or patterns to a destination URL.  Must specify a Source, which will push Commands or Patterns specified in build.pushTargets to targets with that Source.  Can optionally specify filters and custom targets.  May also specify a Pattern or Command to run against the Sources, otherwise the Pattern or Command specified in sourcePatterns will be used.",
 }
