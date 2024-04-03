@@ -523,3 +523,7 @@ During a Pattern [`run`]({{< ref "/docs/guides/running-patterns" >}}), the follo
 
 - `jwt`: String, the contents of the original JWT if the Pattern was run from a JWT.
 
+During a Pattern [`push`]({{< ref "/docs/guides/running-patterns" >}}), the following additional `vars` will be set:
+
+- `source`: String, the source name that was pushed.
+- `target`: String, the target name that is being pushed to.

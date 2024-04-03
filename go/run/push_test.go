@@ -64,6 +64,7 @@ func TestPushTargets(t *testing.T) {
 	c := config.Default()
 
 	cmd := ""
+	vars := map[string]any{}
 
 	ts4 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		j, _ := io.ReadAll(r.Body)
@@ -72,6 +73,7 @@ func TestPushTargets(t *testing.T) {
 		p, _ := o.Pattern(ctx, c, "")
 
 		cmd = p.Run[0].Change
+		vars = p.RunVars
 
 		if cmd != "test" {
 			w.WriteHeader(http.StatusBadGateway)
@@ -170,6 +172,10 @@ func TestPushTargets(t *testing.T) {
 	_, err = PushTargets(ctx, c, tgt, "d", "", PushOpts{})
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, cmd, "test")
+	assert.Equal(t, vars, map[string]any{
+		"source": "d",
+		"target": "4",
+	})
 
 	_, err = PushTargets(ctx, c, tgt, "d", "a.jsonnet", PushOpts{})
 	assert.HasErr(t, err, nil)

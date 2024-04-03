@@ -102,6 +102,9 @@ func PushTargets(ctx context.Context, c *config.Config, targets map[string]confi
 
 					var jwt string
 
+					runVars["source"] = source
+					runVars["target"] = target
+
 					dest, jwt, err = getPushDestJWT(ctx, c, targets[target], p, buildManifest, source, runVars, opts)
 					if err == nil {
 						res, err = pushTarget(ctx, c, dest, jwt)
