@@ -7,7 +7,6 @@ import (
 	"github.com/candiddev/etcha/go/run"
 	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/errs"
-	"github.com/candiddev/shared/go/logger"
 )
 
 var runCmd = cli.Command[*config.Config]{ //nolint:gochecknoglobals
@@ -18,11 +17,6 @@ var runCmd = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 	},
 	Run: func(ctx context.Context, _ []string, flags cli.Flags, c *config.Config) errs.Err {
 		_, once := flags.Value("o")
-
-		if c.CLI.LogFormat == "" {
-			c.CLI.LogFormat = logger.FormatKV
-			ctx = logger.SetFormat(ctx, logger.FormatKV)
-		}
 
 		return run.Run(ctx, c, once)
 	},

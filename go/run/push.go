@@ -47,7 +47,7 @@ func PushTargets(ctx context.Context, c *config.Config, targets map[string]confi
 	t := []string{}
 
 	for k := range targets {
-		if opts.TargetFilter == nil || opts.TargetFilter.MatchString(k) {
+		if opts.TargetFilter == nil || opts.TargetFilter.String() == "" || opts.TargetFilter.MatchString(k) {
 			for s := range targets[k].SourcePatterns {
 				if s == source {
 					t = append(t, k)
@@ -74,6 +74,8 @@ func PushTargets(ctx context.Context, c *config.Config, targets map[string]confi
 		go func(target string) {
 			logger.Debug(ctx, fmt.Sprintf("Pushing config to %s...", target))
 
+			rcmd := cmd
+
 			var err errs.Err
 
 			var p *pattern.Pattern
@@ -85,10 +87,10 @@ func PushTargets(ctx context.Context, c *config.Config, targets map[string]confi
 			o := []string{}
 
 			if targets[target].SourcePatterns[source] != "" {
-				cmd = targets[target].SourcePatterns[source]
+				rcmd = targets[target].SourcePatterns[source]
 			}
 
-			p, path, err = getPushPattern(ctx, c, cmd)
+			p, path, err = getPushPattern(ctx, c, rcmd)
 			if err == nil {
 				var buildManifest string
 
