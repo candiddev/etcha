@@ -176,3 +176,84 @@ func TestParseJWTFile(t *testing.T) {
 
 	os.RemoveAll("testdata")
 }
+
+func TestSignJWT(t *testing.T) {
+	ctx := context.Background()
+	c := Default()
+	j := &jwt.Token{
+		HeaderBase64:  "header",
+		PayloadBase64: "payload",
+	}
+
+	// No keys
+	out, err := c.SignJWT(ctx, j)
+	assert.HasErr(t, err, ErrMissingBuildKey)
+	assert.Equal(t, out == "", true)
+
+	prv, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	c.Build.SigningKey = prv.String()
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
+		pub,
+	}
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	// With key
+	c.Build.SigningKey = prv.String()
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	// With encrypted key password
+	cli.SetStdin("password\npassword\n")
+
+	ev, _ := cryptolib.KDFSet(cryptolib.Argon2ID, "123", []byte(prv.String()), cryptolib.EncryptionBest)
+	c.Build.SigningKey = ev.String()
+
+	cli.SetStdin("password")
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	// With wrong encrypted key password
+	cli.SetStdin("wrong")
+
+	c.Build.key = cryptolib.Key[cryptolib.KeyProviderPrivate]{}
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, ErrMissingBuildKey)
+	assert.Equal(t, out == "", true)
+
+	c.CLI.RunMock()
+	c.Exec.AllowOverride = true
+	c.Build.SigningKey = ""
+	c.Build.SigningExec = &commands.Exec{
+		Command: "hello",
+	}
+	c.Build.SigningCommands = append(commands.Commands{
+		{
+			Always: true,
+			Change: "changeA",
+			ID:     "a",
+			OnChange: []string{
+				"etcha:jwt",
+			},
+		},
+	}, c.Build.SigningCommands...)
+	c.CLI.RunMockOutputs([]string{
+		"output",
+	})
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	in := c.CLI.RunMockInputs()
+	assert.Equal(t, len(in), 1)
+	assert.Equal(t, in[0].Exec, "hello changeA")
+	assert.Equal(t, out, "output")
+}

@@ -94,11 +94,11 @@ func TestPushTargets(t *testing.T) {
 	c.Build.PushMaxWorkers = 2
 	prv, _, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 	c.Build.SigningKey = prv.String()
-	tgt := map[string]config.PushTarget{
+	tgt := map[string]config.Target{
 		"1": {
 			Hostname: "127.0.0.1",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
+			PathPush: "/etcha/v1/push",
 			Port:     p1,
 			SourcePatterns: map[string]string{
 				"a": "",
@@ -111,7 +111,7 @@ func TestPushTargets(t *testing.T) {
 		"2": {
 			Hostname: "127.0.0.1",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
+			PathPush: "/etcha/v1/push",
 			Port:     p2,
 			SourcePatterns: map[string]string{
 				"a": "",
@@ -121,7 +121,7 @@ func TestPushTargets(t *testing.T) {
 		"3": {
 			Hostname: "localhost",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
+			PathPush: "/etcha/v1/push",
 			Port:     p3,
 			SourcePatterns: map[string]string{
 				"a": "",
@@ -131,7 +131,7 @@ func TestPushTargets(t *testing.T) {
 		"4": {
 			Hostname: "localhost",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
+			PathPush: "/etcha/v1/push",
 			Port:     p4,
 			SourcePatterns: map[string]string{
 				"a": "",
@@ -192,9 +192,9 @@ func TestPushTargets(t *testing.T) {
 		"2": float64(2),
 	})
 
-	d, _, _ = getPushDestJWT(ctx, c, config.PushTarget{
+	d, _, _ = getPushDestJWT(ctx, c, config.Target{
 		Hostname: "a",
-		Path:     "/b",
+		PathPush: "/b",
 		Port:     123,
 	}, &pattern.Pattern{}, "", "test", map[string]any{
 		"1": 1,
@@ -297,7 +297,7 @@ func TestPushTargetPostPush(t *testing.T) {
 		{
 			name:    "bad_sign",
 			command: "testdata/good1.jsonnet",
-			wantErr: pattern.ErrPatternMissingKey,
+			wantErr: config.ErrMissingBuildKey,
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{

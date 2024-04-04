@@ -2,7 +2,6 @@ package pattern
 
 import (
 	"context"
-	"strings"
 	"testing"
 	"time"
 
@@ -282,17 +281,13 @@ func TestPatternSign(t *testing.T) {
 		Subject: "subject!",
 	}
 
-	j, _, err := p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
-	assert.HasErr(t, err, ErrPatternMissingKey)
-	assert.Equal(t, j, "")
-
 	cli.BuildVersion = "v2023.10.02"
 	c.Build.SigningKey = prv.String()
 	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
 		pub,
 	}
 
-	j, _, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
+	j, _, err := p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, j != "", true)
 
@@ -306,70 +301,4 @@ func TestPatternSign(t *testing.T) {
 	assert.Equal(t, time.Unix(r.ExpiresAt, 0).Before(time.Now().Add(1*time.Minute)), true)
 	assert.Equal(t, r.Issuer, p.Issuer)
 	assert.Equal(t, r.Subject, p.Subject)
-
-	c.CLI.RunMock()
-	c.CLI.RunMockErrors([]error{
-		ErrBuildEmpty,
-	})
-	c.CLI.RunMockOutputs([]string{
-		"",
-		strings.Split(jw.Raw, ".")[0],
-		strings.Split(jw.Raw, ".")[2],
-	})
-
-	cli.SetStdin("password\npassword\n")
-
-	ev, _ := cryptolib.KDFSet(cryptolib.Argon2ID, "123", []byte(prv.String()), cryptolib.EncryptionBest)
-
-	c.Build.SigningKey = ev.String()
-
-	cli.SetStdin("password")
-
-	j, _, err = p.Sign(ctx, c, "build", map[string]any{"world": "hello"})
-	assert.HasErr(t, err, nil)
-	assert.Equal(t, j != "", true)
-
-	jw, _, err = ParseJWT(ctx, c, j, "")
-	assert.HasErr(t, err, nil)
-	assert.Equal(t, jw.EtchaRunVars, map[string]any{"world": "hello"})
-
-	cli.SetStdin("wrong")
-
-	j, _, err = p.Sign(ctx, c, "build", map[string]any{"hello": "world"})
-	assert.HasErr(t, err, ErrPatternMissingKey)
-	assert.Equal(t, j, "")
-
-	c.Exec.AllowOverride = true
-	c.Build.SigningKey = ""
-	c.Build.SigningExec = &commands.Exec{
-		Command: "hello",
-	}
-	c.Build.SigningCommands = append(commands.Commands{
-		{
-			Always: true,
-			Change: "changeA",
-			ID:     "a",
-			OnChange: []string{
-				"etcha:jwt",
-			},
-		},
-	}, c.Build.SigningCommands...)
-	c.CLI.RunMockErrors([]error{
-		nil,
-		ErrBuildEmpty,
-	})
-	c.CLI.RunMockOutputs([]string{
-		jw.Raw,
-		"",
-		strings.Split(jw.Raw, ".")[0],
-		strings.Split(jw.Raw, ".")[2],
-	})
-
-	out, _, err := p.Sign(ctx, c, "", nil)
-	assert.HasErr(t, err, nil)
-
-	in := c.CLI.RunMockInputs()
-	assert.Equal(t, len(in), 1)
-	assert.Equal(t, in[0].Exec, "hello changeA")
-	assert.Equal(t, out, jw.Raw)
 }

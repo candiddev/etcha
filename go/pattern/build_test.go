@@ -68,7 +68,7 @@ func TestPatternBuildSign(t *testing.T) {
 		},
 		"bad_sign": {
 			destination: "test.jwt",
-			wantErr:     ErrPatternMissingKey,
+			wantErr:     config.ErrMissingBuildKey,
 		},
 		"good": {
 			destination: "test.jwt",

@@ -43,7 +43,7 @@ type PushOpts struct {
 }
 
 // PushTargets pushes a cmd to a bunch of targets.
-func PushTargets(ctx context.Context, c *config.Config, targets map[string]config.PushTarget, source, cmd string, opts PushOpts) ([]string, errs.Err) { //nolint:gocognit,revive
+func PushTargets(ctx context.Context, c *config.Config, targets map[string]config.Target, source, cmd string, opts PushOpts) ([]string, errs.Err) { //nolint:gocognit,revive
 	t := []string{}
 
 	for k := range targets {
@@ -72,7 +72,7 @@ func PushTargets(ctx context.Context, c *config.Config, targets map[string]confi
 		}
 
 		go func(target string) {
-			logger.Debug(ctx, fmt.Sprintf("Pushing config to %s...", target))
+			logger.Debug(ctx, "Pushing config to "+target)
 
 			var err errs.Err
 
@@ -186,10 +186,10 @@ func getPushPattern(ctx context.Context, c *config.Config, cmd string) (*pattern
 	return p, path, err
 }
 
-func getPushDestJWT(ctx context.Context, c *config.Config, target config.PushTarget, p *pattern.Pattern, buildManifest, source string, runVars map[string]any, opts PushOpts) (dest, jwt string, err errs.Err) { //nolint:revive
+func getPushDestJWT(ctx context.Context, c *config.Config, target config.Target, p *pattern.Pattern, buildManifest, source string, runVars map[string]any, opts PushOpts) (dest, jwt string, err errs.Err) { //nolint:revive
 	d := url.URL{
 		Host: net.JoinHostPort(target.Hostname, strconv.Itoa(target.Port)),
-		Path: target.Path + "/" + source,
+		Path: target.PathPush + "/" + source,
 	}
 
 	if target.Insecure {
@@ -228,7 +228,7 @@ func pushTarget(ctx context.Context, c *config.Config, dest, jwt string) (r *Res
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: c.Build.PushTLSSkipVerify, //nolint:gosec
+				InsecureSkipVerify: c.Build.TLSSkipVerify, //nolint:gosec
 			},
 		},
 	}
@@ -271,15 +271,15 @@ func pushTarget(ctx context.Context, c *config.Config, dest, jwt string) (r *Res
 func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	c := chi.URLParam(r, "config")
-	ctx = metrics.SetSourceName(ctx, c)
+	srcName := chi.URLParam(r, "source")
+	ctx = metrics.SetSourceName(ctx, srcName)
 	ctx = logger.SetAttribute(ctx, "remoteAddr", r.RemoteAddr)
 
-	logger.Info(ctx, "Push configuration request")
+	logger.Info(ctx, "Received push request")
 
-	src, ok := s.Config.Sources[c]
+	src, ok := s.Config.Sources[srcName]
 	if !ok || !src.AllowPush {
-		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(fmt.Errorf("unknown config: %s", c))) //nolint: errcheck
+		logger.Error(ctx, errs.ErrSenderBadRequest.Wrap(fmt.Errorf("unknown source: %s", srcName))) //nolint: errcheck
 		w.WriteHeader(http.StatusNotFound)
 
 		return
@@ -293,7 +293,7 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	push, _, err := pattern.ParseJWT(ctx, s.Config, string(body), c)
+	push, _, err := pattern.ParseJWT(ctx, s.Config, string(body), srcName)
 	if err != nil {
 		logger.Error(ctx, err) //nolint: errcheck
 		w.WriteHeader(http.StatusNotFound)
@@ -309,7 +309,7 @@ func (s *state) postPush(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	res, err := s.diffExec(ctx, c, push, diffExecOpts{
+	res, err := s.diffExec(ctx, srcName, push, diffExecOpts{
 		check:          r.URL.Query().Has("check"),
 		parentIDFilter: reg,
 	})

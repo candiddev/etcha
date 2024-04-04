@@ -29,6 +29,7 @@ func main() {
 			"push":     push,
 			"render":   render,
 			"run":      runCmd,
+			"shell":    shell,
 			"test":     test,
 		},
 		Config:      c,

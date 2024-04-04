@@ -23,6 +23,8 @@ import (
 )
 
 var ErrParseJWT = errors.New("error parsing jwt")
+var ErrMissingBuildKey = errors.New("missing build.signingKey")
+var ErrSignJWT = errors.New("error signing jwt")
 
 // Config contains main application configurations.
 type Config struct {
@@ -32,19 +34,21 @@ type Config struct {
 	Lint    Lint               `json:"lint"`
 	Run     Run                `json:"run"`
 	Sources map[string]*Source `json:"sources"`
+	Targets map[string]Target  `json:"targets"`
 	Vars    map[string]any     `json:"vars"`
 }
 
 // Build configures Etcha's build behavior.
 type Build struct {
-	PushMaxWorkers    int                   `json:"pushMaxWorkers"`
-	PushTLSSkipVerify bool                  `json:"pushTLSSkipVerify"`
-	PushTargets       map[string]PushTarget `json:"pushTargets"`
-	SigningCommands   commands.Commands     `json:"signingCommands"`
-	SigningExec       *commands.Exec        `json:"signingExec,omitempty"`
+	PushMaxWorkers  int               `json:"pushMaxWorkers"`
+	SigningCommands commands.Commands `json:"signingCommands"`
+	SigningExec     *commands.Exec    `json:"signingExec,omitempty"`
 
 	/* This is a string as it may be a KDF key or plaintext key */
-	SigningKey string `json:"signingKey"`
+	SigningKey    string `json:"signingKey"`
+	TLSSkipVerify bool   `json:"tlsSkipVerify"`
+
+	key cryptolib.Key[cryptolib.KeyProviderPrivate]
 }
 
 // Lint are config values for linters.
@@ -70,11 +74,12 @@ type Run struct {
 	VerifyKeys              cryptolib.Keys[cryptolib.KeyProviderPublic] `json:"verifyKeys"`
 }
 
-// PushTarget is a target that can be pushed.
-type PushTarget struct {
+// Target is a remote Etcha instance.
+type Target struct {
 	Hostname       string            `json:"hostname"`
 	Insecure       bool              `json:"insecure"`
-	Path           string            `json:"path"`
+	PathPush       string            `json:"pathPush"`
+	PathShell      string            `json:"pathShell"`
 	Port           int               `json:"port"`
 	SourcePatterns map[string]string `json:"sourcePatterns"`
 	Vars           map[string]any    `json:"vars"`
@@ -95,6 +100,7 @@ type Source struct {
 	PullPaths         types.SliceString                           `json:"pullPaths"`
 	RunFrequencySec   int                                         `json:"runFrequencySec"`
 	RunMulti          bool                                        `json:"runMulti"`
+	Shell             string                                      `json:"shell"`
 	TriggerOnly       bool                                        `json:"triggerOnly"`
 	VerifyCommands    commands.Commands                           `json:"verifyCommands"`
 	VerifyExec        *commands.Exec                              `json:"verifyExec,omitempty"`
@@ -190,20 +196,24 @@ func (c *Config) Parse(ctx context.Context, configArgs []string) errs.Err {
 		c.Run.StateDir = filepath.Join(wd, c.Run.StateDir)
 	}
 
-	for k, v := range c.Build.PushTargets {
+	for k, v := range c.Targets {
 		if v.Hostname == "" {
 			v.Hostname = k
 		}
 
-		if v.Path == "" {
-			v.Path = "/etcha/v1/push"
+		if v.PathPush == "" {
+			v.PathPush = "/etcha/v1/push"
+		}
+
+		if v.PathShell == "" {
+			v.PathShell = "/etcha/v1/shell"
 		}
 
 		if v.Port == 0 {
 			v.Port = 4000
 		}
 
-		c.Build.PushTargets[k] = v
+		c.Targets[k] = v
 	}
 
 	return logger.Error(ctx, nil)
@@ -283,4 +293,54 @@ func (c *Config) ParseJWTFile(ctx context.Context, customClaims any, path, sourc
 	}
 
 	return key, r, logger.Error(ctx, nil)
+}
+
+func (c *Config) SignJWT(ctx context.Context, j *jwt.Token) (string, errs.Err) {
+	if c.Build.key.IsNil() {
+		key, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](c.Build.SigningKey)
+		if err != nil {
+			// try to decrypt the key
+			if ev, err := cryptolib.ParseEncryptedValue(c.Build.SigningKey); err == nil {
+				if s, err := ev.Decrypt(nil); err == nil {
+					if k, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](string(s)); err == nil {
+						key = k
+					}
+				}
+			}
+		}
+
+		c.Build.key = key
+	}
+
+	if c.Build.key.IsNil() && len(c.Build.SigningCommands) == 0 {
+		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrMissingBuildKey))
+	}
+
+	if len(c.Build.SigningCommands) > 0 {
+		e := types.EnvVars{
+			"ETCHA_PAYLOAD": j.PayloadBase64,
+		}
+
+		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, c.Exec.Override(c.Build.SigningExec), commands.CommandsRunOpts{
+			Env:      e,
+			ParentID: "signingCommands",
+		})
+		if err != nil {
+			return "", logger.Error(ctx, err)
+		}
+
+		for _, event := range out.Events() {
+			if event.Name == "jwt" && len(event.Outputs) > 0 {
+				return string(event.Outputs[0].Change), logger.Error(ctx, nil)
+			}
+		}
+
+		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrSignJWT, errors.New("no token returned from signingCommands")))
+	}
+
+	if err := j.Sign(c.Build.key); err != nil {
+		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(err))
+	}
+
+	return j.String(), logger.Error(ctx, nil)
 }

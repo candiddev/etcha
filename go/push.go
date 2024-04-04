@@ -66,7 +66,7 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 
 		_, check := flags.Value("c")
 
-		targets := maps.Clone(c.Build.PushTargets)
+		targets := maps.Clone(c.Targets)
 
 		if host, ok := flags.Value("h"); ok {
 			po, _ := flags.Value("p")
@@ -77,10 +77,10 @@ var push = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 
 			u, _ := flags.Value("u")
 
-			targets = map[string]config.PushTarget{
+			targets = map[string]config.Target{
 				host: {
 					Hostname: host,
-					Path:     u,
+					PathPush: u,
 					Port:     p,
 					SourcePatterns: map[string]string{
 						source: "",

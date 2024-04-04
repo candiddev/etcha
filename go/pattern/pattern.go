@@ -3,23 +3,15 @@ package pattern
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/candiddev/etcha/go/commands"
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/cli"
-	"github.com/candiddev/shared/go/cryptolib"
 	"github.com/candiddev/shared/go/errs"
 	"github.com/candiddev/shared/go/jsonnet"
 	"github.com/candiddev/shared/go/jwt"
 	"github.com/candiddev/shared/go/logger"
-	"github.com/candiddev/shared/go/types"
-)
-
-var (
-	ErrPatternMissingKey = errors.New("missing build.signingKey")
-	ErrPatternSigningJWT = errors.New("error signing jwt")
 )
 
 // Pattern is a list of Build and Runtime Commands.
@@ -121,22 +113,6 @@ func ParsePatternFromPath(ctx context.Context, c *config.Config, configSource, p
 
 // Sign creates a signed JWT.
 func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest string, runVars map[string]any) (string, *jwt.RegisteredClaims, errs.Err) {
-	key, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](c.Build.SigningKey)
-	if err != nil {
-		// try to decrypt the key
-		if ev, err := cryptolib.ParseEncryptedValue(c.Build.SigningKey); err == nil {
-			if s, err := ev.Decrypt(nil); err == nil {
-				if k, err := cryptolib.ParseKey[cryptolib.KeyProviderPrivate](string(s)); err == nil {
-					key = k
-				}
-			}
-		}
-	}
-
-	if key.IsNil() && len(c.Build.SigningCommands) == 0 {
-		return "", nil, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternMissingKey))
-	}
-
 	e := time.Time{}
 	if p.ExpiresInSec != 0 {
 		e = time.Now().Add(time.Duration(p.ExpiresInSec) * time.Second)
@@ -151,34 +127,10 @@ func (p *Pattern) Sign(ctx context.Context, c *config.Config, buildManifest stri
 
 	t, r, err := jwt.New(j, e, p.Audience, p.ID, p.Issuer, p.Subject)
 	if err != nil {
-		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, err))
+		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(config.ErrSignJWT, err))
 	}
 
-	if len(c.Build.SigningCommands) > 0 {
-		e := types.EnvVars{
-			"ETCHA_PAYLOAD": t.PayloadBase64,
-		}
+	s, er := c.SignJWT(ctx, t)
 
-		out, err := c.Build.SigningCommands.Run(ctx, c.CLI, c.Exec.Override(c.Build.SigningExec), commands.CommandsRunOpts{
-			Env:      e,
-			ParentID: "signingCommands",
-		})
-		if err != nil {
-			return "", r, logger.Error(ctx, err)
-		}
-
-		for _, event := range out.Events() {
-			if event.Name == "jwt" && len(event.Outputs) > 0 {
-				return string(event.Outputs[0].Change), r, nil
-			}
-		}
-
-		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(ErrPatternSigningJWT, errors.New("no token returned from signingCommands")))
-	}
-
-	if err := t.Sign(key); err != nil {
-		return "", r, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
-	}
-
-	return t.String(), r, logger.Error(ctx, nil)
+	return s, r, logger.Error(ctx, er)
 }
