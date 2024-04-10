@@ -70,16 +70,17 @@ func TestConfigParse(t *testing.T) {
 
 	assert.Equal(t, c.License, License{
 		Commands: 10,
-		Sources:  1,
+		Sources:  2,
 		Targets:  3,
 	})
 
 	c.Sources = map[string]*Source{
 		"a": {},
 		"b": {},
+		"c": {},
 	}
 	claims := License{
-		Sources: 2,
+		Sources: 3,
 	}
 
 	assert.Contains(t, c.Parse(ctx, nil).Error(), "number of sources")

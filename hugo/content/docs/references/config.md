@@ -61,44 +61,6 @@ Boolean, skip TLS verification when running [`etcha push`]({{< ref "/docs/refere
 
 **Default:** `false`
 
-### `pushTargets`
-
-A map of target names to these target options:
-
-- `hostname`: String, the hostname or IP address of the target (default: the target name).
-- `insecure`: Boolean, whether to access to the target using http (`true`) or https (`false`).
-- `path`: String, optional path to the push API endpoint (default: `"/etcha/v1/push"`).
-- `port`: Integer, optional port of the target (default: `4000`).
-- `sourcePatterns`: A map of source names to Pattern paths or Commands.  Etcha will push to this target if the source is specified with `etcha push`.  If the Pattern is an empty string, Etcha will allow any Pattern or Command to be pushed if the Source is matched.
-- `vars`: Target specific [`vars`](#vars).
-
-Example pushTargets:
-
-```json
-{
-  "build": {
-    "pushTargets": {
-      "server1": {
-        "hostname": "server1.example.com",
-        "insecure": true,
-        "port": 4001,
-        "sources": [
-          "core",
-          "nginx"
-        ],
-        "vars": {
-          "selinux": true
-        }
-      }
-    }
-  }
-}
-```
-
-See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
-
-**Default:** `false`
-
 ### `signingCommands` (recommended) {#signingcommands}
 
 List of [Commands]({{< ref "/docs/references/commands" >}}) to run when signing a JWT instead of using a [`signingKey`](#signingKey).  See [Building Patterns]({{< ref "/docs/guides/building-patterns" >}}) for more information.
@@ -455,6 +417,12 @@ Boolean, allows for multiple runs to of the source to happen at the same time.  
 
 **Default:** `false`
 
+### `shell`
+
+String, a path to a binary that will be executed when an Etcha instance connects to this instance using [`etcha shell`]({{< ref "/docs/references/config#shell" >}}).  This value is typically an interactive shell like `"/bin/bash"`.  Setting this value enables shell access.
+
+**Default:** `""`
+
 ### `triggerOnly`
 
 Boolean, when `true`, never run a Pattern unless it's triggered via [Events or Webhooks]({{< ref "/docs/guides/running-patterns" >}}).
@@ -466,6 +434,76 @@ Boolean, when `true`, never run a Pattern unless it's triggered via [Events or W
 See [Run > verifyCommands](#verifycommands).  Setting this value overrides `run.verifyCommands`.
 
 **Default:** `[]`
+
+## `targets`
+
+A map of target names to target options for use by [`etcha push`]({{< ref "/docs/references/cli#push" >}}) and [`etcha shell`]({{< ref "/docs/references/cli#shell" >}}):
+
+```json
+{
+  "targets": {
+    "server1": {
+      "hostname": "server1.example.com",
+      "insecure": true,
+      "port": 4001,
+      "sources": [
+        "core",
+        "nginx"
+      ],
+      "vars": {
+        "selinux": true
+      }
+    }
+  }
+}
+```
+
+See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
+
+Targets are meant to be flexible **and proxyable**.  Etcha uses standard HTTP/HTTP2 functionality, including Server-Sent Events (SSE) for shell access, and it should work out of the box with most reverse proxies (NGINX, Traefik, HAProxy, etc).  You could have all of your Etcha devices behind a proxy and use separate paths (`/server1/etcha/v1/push`) or host-based routing on your proxy.  This would be the Etcha equivalent of a jumpbox.
+
+### `hostname`
+
+String, the hostname or IP address of the target (default: the target name).
+
+**Default:** The target name
+
+### `insecure`
+
+Boolean, will use an insecure (not HTTPS) connection when connecting to the target.
+
+**Default:** `false`
+
+### `pathPush`
+
+String, the URL path for the push endpoint without any sources.
+
+**Default:** `"/etcha/v1/push"`
+
+### `pathShell`
+
+String, the URL path for the shell endpoint without any sources.
+
+**Default:** `"/etcha/v1/shell"`
+
+### `port`
+
+String, the port number of the target.
+
+**Default:** `"4000"`
+
+### `sourcePatterns`
+
+A map of source names to Pattern paths or Commands.  Withca will push to this target if the source is specified with `etcha push`.  If the Pattern is an empty string, Etcha will allow any Pattern or Command to be pushed if the Source is matched.
+
+**Default:** `{}`
+
+### `vars`
+
+A map of Target-specific [`vars`](#vars).
+
+**Default:** `false`
+
 
 ## `vars` {#sourcevars}
 

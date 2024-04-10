@@ -302,6 +302,7 @@ local config = std.native('getConfig')();
 			}, nil)
 
 			assert.Contains(t, err.Error(), "number of commands")
+
 			c.License.Commands = 11
 
 			_, err = ParsePatternFromImports(ctx, c, "", &jsonnet.Imports{

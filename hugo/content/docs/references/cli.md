@@ -51,6 +51,10 @@ Copy a local file or HTTP path to a destination path.  Utilizes the same functio
 
 Manages a directory on the local machine using check/change/remove.  Can optionally set permissions, owner, or group, otherwise permissions will be `0755` and the user and group will be inherited from the current user.
 
+### `eula`
+
+View the Etcha End User License Agreement (EULA).
+
 ### `file`
 
 Manages a file on the local machine using check/change/remove.  Can optionally provide contents directly or via stdin, or set permissions, owner, or group, otherwise permissions will be `0644` and the user and group will be inherited from the current user.
@@ -98,7 +102,7 @@ Import [Pattern]({{< ref "/docs/references/patterns" >}}) [Jsonnet]({{< ref "/do
 
 ### `push`
 
-Push ad-hoc commands or a signed pattern to a destination URL.  See [Running Commands]({{< ref "/docs/guides/running-commands" >}}) for more information.
+Push ad-hoc commands or a signed pattern to a remote Etcha instance.  See [Running Commands]({{< ref "/docs/guides/running-commands" >}}) for more information.
 
 ### `render`
 
@@ -107,6 +111,10 @@ Render a Pattern from JWT or Jsonnet and display the result.
 ### `run`
 
 Run Etcha in listening mode, periodically pulling new patterns, receiving new patterns via push, and exposing metrics.  Can specify an additional flag to only run once and exit.
+
+### `shell`
+
+Start an interactive shell on the remote Etcha instance.  See [Shell Access]({{< ref "/docs/guides/shell-access" >}}) for more information.
 
 ### `show-config`
 

@@ -146,7 +146,7 @@ func Default() *Config {
 		},
 		License: License{
 			Commands: 10,
-			Sources:  1,
+			Sources:  2,
 			Targets:  3,
 		},
 		Sources: map[string]*Source{},
