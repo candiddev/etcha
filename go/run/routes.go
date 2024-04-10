@@ -31,7 +31,8 @@ func (s *state) newMux(ctx context.Context) (http.Handler, errs.Err) {
 	r.Use(middleware.Recoverer)
 	r.Use(s.setContext)
 	r.Use(s.checkRateLimiter)
-	r.Post("/etcha/v1/push/{config}", s.postPush)
+	r.Post("/etcha/v1/push/{source}", s.postPush)
+	r.Post("/etcha/v1/shell/{source}", s.postShell)
 	r.Route("/etcha/v1/system", func(r chi.Router) {
 		r.Use(s.checkSystemAuth)
 
@@ -57,7 +58,7 @@ func (s *state) checkRateLimiter(next http.Handler) http.Handler {
 		ctx = logger.SetAttribute(ctx, "sourceAddress", ip)
 		key := ip + chi.RouteContext(ctx).RoutePattern()
 
-		limit, err := s.RateLimiter.Get(ctx, key)
+		limit, err := s.RateLimiter.Peek(ctx, key)
 		if err != nil {
 			logger.Error(ctx, errs.ErrReceiver.Wrap(err)) //nolint:errcheck
 			w.WriteHeader(errs.ErrReceiver.Status())
@@ -76,7 +77,18 @@ func (s *state) checkRateLimiter(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r.WithContext(ctx))
+		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+
+		next.ServeHTTP(ww, r.WithContext(ctx))
+
+		if ww.Status() >= 300 {
+			_, err := s.RateLimiter.Get(ctx, key)
+			if err != nil {
+				logger.Error(ctx, errs.ErrReceiver.Wrap(err)) //nolint:errcheck
+
+				return
+			}
+		}
 	})
 }
 

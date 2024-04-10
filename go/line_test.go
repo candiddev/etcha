@@ -7,7 +7,6 @@ import (
 
 	"github.com/candiddev/etcha/go/config"
 	"github.com/candiddev/shared/go/assert"
-	"github.com/candiddev/shared/go/cli"
 	"github.com/candiddev/shared/go/logger"
 )
 
@@ -176,7 +175,7 @@ PermitRootLogin yes$$`,
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			cli.SetStdin(tc.stdin)
+			logger.SetStdin(tc.stdin)
 
 			logger.SetStd()
 			assert.Equal(t, line.Run(ctx, []string{

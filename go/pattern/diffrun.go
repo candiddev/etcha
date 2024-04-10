@@ -36,7 +36,23 @@ func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, o
 		removeBefore, removeAfter = p.Run.Diff(old.Run)
 	}
 
+	change := p.Run
+
+	diff := false
 	o := commands.Outputs{}
+
+	for i := range change {
+		if change[i].Check != "" || change[i].Always {
+			diff = true
+
+			break
+		}
+	}
+
+	if !diff && len(removeBefore) == 0 && len(removeAfter) == 0 {
+		return o, nil
+	}
+
 	env := types.EnvVars{}
 
 	var err errs.Err
@@ -54,7 +70,7 @@ func (p *Pattern) DiffRun(ctx context.Context, c *config.Config, old *Pattern, o
 		return o, logger.Error(ctx, err)
 	}
 
-	out, err = p.Run.Run(ctx, c.CLI, p.RunExec, commands.CommandsRunOpts{
+	out, err = change.Run(ctx, c.CLI, p.RunExec, commands.CommandsRunOpts{
 		Check:          opts.Check,
 		Env:            env,
 		ParentID:       opts.Source,

@@ -97,7 +97,6 @@ Example pushTargets:
 
 See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
 
-
 **Default:** `false`
 
 ### `signingCommands` (recommended) {#signingcommands}
@@ -262,6 +261,12 @@ String, the user or UID to run the commands with.  Using this is typically privi
 ### `workDir`
 
 String, the working directory to execute commands within.
+
+**Default:** `""`
+
+## `licenseKey`
+
+String, the Etcha license key provided to your organization.
 
 **Default:** `""`
 

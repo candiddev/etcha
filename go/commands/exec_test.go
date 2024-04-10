@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
@@ -79,7 +80,8 @@ func TestExecRun(t *testing.T) {
 		WorkDir: "work1",
 	}
 
-	out, err := e.Run(ctx, c, "script", "stdin")
+	e.Stdin = bytes.NewBufferString("stdin")
+	out, err := e.Run(ctx, c, "script")
 	assert.HasErr(t, err, ErrCommandsEmpty)
 	assert.Equal(t, out, "hello")
 
@@ -93,7 +95,8 @@ func TestExecRun(t *testing.T) {
 	assert.Equal(t, inputs[0].WorkDir, e.WorkDir)
 
 	e.ContainerImage = ""
-	e.Run(ctx, c, "script", "stdin")
+	e.Stdin = bytes.NewBufferString("stdin")
+	e.Run(ctx, c, "script")
 	inputs = c.RunMockInputs()
 
 	assert.Equal(t, inputs[0].Environment, e.Env.GetEnv())

@@ -134,7 +134,7 @@ func dirFileRun(file bool, usage string) cli.Command[*config.Config] { //nolint:
 
 			if !dir && len(args) == 4 {
 				if args[3] == "-" {
-					contents = cli.ReadStdin()
+					contents = logger.ReadStdin()
 				} else {
 					contents = []byte(args[3])
 				}

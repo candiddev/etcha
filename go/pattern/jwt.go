@@ -37,10 +37,12 @@ func ParseJWT(ctx context.Context, c *config.Config, token, source string) (*JWT
 		Raw: token,
 	}
 
-	_, r, err := c.ParseJWT(ctx, &j, token, source)
+	k, r, err := c.ParseJWT(ctx, &j, token, source)
 	if err != nil {
 		return &j, r, logger.Error(ctx, errs.ErrReceiver.Wrap(err))
 	}
+
+	logger.Info(ctx, fmt.Sprintf("Received JWT for %s from key %s", source, k.ID))
 
 	return &j, r, nil
 }

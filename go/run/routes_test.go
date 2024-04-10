@@ -62,7 +62,7 @@ func TestCheckRateLimiter(t *testing.T) {
 
 	var res *http.Response
 
-	for i := 0; i < 11; i++ {
+	for i := 0; i < 12; i++ {
 		res, _ = http.Get(ts.URL + "/etcha/v1/system/metrics?key=12345")
 	}
 

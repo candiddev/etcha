@@ -85,6 +85,18 @@ var cmdH = &Command{
 	ID: "h",
 }
 
+func TestCommandsCount(t *testing.T) {
+	assert.Equal(t, Commands{
+		cmdA,
+		cmdB,
+		cmdC,
+		cmdE,
+		cmdF,
+		cmdG,
+		cmdH,
+	}.Count(), 9)
+}
+
 func TestCommandsDiff(t *testing.T) {
 	before, after := Commands{
 		cmdA,
@@ -202,7 +214,7 @@ func TestCommandsRun(t *testing.T) {
 					Exec: "removeA",
 				},
 			},
-			wantOut: "INFO  Always removing g...\nINFO  Removing a...\noutput2output2",
+			wantOut: "INFO  Always removing g\nINFO  Removing a\noutput2output2",
 			wantOutputs: Outputs{
 				&Output{
 					ID:              "g",
@@ -261,7 +273,7 @@ func TestCommandsRun(t *testing.T) {
 					Exec: "changeG",
 				},
 			},
-			wantOut: "INFO  Changing a...\na\na\nINFO  Triggering e via a...\nINFO  Triggering f via a...\nINFO  Always changing g...\n",
+			wantOut: "INFO  Changing a\na\na\nINFO  Triggering e via a\nINFO  Triggering f via a\nINFO  Always changing g\n",
 			wantOutputs: Outputs{
 				&Output{
 					Change:          "a",

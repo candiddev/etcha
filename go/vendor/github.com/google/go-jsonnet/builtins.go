@@ -19,6 +19,9 @@ package jsonnet
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -31,6 +34,7 @@ import (
 	"strings"
 
 	"github.com/google/go-jsonnet/ast"
+	"golang.org/x/crypto/sha3"
 )
 
 func builtinPlus(i *interpreter, x, y value) (value, error) {
@@ -916,6 +920,42 @@ func builtinMd5(i *interpreter, x value) (value, error) {
 	return makeValueString(hex.EncodeToString(hash[:])), nil
 }
 
+func builtinSha1(i *interpreter, x value) (value, error) {
+	str, err := i.getString(x)
+	if err != nil {
+		return nil, err
+	}
+	hash := sha1.Sum([]byte(str.getGoString()))
+	return makeValueString(hex.EncodeToString(hash[:])), nil
+}
+
+func builtinSha256(i *interpreter, x value) (value, error) {
+	str, err := i.getString(x)
+	if err != nil {
+		return nil, err
+	}
+	hash := sha256.Sum256([]byte(str.getGoString()))
+	return makeValueString(hex.EncodeToString(hash[:])), nil
+}
+
+func builtinSha512(i *interpreter, x value) (value, error) {
+	str, err := i.getString(x)
+	if err != nil {
+		return nil, err
+	}
+	hash := sha512.Sum512([]byte(str.getGoString()))
+	return makeValueString(hex.EncodeToString(hash[:])), nil
+}
+
+func builtinSha3(i *interpreter, x value) (value, error) {
+	str, err := i.getString(x)
+	if err != nil {
+		return nil, err
+	}
+	hash := sha3.Sum512([]byte(str.getGoString()))
+	return makeValueString(hex.EncodeToString(hash[:])), nil
+}
+
 func builtinBase64(i *interpreter, input value) (value, error) {
 	var byteArr []byte
 
@@ -1059,6 +1099,16 @@ func liftNumeric(f func(float64) float64) func(*interpreter, value) (value, erro
 	}
 }
 
+func liftNumericToBoolean(f func(float64) bool) func(*interpreter, value) (value, error) {
+	return func(i *interpreter, x value) (value, error) {
+		n, err := i.getNumber(x)
+		if err != nil {
+			return nil, err
+		}
+		return makeValueBoolean(f(n.value)), nil
+	}
+}
+
 var builtinSqrt = liftNumeric(math.Sqrt)
 var builtinCeil = liftNumeric(math.Ceil)
 var builtinFloor = liftNumeric(math.Floor)
@@ -1085,6 +1135,22 @@ var builtinExponent = liftNumeric(func(f float64) float64 {
 	return float64(exponent)
 })
 var builtinRound = liftNumeric(math.Round)
+var builtinIsEven = liftNumericToBoolean(func(f float64) bool {
+	i, _ := math.Modf(f) // Get the integral part of the float
+	return math.Mod(i, 2) == 0
+})
+var builtinIsOdd = liftNumericToBoolean(func(f float64) bool {
+	i, _ := math.Modf(f) // Get the integral part of the float
+	return math.Mod(i, 2) != 0
+})
+var builtinIsInteger = liftNumericToBoolean(func(f float64) bool {
+	_, frac := math.Modf(f) // Get the fraction part of the float
+	return frac == 0
+})
+var builtinIsDecimal = liftNumericToBoolean(func(f float64) bool {
+	_, frac := math.Modf(f) // Get the fraction part of the float
+	return frac != 0
+})
 
 func liftBitwise(f func(int64, int64) int64, positiveRightArg bool) func(*interpreter, value, value) (value, error) {
 	return func(i *interpreter, xv, yv value) (value, error) {
@@ -1289,6 +1355,27 @@ func builtinIsEmpty(i *interpreter, strv value) (value, error) {
 	return makeValueBoolean(len(sStr) == 0), nil
 }
 
+func builtinEqualsIgnoreCase(i *interpreter, sv1, sv2 value) (value, error) {
+	s1, err := i.getString(sv1)
+	if err != nil {
+		return nil, err
+	}
+	s2, err := i.getString(sv2)
+	if err != nil {
+		return nil, err
+	}
+	return makeValueBoolean(strings.EqualFold(s1.getGoString(), s2.getGoString())), nil
+}
+
+func builtinTrim(i *interpreter, strv value) (value, error) {
+	str, err := i.getString(strv)
+	if err != nil {
+		return nil, err
+	}
+	sStr := str.getGoString()
+	return makeValueString(strings.TrimSpace(sStr)), nil
+}
+
 func base64DecodeGoBytes(i *interpreter, str string) ([]byte, error) {
 	strLen := len(str)
 	if strLen%4 != 0 {
@@ -1406,8 +1493,6 @@ func builtinParseYAML(i *interpreter, str value) (value, error) {
 	}
 	s := sval.getGoString()
 
-	isYamlStream := strings.Contains(s, "---")
-
 	elems := []interface{}{}
 	d := NewYAMLToJSONDecoder(strings.NewReader(s))
 	for {
@@ -1421,7 +1506,7 @@ func builtinParseYAML(i *interpreter, str value) (value, error) {
 		elems = append(elems, elem)
 	}
 
-	if isYamlStream {
+	if d.IsStream() {
 		return jsonToValue(i, elems)
 	}
 	return jsonToValue(i, elems[0])
@@ -1907,6 +1992,78 @@ func builtinExtVar(i *interpreter, name value) (value, error) {
 	return nil, i.Error("Undefined external variable: " + string(index))
 }
 
+func builtinMinArray(i *interpreter, arguments []value) (value, error) {
+	arrv := arguments[0]
+	keyFv := arguments[1]
+
+	arr, err := i.getArray(arrv)
+	if err != nil {
+		return nil, err
+	}
+	keyF, err := i.getFunction(keyFv)
+	if err != nil {
+		return nil, err
+	}
+	num := arr.length()
+	if num == 0 {
+		return nil, i.Error("Expected at least one element in array. Got none")
+	}
+	minVal, err := keyF.call(i, args(arr.elements[0]))
+	if err != nil {
+		return nil, err
+	}
+	for index := 1; index < num; index++ {
+		current, err := keyF.call(i, args(arr.elements[index]))
+		if err != nil {
+			return nil, err
+		}
+		cmp, err := valueCmp(i, minVal, current)
+		if err != nil {
+			return nil, err
+		}
+		if cmp > 0 {
+			minVal = current
+		}
+	}
+	return minVal, nil
+}
+
+func builtinMaxArray(i *interpreter, arguments []value) (value, error) {
+	arrv := arguments[0]
+	keyFv := arguments[1]
+
+	arr, err := i.getArray(arrv)
+	if err != nil {
+		return nil, err
+	}
+	keyF, err := i.getFunction(keyFv)
+	if err != nil {
+		return nil, err
+	}
+	num := arr.length()
+	if num == 0 {
+		return nil, i.Error("Expected at least one element in array. Got none")
+	}
+	maxVal, err := keyF.call(i, args(arr.elements[0]))
+	if err != nil {
+		return nil, err
+	}
+	for index := 1; index < num; index++ {
+		current, err := keyF.call(i, args(arr.elements[index]))
+		if err != nil {
+			return nil, err
+		}
+		cmp, err := valueCmp(i, maxVal, current)
+		if err != nil {
+			return nil, err
+		}
+		if cmp < 0 {
+			maxVal = current
+		}
+	}
+	return maxVal, nil
+}
+
 func builtinNative(i *interpreter, name value) (value, error) {
 	str, err := i.getString(name)
 	if err != nil {
@@ -1933,6 +2090,121 @@ func builtinSum(i *interpreter, arrv value) (value, error) {
 		sum += elemValue.value
 	}
 	return makeValueNumber(sum), nil
+}
+
+func builtinAvg(i *interpreter, arrv value) (value, error) {
+	arr, err := i.getArray(arrv)
+	if err != nil {
+		return nil, err
+	}
+	
+	len := float64(arr.length())
+	if len == 0 {
+		return nil, i.Error("Cannot calculate average of an empty array.")
+	}
+	
+	sumValue, err := builtinSum(i, arrv)
+	if err != nil {
+		return nil, err
+	}
+	sum, err := i.getNumber(sumValue)
+	if err != nil {
+		return nil, err
+	}
+
+	avg := sum.value/len
+	return makeValueNumber(avg), nil
+}
+
+func builtinContains(i *interpreter, arrv value, ev value) (value, error) {
+	arr, err := i.getArray(arrv)
+	if err != nil {
+		return nil, err
+	}
+	for _, elem := range arr.elements {
+		val, err := elem.getValue(i)
+		if err != nil {
+			return nil, err
+		}
+		eq, err := rawEquals(i, val, ev)
+		if err != nil {
+			return nil, err
+		}
+		if eq {
+			return makeValueBoolean(true), nil
+		}
+	}
+	return makeValueBoolean(false), nil
+}
+
+func builtinRemove(i *interpreter, arrv value, ev value) (value, error) {
+	arr, err := i.getArray(arrv)
+	if err != nil {
+		return nil, err
+	}
+	for idx, elem := range arr.elements {
+		val, err := elem.getValue(i)
+		if err != nil {
+			return nil, err
+		}
+		eq, err := rawEquals(i, val, ev)
+		if err != nil {
+			return nil, err
+		}
+		if eq {
+			return builtinRemoveAt(i, arrv, intToValue(idx))
+		}
+	}
+	return arr, nil
+}
+
+func builtinRemoveAt(i *interpreter, arrv value, idxv value) (value, error) {
+	arr, err := i.getArray(arrv)
+	if err != nil {
+		return nil, err
+	}
+	idx, err := i.getInt(idxv)
+	if err != nil {
+		return nil, err
+	}
+
+	newArr := append(arr.elements[:idx], arr.elements[idx+1:]...)
+	return makeValueArray(newArr), nil
+}
+
+func builtInObjectRemoveKey(i *interpreter, objv value, keyv value) (value, error) {
+	obj, err := i.getObject(objv)
+	if err != nil {
+		return nil, err
+	}
+	key, err := i.getString(keyv)
+	if err != nil {
+		return nil, err
+	}
+
+	newFields := make(simpleObjectFieldMap)
+	simpleObj := obj.uncached.(*simpleObject)
+	for fieldName, fieldVal := range simpleObj.fields {
+		if fieldName == key.getGoString() {
+			// skip the field which needs to be deleted
+			continue
+		}
+
+		newFields[fieldName] = simpleObjectField{
+			hide: fieldVal.hide,
+			field: &bindingsUnboundField{
+				inner:    fieldVal.field,
+				bindings: simpleObj.upValues,
+			},
+		}
+	}
+
+	return makeValueSimpleObject(
+		nil,
+		newFields,
+		[]unboundField{}, // No asserts allowed
+		nil,
+	), nil
 }
 
 // Utils for builtins - TODO(sbarzowski) move to a separate file in another commit
@@ -2196,11 +2468,14 @@ var funcBuiltins = buildBuiltinMap([]builtin{
 	&ternaryBuiltin{name: "foldl", function: builtinFoldl, params: ast.Identifiers{"func", "arr", "init"}},
 	&ternaryBuiltin{name: "foldr", function: builtinFoldr, params: ast.Identifiers{"func", "arr", "init"}},
 	&binaryBuiltin{name: "member", function: builtinMember, params: ast.Identifiers{"arr", "x"}},
+	&binaryBuiltin{name: "remove", function: builtinRemove, params: ast.Identifiers{"arr", "elem"}},
+	&binaryBuiltin{name: "removeAt", function: builtinRemoveAt, params: ast.Identifiers{"arr", "i"}},
 	&binaryBuiltin{name: "range", function: builtinRange, params: ast.Identifiers{"from", "to"}},
 	&binaryBuiltin{name: "primitiveEquals", function: primitiveEquals, params: ast.Identifiers{"x", "y"}},
 	&binaryBuiltin{name: "equals", function: builtinEquals, params: ast.Identifiers{"x", "y"}},
 	&binaryBuiltin{name: "objectFieldsEx", function: builtinObjectFieldsEx, params: ast.Identifiers{"obj", "hidden"}},
 	&ternaryBuiltin{name: "objectHasEx", function: builtinObjectHasEx, params: ast.Identifiers{"obj", "fname", "hidden"}},
+	&binaryBuiltin{name: "objectRemoveKey", function: builtInObjectRemoveKey, params: ast.Identifiers{"obj", "key"}},
 	&unaryBuiltin{name: "type", function: builtinType, params: ast.Identifiers{"x"}},
 	&unaryBuiltin{name: "char", function: builtinChar, params: ast.Identifiers{"n"}},
 	&unaryBuiltin{name: "codepoint", function: builtinCodepoint, params: ast.Identifiers{"str"}},
@@ -2218,9 +2493,17 @@ var funcBuiltins = buildBuiltinMap([]builtin{
 	&unaryBuiltin{name: "mantissa", function: builtinMantissa, params: ast.Identifiers{"x"}},
 	&unaryBuiltin{name: "exponent", function: builtinExponent, params: ast.Identifiers{"x"}},
 	&unaryBuiltin{name: "round", function: builtinRound, params: ast.Identifiers{"x"}},
+	&unaryBuiltin{name: "isEven", function: builtinIsEven, params: ast.Identifiers{"x"}},
+	&unaryBuiltin{name: "isOdd", function: builtinIsOdd, params: ast.Identifiers{"x"}},
+	&unaryBuiltin{name: "isInteger", function: builtinIsInteger, params: ast.Identifiers{"x"}},
+	&unaryBuiltin{name: "isDecimal", function: builtinIsDecimal, params: ast.Identifiers{"x"}},
 	&binaryBuiltin{name: "pow", function: builtinPow, params: ast.Identifiers{"x", "n"}},
 	&binaryBuiltin{name: "modulo", function: builtinModulo, params: ast.Identifiers{"x", "y"}},
 	&unaryBuiltin{name: "md5", function: builtinMd5, params: ast.Identifiers{"s"}},
+	&unaryBuiltin{name: "sha1", function: builtinSha1, params: ast.Identifiers{"s"}},
+	&unaryBuiltin{name: "sha256", function: builtinSha256, params: ast.Identifiers{"s"}},
+	&unaryBuiltin{name: "sha512", function: builtinSha512, params: ast.Identifiers{"s"}},
+	&unaryBuiltin{name: "sha3", function: builtinSha3, params: ast.Identifiers{"s"}},
 	&binaryBuiltin{name: "xnor", function: builtinXnor, params: ast.Identifiers{"x", "y"}},
 	&binaryBuiltin{name: "xor", function: builtinXor, params: ast.Identifiers{"x", "y"}},
 	&binaryBuiltin{name: "lstripChars", function: builtinLstripChars, params: ast.Identifiers{"str", "chars"}},
@@ -2230,6 +2513,8 @@ var funcBuiltins = buildBuiltinMap([]builtin{
 	&ternaryBuiltin{name: "splitLimit", function: builtinSplitLimit, params: ast.Identifiers{"str", "c", "maxsplits"}},
 	&ternaryBuiltin{name: "strReplace", function: builtinStrReplace, params: ast.Identifiers{"str", "from", "to"}},
 	&unaryBuiltin{name: "isEmpty", function: builtinIsEmpty, params: ast.Identifiers{"str"}},
+	&binaryBuiltin{name: "equalsIgnoreCase", function: builtinEqualsIgnoreCase, params: ast.Identifiers{"str1", "str2"}},
+	&unaryBuiltin{name: "trim", function: builtinTrim, params: ast.Identifiers{"str"}},
 	&unaryBuiltin{name: "base64Decode", function: builtinBase64Decode, params: ast.Identifiers{"str"}},
 	&unaryBuiltin{name: "base64DecodeBytes", function: builtinBase64DecodeBytes, params: ast.Identifiers{"str"}},
 	&unaryBuiltin{name: "parseInt", function: builtinParseInt, params: ast.Identifiers{"str"}},
@@ -2243,8 +2528,12 @@ var funcBuiltins = buildBuiltinMap([]builtin{
 	&unaryBuiltin{name: "encodeUTF8", function: builtinEncodeUTF8, params: ast.Identifiers{"str"}},
 	&unaryBuiltin{name: "decodeUTF8", function: builtinDecodeUTF8, params: ast.Identifiers{"arr"}},
 	&generalBuiltin{name: "sort", function: builtinSort, params: []generalBuiltinParameter{{name: "arr"}, {name: "keyF", defaultValue: functionID}}},
+	&generalBuiltin{name: "minArray", function: builtinMinArray, params: []generalBuiltinParameter{{name: "arr"}, {name: "keyF", defaultValue: functionID}}},
+	&generalBuiltin{name: "maxArray", function: builtinMaxArray, params: []generalBuiltinParameter{{name: "arr"}, {name: "keyF", defaultValue: functionID}}},
 	&unaryBuiltin{name: "native", function: builtinNative, params: ast.Identifiers{"x"}},
 	&unaryBuiltin{name: "sum", function: builtinSum, params: ast.Identifiers{"arr"}},
+	&unaryBuiltin{name: "avg", function: builtinAvg, params: ast.Identifiers{"arr"}},
+	&binaryBuiltin{name: "contains", function: builtinContains, params: ast.Identifiers{"arr", "elem"}},
 
 	// internal
 	&unaryBuiltin{name: "$objectFlatMerge", function: builtinUglyObjectFlatMerge, params: ast.Identifiers{"x"}},

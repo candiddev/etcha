@@ -3,6 +3,7 @@ package run
 import (
 	"context"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/candiddev/etcha/go/config"
@@ -20,6 +21,7 @@ type state struct {
 	JWTs           *types.MapLock[pattern.JWT]
 	Patterns       *types.MapLock[pattern.Pattern]
 	PatternLocks   map[string]*sync.Mutex
+	Shells         *types.MapLock[os.File]
 	RateLimiter    *limiter.Limiter
 	WaitGroup      sync.WaitGroup
 	WebhookHandler http.Handler
@@ -33,6 +35,7 @@ func newState(ctx context.Context, c *config.Config) (*state, errs.Err) {
 		JWTs:           types.NewMapLock[pattern.JWT](),
 		Patterns:       types.NewMapLock[pattern.Pattern](),
 		PatternLocks:   map[string]*sync.Mutex{},
+		Shells:         types.NewMapLock[os.File](),
 	}
 
 	return s, logger.Error(ctx, s.initHandlers(ctx))

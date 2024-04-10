@@ -7,10 +7,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"regexp"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/candiddev/etcha/go/commands"
@@ -39,7 +38,7 @@ func TestPushTargets(t *testing.T) {
 
 		w.Write(j)
 	}))
-	p1, _ := strconv.Atoi(strings.Split(ts1.URL, ":")[2])
+	u1, _ := url.Parse(ts1.URL)
 
 	ts2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		j, _ := json.MarshalIndent(Result{
@@ -48,7 +47,7 @@ func TestPushTargets(t *testing.T) {
 
 		w.Write(j)
 	}))
-	p2, _ := strconv.Atoi(strings.Split(ts2.URL, ":")[2])
+	u2, _ := url.Parse(ts2.URL)
 
 	ts3 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		j, _ := json.MarshalIndent(Result{
@@ -59,12 +58,11 @@ func TestPushTargets(t *testing.T) {
 
 		w.Write(j)
 	}))
-	p3, _ := strconv.Atoi(strings.Split(ts3.URL, ":")[2])
+	u3, _ := url.Parse(ts3.URL)
 
 	c := config.Default()
 
 	cmd := ""
-	vars := map[string]any{}
 
 	ts4 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		j, _ := io.ReadAll(r.Body)
@@ -73,7 +71,6 @@ func TestPushTargets(t *testing.T) {
 		p, _ := o.Pattern(ctx, c, "")
 
 		cmd = p.Run[0].Change
-		vars = p.RunVars
 
 		if cmd != "test" {
 			w.WriteHeader(http.StatusBadGateway)
@@ -81,7 +78,7 @@ func TestPushTargets(t *testing.T) {
 			w.Write([]byte(types.JSONToString(&Result{})))
 		}
 	}))
-	p4, _ := strconv.Atoi(strings.Split(ts4.URL, ":")[2])
+	u4, _ := url.Parse(ts4.URL)
 
 	os.WriteFile("a.jsonnet", []byte(`{
 		run: [
@@ -96,12 +93,12 @@ func TestPushTargets(t *testing.T) {
 	c.Build.PushMaxWorkers = 2
 	prv, _, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
 	c.Build.SigningKey = prv.String()
-	tgt := map[string]config.PushTarget{
+	tgt := map[string]config.Target{
 		"1": {
 			Hostname: "127.0.0.1",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
-			Port:     p1,
+			PathPush: "/etcha/v1/push",
+			Port:     u1.Port(),
 			SourcePatterns: map[string]string{
 				"a": "",
 				"b": "",
@@ -113,8 +110,8 @@ func TestPushTargets(t *testing.T) {
 		"2": {
 			Hostname: "127.0.0.1",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
-			Port:     p2,
+			PathPush: "/etcha/v1/push",
+			Port:     u2.Port(),
 			SourcePatterns: map[string]string{
 				"a": "",
 				"c": "",
@@ -123,8 +120,8 @@ func TestPushTargets(t *testing.T) {
 		"3": {
 			Hostname: "localhost",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
-			Port:     p3,
+			PathPush: "/etcha/v1/push",
+			Port:     u3.Port(),
 			SourcePatterns: map[string]string{
 				"a": "",
 				"c": "",
@@ -133,8 +130,8 @@ func TestPushTargets(t *testing.T) {
 		"4": {
 			Hostname: "localhost",
 			Insecure: true,
-			Path:     "/etcha/v1/push",
-			Port:     p4,
+			PathPush: "/etcha/v1/push",
+			Port:     u4.Port(),
 			SourcePatterns: map[string]string{
 				"a": "",
 				"d": "test",
@@ -172,10 +169,6 @@ func TestPushTargets(t *testing.T) {
 	_, err = PushTargets(ctx, c, tgt, "d", "", PushOpts{})
 	assert.HasErr(t, err, nil)
 	assert.Equal(t, cmd, "test")
-	assert.Equal(t, vars, map[string]any{
-		"source": "d",
-		"target": "4",
-	})
 
 	_, err = PushTargets(ctx, c, tgt, "d", "a.jsonnet", PushOpts{})
 	assert.HasErr(t, err, nil)
@@ -198,10 +191,10 @@ func TestPushTargets(t *testing.T) {
 		"2": float64(2),
 	})
 
-	d, _, _ = getPushDestJWT(ctx, c, config.PushTarget{
+	d, _, _ = getPushDestJWT(ctx, c, config.Target{
 		Hostname: "a",
-		Path:     "/b",
-		Port:     123,
+		PathPush: "/b",
+		Port:     "123",
 	}, &pattern.Pattern{}, "", "test", map[string]any{
 		"1": 1,
 		"2": 2,
@@ -218,7 +211,9 @@ func TestPushTargetPostPush(t *testing.T) {
 	logger.UseTestLogger(t)
 
 	ctx := context.Background()
+
 	c := config.Default()
+	c.CLI.LogFormat = logger.FormatKV
 	c.Exec.AllowOverride = true
 	c.CLI.RunMock()
 
@@ -303,7 +298,7 @@ func TestPushTargetPostPush(t *testing.T) {
 		{
 			name:    "bad_sign",
 			command: "testdata/good1.jsonnet",
-			wantErr: pattern.ErrPatternMissingKey,
+			wantErr: config.ErrMissingBuildKey,
 			wantInputs: []cli.RunMockInput{
 				{
 					Environment: []string{
@@ -500,6 +495,7 @@ func TestPushTargetPostPush(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			c.Build = config.Build{}
 			c.Build.SigningKey = tc.signingKey.String()
 			c.CLI.RunMockErrors(tc.mockErrors)
 			c.CLI.RunMockOutputs([]string{"1", "a", "b", "c", "d", "e"})

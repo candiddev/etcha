@@ -65,6 +65,92 @@ func TestConfigParse(t *testing.T) {
 	})
 	assert.Equal(t, c.Run.StateDir, filepath.Join(wd, "run"))
 
+	prv, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.BestEncryptionAsymmetric)
+	cli.LicensePublicKeys = pub.String()
+
+	assert.Equal(t, c.License, License{
+		Commands: 10,
+		Sources:  1,
+		Targets:  3,
+	})
+
+	c.Sources = map[string]*Source{
+		"a": {},
+		"b": {},
+	}
+	claims := License{
+		Sources: 2,
+	}
+
+	assert.Contains(t, c.Parse(ctx, nil).Error(), "number of sources")
+
+	token, _, _ := jwt.New(&claims, time.Now().Add(10*time.Second), nil, "", "", "A")
+	token.Sign(prv)
+	c.LicenseKey = token.String()
+
+	assert.HasErr(t, c.Parse(ctx, nil), nil)
+
+	c.Targets = map[string]Target{
+		"a": {},
+		"b": {},
+		"c": {},
+		"d": {},
+	}
+	claims.Targets = 4
+
+	assert.Contains(t, c.Parse(ctx, nil).Error(), "number of targets")
+
+	token, _, _ = jwt.New(&claims, time.Now().Add(10*time.Second), nil, "", "", "A")
+	token.Sign(prv)
+	c.LicenseKey = token.String()
+
+	assert.HasErr(t, c.Parse(ctx, nil), nil)
+
+	c.Sources["a"].Commands = []*commands.Command{
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+		{
+			ID: "a",
+		},
+	}
+	claims.Commands = 11
+
+	assert.Contains(t, c.Parse(ctx, nil).Error(), "number of commands")
+
+	token, _, _ = jwt.New(&claims, time.Now().Add(10*time.Second), nil, "", "", "A")
+	token.Sign(prv)
+	c.LicenseKey = token.String()
+
+	assert.HasErr(t, c.Parse(ctx, nil), nil)
+
 	os.Remove("config.jsonnet")
 	os.Remove("run")
 }
@@ -175,4 +261,85 @@ func TestParseJWTFile(t *testing.T) {
 	})
 
 	os.RemoveAll("testdata")
+}
+
+func TestSignJWT(t *testing.T) {
+	ctx := context.Background()
+	c := Default()
+	j := &jwt.Token{
+		HeaderBase64:  "header",
+		PayloadBase64: "payload",
+	}
+
+	// No keys
+	out, err := c.SignJWT(ctx, j)
+	assert.HasErr(t, err, ErrMissingBuildKey)
+	assert.Equal(t, out == "", true)
+
+	prv, pub, _ := cryptolib.NewKeysAsymmetric(cryptolib.AlgorithmBest)
+	c.Build.SigningKey = prv.String()
+	c.Run.VerifyKeys = cryptolib.Keys[cryptolib.KeyProviderPublic]{
+		pub,
+	}
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	// With key
+	c.Build.SigningKey = prv.String()
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	// With encrypted key password
+	logger.SetStdin("password\npassword\n")
+
+	ev, _ := cryptolib.KDFSet(cryptolib.Argon2ID, "123", []byte(prv.String()), cryptolib.EncryptionBest)
+	c.Build.SigningKey = ev.String()
+
+	logger.SetStdin("password")
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	// With wrong encrypted key password
+	logger.SetStdin("wrong")
+
+	c.Build.key = cryptolib.Key[cryptolib.KeyProviderPrivate]{}
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, ErrMissingBuildKey)
+	assert.Equal(t, out == "", true)
+
+	c.CLI.RunMock()
+	c.Exec.AllowOverride = true
+	c.Build.SigningKey = ""
+	c.Build.SigningExec = &commands.Exec{
+		Command: "hello",
+	}
+	c.Build.SigningCommands = append(commands.Commands{
+		{
+			Always: true,
+			Change: "changeA",
+			ID:     "a",
+			OnChange: []string{
+				"etcha:jwt",
+			},
+		},
+	}, c.Build.SigningCommands...)
+	c.CLI.RunMockOutputs([]string{
+		"output",
+	})
+
+	out, err = c.SignJWT(ctx, j)
+	assert.HasErr(t, err, nil)
+	assert.Equal(t, out == "", false)
+
+	in := c.CLI.RunMockInputs()
+	assert.Equal(t, len(in), 1)
+	assert.Equal(t, in[0].Exec, "hello changeA")
+	assert.Equal(t, out, "output")
 }

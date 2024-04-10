@@ -23,6 +23,7 @@ var compare = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		},
 	},
 	Run: func(ctx context.Context, args []string, flags cli.Flags, c *config.Config) errs.Err {
+		ctx = logger.SetLevel(ctx, logger.LevelError)
 		j1, _, err := pattern.ParseJWTFromPath(ctx, c, "", args[1])
 		if err != nil {
 			return err

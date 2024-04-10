@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"math/big"
 	"net/http"
 	"os"
@@ -61,7 +60,7 @@ func Run(ctx context.Context, c *config.Config, once bool) errs.Err {
 	defer s.WaitGroup.Wait()
 
 	if len(c.Sources) != 0 {
-		logger.Info(ctx, "Starting source runners...")
+		logger.Info(ctx, "Starting source runners")
 
 		s.sourceRunner(ctx, cancel)
 	}
@@ -132,7 +131,7 @@ func (s *state) diffExec(ctx context.Context, source string, j *pattern.JWT, opt
 	var r Result
 
 	if !src.TriggerOnly {
-		logger.Info(ctx, fmt.Sprintf("Diffing Pattern for %s...", source))
+		logger.Info(ctx, "Diffing Pattern for "+source)
 
 		l := s.PatternLocks[source]
 		if l == nil {
@@ -183,7 +182,7 @@ func (s *state) diffExec(ctx context.Context, source string, j *pattern.JWT, opt
 	}
 
 	if !src.NoRestore && j != nil && j.Raw != "" {
-		logger.Info(ctx, fmt.Sprintf("Saving JWT for %s...", source))
+		logger.Info(ctx, "Saving JWT for "+source)
 
 		jp := filepath.Join(s.Config.Run.StateDir, source+".jwt")
 
@@ -244,7 +243,7 @@ func (s *state) listen(ctx context.Context) errs.Err {
 	case s.Config.Run.TLSCertificateBase64 != "" && s.Config.Run.TLSKeyBase64 != "":
 		c, err = certificates.GetBase64(s.Config.Run.TLSCertificateBase64, s.Config.Run.TLSKeyBase64)
 	case s.Config.Run.TLSCertificatePath == "" || s.Config.Run.TLSCertificateBase64 == "":
-		logger.Info(ctx, "Generating self-signed certificate for listener...")
+		logger.Info(ctx, "Generating self-signed certificate for listener")
 
 		c, err = certificates.GetSelfSigned("Etcha")
 	}
@@ -262,7 +261,7 @@ func (s *state) listen(ctx context.Context) errs.Err {
 		}
 	}
 
-	logger.Info(ctx, "Starting listener...")
+	logger.Info(ctx, "Starting listener")
 
 	if err := srv.ListenAndServeTLS(s.Config.Run.TLSCertificatePath, s.Config.Run.TLSKeyPath); err != nil && err != http.ErrServerClosed {
 		return logger.Error(ctx, errs.ErrReceiver.Wrap(err))
@@ -285,7 +284,7 @@ func (s *state) loadExecJWTs(ctx context.Context) {
 
 		// Load static commands from config.
 		if len(source.Commands) > 0 {
-			logger.Info(ctx, fmt.Sprintf("Loading config commands for %s...", k))
+			logger.Info(ctx, "Loading config commands for "+k)
 
 			p := &pattern.Pattern{
 				Run:     source.Commands,
@@ -301,7 +300,7 @@ func (s *state) loadExecJWTs(ctx context.Context) {
 			if jw, _, err := pattern.ParseJWTFromPath(ctx, s.Config, k, path); err == nil && jw != nil {
 				p, err := jw.Pattern(ctx, s.Config, k)
 				if err == nil {
-					logger.Info(ctx, fmt.Sprintf("Loading cached config for %s...", k))
+					logger.Info(ctx, "Loading cached config for "+k)
 					s.JWTs.Set(k, jw)
 					s.Patterns.Set(k, p)
 				} else {

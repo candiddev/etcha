@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"errors"
+	"io"
 	"strings"
 
 	"github.com/candiddev/shared/go/cli"
@@ -30,6 +31,9 @@ type Exec struct {
 	Env                 types.EnvVars `json:"env"`
 	EnvInherit          bool          `json:"envInherit"`
 	Group               string        `json:"group"`
+	Stdin               io.Reader     `json:"-"`
+	Stderr              io.Writer     `json:"-"`
+	Stdout              io.Writer     `json:"-"`
 	Sudo                bool          `json:"sudo"`
 	User                string        `json:"user"`
 	WorkDir             string        `json:"workDir"`
@@ -52,8 +56,7 @@ func (e Exec) Override(o ...*Exec) *Exec {
 	return &out
 }
 
-// Run will run a script using the Exec.
-func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli.CmdOutput, errs.Err) {
+func (e *Exec) RunOpts(ctx context.Context, script string) (cli.RunOpts, errs.Err) {
 	var s []string
 
 	if e.Command == "" {
@@ -63,7 +66,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 	}
 
 	if len(s) == 0 {
-		return "", logger.Error(ctx, errs.ErrReceiver.Wrap(ErrCommandsEmpty))
+		return cli.RunOpts{}, logger.Error(ctx, ErrCommandsEmpty)
 	}
 
 	command := s[0]
@@ -77,7 +80,7 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		args = append(args, script)
 	}
 
-	return c.Run(ctx, cli.RunOpts{
+	return cli.RunOpts{
 		Args:                args,
 		Command:             command,
 		ContainerEntrypoint: e.ContainerEntrypoint,
@@ -92,8 +95,20 @@ func (e *Exec) Run(ctx context.Context, c cli.Config, script, stdin string) (cli
 		Group:               e.Group,
 		NoErrorLog:          true,
 		Sudo:                e.Sudo,
-		Stdin:               stdin,
+		Stderr:              e.Stderr,
+		Stdout:              e.Stdout,
+		Stdin:               e.Stdin,
 		User:                e.User,
 		WorkDir:             e.WorkDir,
-	})
+	}, nil
+}
+
+// Run will run a script using the Exec.
+func (e *Exec) Run(ctx context.Context, c cli.Config, script string) (cli.CmdOutput, errs.Err) {
+	opts, err := e.RunOpts(ctx, script)
+	if err != nil {
+		return "", logger.Error(ctx, err)
+	}
+
+	return c.Run(ctx, opts)
 }

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -86,27 +87,31 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, exec Exec, opts Comma
 		return out, newEnv, nil
 	}
 
-	ch := fmt.Sprintf("Changing %s...", id)
+	ch := "Changing " + id
 	if opts.Remove {
-		ch = fmt.Sprintf("Removing %s...", id)
+		ch = "Removing " + id
 	}
 
 	switch {
 	case cmd.Always:
-		ch = fmt.Sprintf("Always changing %s...", id)
+		ch = "Always changing " + id
 		if opts.Remove {
-			ch = fmt.Sprintf("Always removing %s...", id)
+			ch = "Always removing " + id
 		}
 	case !opts.Remove && len(cmd.ChangedBy) > 0:
-		ch = fmt.Sprintf("Triggering %s via %s...", id, strings.Join(cmd.ChangedBy, ", "))
+		ch = fmt.Sprintf("Triggering %s via %s", id, strings.Join(cmd.ChangedBy, ", "))
 	case opts.Remove && len(cmd.RemovedBy) > 0:
-		ch = fmt.Sprintf("Triggering %s via %s...", id, strings.Join(cmd.RemovedBy, ", "))
+		ch = fmt.Sprintf("Triggering %s via %s", id, strings.Join(cmd.RemovedBy, ", "))
 	default:
 		out.Checked = true
 
-		logger.Debug(ctx, fmt.Sprintf("Checking %s...", id))
+		logger.Debug(ctx, "Checking "+id)
 
-		out.Check, err = cfg.Run(ctx, c, cmd.Check, cmd.Stdin)
+		if cmd.Stdin != "" {
+			cfg.Stdin = bytes.NewBufferString(cmd.Stdin)
+		}
+
+		out.Check, err = cfg.Run(ctx, c, cmd.Check)
 
 		newEnv[cmd.EnvPrefix+"_CHECK_OUT"] = out.Check.String()
 		if cmd.EnvPrefix != "" {
@@ -162,7 +167,11 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, exec Exec, opts Comma
 		s = cmd.Remove
 	}
 
-	o, err := cfg.Run(ctx, c, s, cmd.Stdin)
+	if cmd.Stdin != "" {
+		cfg.Stdin = bytes.NewBufferString(cmd.Stdin)
+	}
+
+	o, err := cfg.Run(ctx, c, s)
 	if err != nil {
 		if opts.Remove {
 			out.Remove = o
@@ -170,14 +179,14 @@ func (cmd *Command) Run(ctx context.Context, c cli.Config, exec Exec, opts Comma
 			newEnv[cmd.EnvPrefix+"_REMOVE"] = "1"
 			newEnv[cmd.EnvPrefix+"_REMOVE_OUT"] = out.Remove.String()
 
-			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error removing id %s", id)).Wrap(err.Errors()...), out.Remove.String())
+			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error removing id %s", id)).Wrap(err.Unwrap()...), out.Remove.String())
 		} else {
 			out.Change = o
 			out.ChangeFail = true
 			newEnv[cmd.EnvPrefix+"_CHANGE"] = "1"
 			newEnv[cmd.EnvPrefix+"_CHANGE_OUT"] = out.Change.String()
 
-			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", id)).Wrap(err.Errors()...).Wrap(errors.New(out.Change.String())))
+			err = logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", id)).Wrap(err.Unwrap()...).Wrap(errors.New(out.Change.String())))
 		}
 
 		metrics.CollectCommands(ctx, true)

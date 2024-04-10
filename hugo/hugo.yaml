@@ -34,6 +34,6 @@ params:
   offlineSearch: true
   search:
   stripe:
-    buyButtonID: buy_btn_1NzlxYKMTluwLdTdkGl8xS18
+    buyButtonID: buy_btn_1P3rXQKMTluwLdTd6V8R0nI7
     publishableKey: pk_test_L42ooayfe2Ui3PnUrkKZr3Dk00m8WzYZRD
 title: Etcha

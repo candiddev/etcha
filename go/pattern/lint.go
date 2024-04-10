@@ -1,6 +1,7 @@
 package pattern
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -37,7 +38,8 @@ func Lint(ctx context.Context, c *config.Config, path string, checkFormat bool) 
 			for name, linter := range c.Lint.Linters {
 				if linter != nil {
 					for _, cmd := range append(p.Build, p.Run...) {
-						if out, err := linter.Run(ctx, c.CLI, "", cmd.Check+"\n"+cmd.Change+"\n"+cmd.Remove); err != nil {
+						linter.Stdin = bytes.NewBufferString(cmd.Check + "\n" + cmd.Change + "\n" + cmd.Remove)
+						if out, err := linter.Run(ctx, c.CLI, ""); err != nil {
 							r[path] = append(r[path], fmt.Sprintf("linter %s: %s", name, out.String()))
 						}
 					}

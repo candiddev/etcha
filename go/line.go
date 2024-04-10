@@ -36,7 +36,7 @@ var line = cli.Command[*config.Config]{ //nolint:gochecknoglobals
 		var err error
 
 		if args[2] == "-" {
-			content = cli.ReadStdin()
+			content = logger.ReadStdin()
 		} else {
 			content, err = os.ReadFile(args[2])
 			if err != nil {

@@ -69,6 +69,18 @@ func (cmds Commands) Diff(old Commands) (removeBefore Commands, removeAfter Comm
 	return removeBefore, removeAfter
 }
 
+// Count returns the total number of Commands.
+func (cmds Commands) Count() int {
+	c := 0
+
+	for i := range cmds {
+		c++
+		c += cmds[i].Commands.Count()
+	}
+
+	return c
+}
+
 // CommandsRunOpts is a list of options for Commands.Run.
 type CommandsRunOpts struct { //nolint:revive
 	/* Run Commands in Check mode */
@@ -163,7 +175,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, exe *Exec, opts Comm
 
 						run := cmds[j].Always
 						if run {
-							logger.Info(ctx, fmt.Sprintf("Always changing %s...", cmds[j].ID))
+							logger.Info(ctx, "Always changing "+cmds[j].ID)
 						} else {
 							for k := range cmd.OnFail {
 								r, err := regexp.Compile(cmd.OnFail[k])
@@ -174,7 +186,7 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, exe *Exec, opts Comm
 								if r.MatchString(cmds[j].ID) { //nolint:revive
 									run = true
 
-									logger.Info(ctx, fmt.Sprintf("Triggering %s via %s.onFail...", cmds[j].ID, cmd.ID))
+									logger.Info(ctx, fmt.Sprintf("Triggering %s via %s.onFail", cmds[j].ID, cmd.ID))
 
 									break
 								}
@@ -191,8 +203,8 @@ func (cmds Commands) Run(ctx context.Context, c cli.Config, exe *Exec, opts Comm
 
 							cout = append(cout, out)
 
-							if out.Change, e = cfg.Run(ctx, c, cmds[j].Change, ""); e != nil { //nolint:revive
-								logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(e.Errors()...), out.Change.String()) //nolint:errcheck
+							if out.Change, e = cfg.Run(ctx, c, cmds[j].Change); e != nil { //nolint:revive
+								logger.Error(ctx, errs.ErrReceiver.Wrap(fmt.Errorf("error changing id %s", cmds[j].ID)).Wrap(e.Unwrap()...), out.Change.String()) //nolint:errcheck
 							}
 						}
 					}

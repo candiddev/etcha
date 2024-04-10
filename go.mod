@@ -1,17 +1,20 @@
 module github.com/candiddev/etcha
 
-go 1.21
-
-toolchain go1.21.1
+go 1.22
 
 replace github.com/candiddev/shared => ./shared
 
+replace github.com/google/go-jsonnet => github.com/thequailman/go-jsonnet v0.0.0-20230924031349-110b4ca1dc1a
+
 require (
 	github.com/candiddev/shared v0.0.0-00010101000000-000000000000
+	github.com/creack/pty v1.1.21
 	github.com/go-chi/chi/v5 v5.0.11
+	github.com/google/uuid v1.6.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/ulule/limiter/v3 v3.11.2
 	golang.org/x/sync v0.4.0
+	golang.org/x/term v0.18.0
 )
 
 require (
@@ -23,8 +26,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/go-jsonnet v0.20.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/go-jsonnet v0.0.0-00010101000000-000000000000 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
 	github.com/itchyny/gojq v0.12.14 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
@@ -41,10 +43,9 @@ require (
 	go.opentelemetry.io/otel/sdk v1.22.0 // indirect
 	go.opentelemetry.io/otel/trace v1.22.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
-	golang.org/x/crypto v0.18.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/term v0.16.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect

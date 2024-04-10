@@ -38,7 +38,7 @@ func (s *state) handleEvents(ctx context.Context, o commands.Outputs, source *co
 			for i := range event.Outputs {
 				ctx = metrics.SetSourceName(ctx, source)
 
-				logger.Info(ctx, fmt.Sprintf("Running source %s for event %s from ID %s...", source, event.Name, event.Outputs[i].ID))
+				logger.Info(ctx, fmt.Sprintf("Running source %s for event %s from ID %s", source, event.Name, event.Outputs[i].ID))
 
 				src := s.Config.Sources[source]
 				if src == nil {
@@ -123,7 +123,7 @@ func (s *state) initHandlers(ctx context.Context) errs.Err { //nolint:gocognit
 			ctx = metrics.SetSourceName(ctx, source)
 
 			if route == r.URL.Path {
-				logger.Info(ctx, fmt.Sprintf("Running source %s for webhook %s...", source, route))
+				logger.Info(ctx, fmt.Sprintf("Running source %s for webhook %s", source, route))
 
 				p := s.Patterns.Get(source)
 				if p == nil || len(p.Run) == 0 {
