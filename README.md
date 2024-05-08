@@ -2,7 +2,7 @@
 
 > Configuration Management That Evolves With Your Infrastructure
 
-**Latest Release Notes: [v2024.04](https://etcha.dev/blog/whats-new-202404/)**
+**Latest Release Notes: [v2024.05](https://etcha.dev/blog/whats-new-202405/)**
 
 [:speech_balloon: Discussions](https://github.com/candiddev/etcha/discussions)\
 [:book: Docs](https://etcha.dev/docs/)\

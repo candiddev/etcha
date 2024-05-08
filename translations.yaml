@@ -1,0 +1,855 @@
+outputs:
+- format: go
+  package: main
+  path: ../go/etcha
+translations:
+  BuildArgs1:
+    ar: مسار النمط
+    context: build arg1
+    de: Musterpfad
+    en: pattern path
+    es: ruta del patrón
+    fr: chemin de modèle
+    hi: पैटर्न पथ
+    ja: パターンパス
+    nl: patroon pad
+    pt: caminho padrão
+    ru: путь к шаблону
+    zh: 图案路径
+  BuildArgs2:
+    ar: مسار الوجهة
+    context: build arg2
+    de: Weg zum Ziel
+    en: destination path
+    es: ruta de destino
+    fr: chemin de destination
+    hi: गंतव्य पथ
+    ja: 宛先パス
+    nl: bestemming pad
+    pt: caminho de destino
+    ru: путь назначения
+    zh: 目标路径
+  BuildUsage:
+    ar: بناء نمط
+    context: build usage
+    de: Erstellen eines Musters
+    en: Build a Pattern
+    es: Construir un patrón
+    fr: Construire un modèle
+    hi: एक पैटर्न बनाएं
+    ja: パターンを構築する
+    nl: Bouw een patroon
+    pt: Construa um padrão
+    ru: Постройте шаблон
+    zh: 建立一个模式
+  CompareArg1:
+    ar: مسار jwt جديد أو عنوان URL
+    context: compare arg1
+    de: neuer JWT-Pfad oder neue URL
+    en: new jwt path or URL
+    es: nueva ruta jwt o URL
+    fr: nouveau chemin ou URL jwt
+    hi: नया jwt पथ या URL
+    ja: 新しい jwt パスまたは URL
+    nl: nieuw jwt-pad of URL
+    pt: novo caminho ou URL jwt
+    ru: новый путь или URL-адрес jwt
+    zh: 新的 jwt 路径或者 URL
+  CompareArg2:
+    ar: مسار jwt القديم أو عنوان URL
+    context: compare arg2
+    de: alter JWT-Pfad oder URL
+    en: old jwt path or URL
+    es: antigua ruta jwt o URL
+    fr: ancien chemin ou URL jwt
+    hi: पुराना jwt पथ या URL
+    ja: 古い jwt パスまたは URL
+    nl: oud jwt-pad of URL
+    pt: caminho ou URL jwt antigo
+    ru: старый путь или URL-адрес jwt
+    zh: 旧的 jwt 路径或 URL
+  CompareFlagsIUsage:
+    ar: تجاهل اختلافات JWTetchaVersion
+    context: compare -i usage
+    de: JWT EtchaVersion-Unterschiede ignorieren
+    en: Ignore JWT etchaVersion differences
+    es: Ignorar las diferencias de versión de JWT etcha
+    fr: Ignorer les différences JWT etchaVersion
+    hi: JWT etchaVersion अंतरों को अनदेखा करें
+    ja: JWT etchaVersion の違いを無視する
+    nl: Negeer JWT etchaVersion-verschillen
+    pt: Ignore as diferenças do JWT etchaVersion
+    ru: Игнорировать различия JWTetchaVersion
+    zh: 忽略 JWTetchaVersion 差异
+  CompareUsage:
+    ar: قارن بين اثنين من JWTs لمعرفة ما إذا كان لديهم نفس etchaBuildManifest وetchaPattern
+      وetchaVersion بشكل اختياري
+    context: compare usage
+    de: Vergleichen Sie zwei JWTs, um zu sehen, ob sie dasselbe etchaBuildManifest,
+      dasselbe etchaPattern und optional dieselbe etchaVersion haben.
+    en: Compare two JWTs to see if they have the same etchaBuildManifest, etchaPattern,
+      and optionally etchaVersion
+    es: Compare dos JWT para ver si tienen el mismo etcchaBuildManifest, etcchaPattern
+      y, opcionalmente, etchaVersion.
+    fr: Comparez deux JWT pour voir s&#39;ils ont les mêmes etchaBuildManifest, etchaPattern
+      et éventuellement etchaVersion
+    hi: दो JWT की तुलना करके देखें कि क्या उनमें समान etchaBuildManifest, etchaPattern
+      और वैकल्पिक रूप से etchaVersion है
+    ja: 2 つの JWT を比較して、etchaBuildManifest、etchaPattern、およびオプションでetchaVersion が同じかどうかを確認します。
+    nl: Vergelijk twee JWT&#39;s om te zien of ze dezelfde etchaBuildManifest, etchaPattern
+      en optioneel etchaVersion hebben
+    pt: Compare dois JWTs para ver se eles têm o mesmo etchaBuildManifest, etchaPattern
+      e, opcionalmente, etchaVersion
+    ru: Сравните два JWT, чтобы увидеть, имеют ли они одинаковыйetchaBuildManifest,etchPattern
+      и, при необходимости,etchaVersion.
+    zh: 比较两个 JWT，查看它们是否具有相同的 etchaBuildManifest、etchaPattern 以及可选的 etchaVersion
+  CopyArg3:
+    ar: مسار الوجهة أو - لـ stdout
+    context: copy arg2
+    de: Zielpfad oder - für stdout
+    en: destination path or - for stdout
+    es: ruta de destino o - para stdout
+    fr: chemin de destination ou - pour la sortie standard
+    hi: गंतव्य पथ या - stdout के लिए
+    ja: 宛先パスまたは - （標準出力用）
+    nl: bestemmingspad of - voor stdout
+    pt: caminho de destino ou - para stdout
+    ru: путь назначения или - для стандартного вывода
+    zh: 目标路径或 - 用于标准输出
+  CopyUsage:
+    ar: انسخ ملفًا محليًا أو مسار HTTP إلى الوجهة. يمكن اختياريًا تحديد رؤوس HTTP
+      عن طريق الإلحاق
+    context: copy usage
+    de: Kopiert eine lokale Datei oder einen HTTP-Pfad zu einem Ziel. Optional können
+      HTTP-Header durch Anhängen angegeben werden.
+    en: Copy a local file or HTTP path to a destination.  Can optionally specify HTTP
+      headers by appending
+    es: Copie un archivo local o una ruta HTTP a un destino. Opcionalmente, puede
+      especificar encabezados HTTP agregando
+    fr: Copiez un fichier local ou un chemin HTTP vers une destination. Peut éventuellement
+      spécifier les en-têtes HTTP en ajoutant
+    hi: किसी स्थानीय फ़ाइल या HTTP पथ को गंतव्य पर कॉपी करें। वैकल्पिक रूप से HTTP
+      हेडर को जोड़कर निर्दिष्ट कर सकते हैं
+    ja: ローカルファイルまたはHTTPパスを宛先にコピーします。オプションでHTTPヘッダーを追加して指定できます。
+    nl: Kopieer een lokaal bestand of HTTP-pad naar een bestemming. Kan optioneel
+      HTTP-headers opgeven door deze toe te voegen
+    pt: Copie um arquivo local ou caminho HTTP para um destino. Opcionalmente, pode
+      especificar cabeçalhos HTTP anexando
+    ru: Скопируйте локальный файл или путь HTTP в место назначения. При необходимости
+      можно указать заголовки HTTP, добавив
+    zh: 将本地文件或 HTTP 路径复制到目标。可以选择通过附加来指定 HTTP 标头
+  Description:
+    ar: إدارة التكوين التي تتطور مع البنية التحتية الخاصة بك
+    context: app description
+    de: Konfigurationsmanagement, das sich mit Ihrer Infrastruktur weiterentwickelt
+    en: Configuration management tha evolves with your infrastructure
+    es: Gestión de configuración que evoluciona con su infraestructura.
+    fr: Une gestion de configuration qui évolue avec votre infrastructure
+    hi: कॉन्फ़िगरेशन प्रबंधन जो आपके बुनियादी ढांचे के साथ विकसित होता है
+    ja: インフラストラクチャに合わせて進化する構成管理
+    nl: Configuratiebeheer dat mee evolueert met uw infrastructuur
+    pt: Gerenciamento de configuração que evolui com sua infraestrutura
+    ru: Управление конфигурацией, которое развивается вместе с вашей инфраструктурой
+    zh: 随基础设施一起发展的配置管理
+  DirUsage:
+    ar: إدارة دير على النظام
+    context: dir usage
+    de: Verwalten Sie ein Verzeichnis im System
+    en: Manage a dir on the system
+    es: Administrar un directorio en el sistema
+    fr: Gérer un répertoire sur le système
+    hi: सिस्टम पर निर्देशिका प्रबंधित करें
+    ja: システム上のディレクトリを管理する
+    nl: Beheer een map op het systeem
+    pt: Gerenciar um diretório no sistema
+    ru: Управление каталогом в системе
+    zh: 管理系统上的目录
+  FileUsage:
+    ar: إدارة ملف على النظام. يمكن توفير محتويات الملف باستخدام stdin.
+    context: file usage
+    de: Verwalten Sie eine Datei auf dem System. Dateiinhalte können über stdin bereitgestellt
+      werden.
+    en: Manage a file on the system.  File contents can be provided using stdin.
+    es: Administrar un archivo en el sistema. El contenido del archivo se puede proporcionar
+      utilizando stdin.
+    fr: Gérer un fichier sur le système. Le contenu du fichier peut être fourni en
+      utilisant stdin.
+    hi: सिस्टम पर फ़ाइल प्रबंधित करें। फ़ाइल सामग्री stdin का उपयोग करके प्रदान की
+      जा सकती है।
+    ja: システム上のファイルを管理します。ファイルの内容は stdin を使用して提供できます。
+    nl: Beheer een bestand op het systeem. Bestandsinhoud kan worden geleverd met
+      behulp van stdin.
+    pt: Gerencie um arquivo no sistema. O conteúdo do arquivo pode ser fornecido usando
+      stdin.
+    ru: Управление файлом в системе. Содержимое файла можно передать с помощью стандартного
+      ввода.
+    zh: 管理系统上的文件。可以使用 stdin 提供文件内容。
+  FilterParentCommandIDs:
+    ar: تصفية معرفات الأوامر الأصلية
+    context: local -f usage
+    de: Filtern Sie übergeordnete Befehls-IDs
+    en: Filter parent Command IDs
+    es: Filtrar ID de comando principal
+    fr: Filtrer les ID de commande parent
+    hi: पैरेंट कमांड आईडी फ़िल्टर करें
+    ja: 親コマンドIDをフィルターする
+    nl: Filter bovenliggende opdracht-ID&#39;s
+    pt: Filtrar IDs de comando pai
+    ru: Фильтровать идентификаторы родительских команд
+    zh: 筛选父命令 ID
+  HelpersArgsFile:
+    ar: محتويات، أو - للقراءة من stdin
+    context: helpers args file
+    de: Inhalt, oder - zum Lesen von stdin
+    en: contents, or - to read from stdin
+    es: contenidos, o - para leer desde stdin
+    fr: contenu, ou - pour lire depuis stdin
+    hi: सामग्री, या - stdin से पढ़ने के लिए
+    ja: 内容、または - 標準入力から読み取る
+    nl: inhoud, of - om te lezen van stdin
+    pt: conteúdo, ou - para ler de stdin
+    ru: содержимое, или - прочитать со стандартного ввода
+    zh: 内容，或者-从标准输入读取
+  HelpersFlagsFUsage:
+    ar: إزالة الدلائل غير الفارغة
+    context: -f usage
+    de: Nicht leere Verzeichnisse entfernen
+    en: Remove non-empty directories
+    es: Eliminar directorios no vacíos
+    fr: Supprimer les répertoires non vides
+    hi: गैर-रिक्त निर्देशिकाएँ हटाएँ
+    ja: 空でないディレクトリを削除する
+    nl: Verwijder niet-lege mappen
+    pt: Remover diretórios não vazios
+    ru: Удалить непустые каталоги
+    zh: 删除非空目录
+  HelpersFlagsGPlaceholder:
+    ar: مجموعة
+    context: -g placeholder
+    de: Gruppe
+    en: group
+    es: grupo
+    fr: groupe
+    hi: समूह
+    ja: グループ
+    nl: groep
+    pt: grupo
+    ru: группа
+    zh: 团体
+  HelpersFlagsGUsage:
+    ar: إدارة المجموعة
+    context: -g usage
+    de: Verwalten der Gruppe
+    en: Manage the group
+    es: Administrar el grupo
+    fr: Gérer le groupe
+    hi: समूह का प्रबंधन करें
+    ja: グループを管理する
+    nl: Beheer de groep
+    pt: Gerenciar o grupo
+    ru: Управлять группой
+    zh: 管理群组
+  HelpersFlagsOPlaceholder:
+    ar: مالك
+    context: -o placeholder
+    de: Eigentümer
+    en: owner
+    es: dueño
+    fr: propriétaire
+    hi: मालिक
+    ja: 所有者
+    nl: eigenaar
+    pt: proprietário
+    ru: владелец
+    zh: 所有者
+  HelpersFlagsOUsage:
+    ar: إدارة المالك
+    context: -o usage
+    de: Den Eigentümer verwalten
+    en: Manage the owner
+    es: Administrar el propietario
+    fr: Gérer le propriétaire
+    hi: स्वामी को प्रबंधित करें
+    ja: 所有者を管理する
+    nl: Beheer de eigenaar
+    pt: Gerenciar o proprietário
+    ru: Управление владельцем
+    zh: 管理所有者
+  HelpersFlagsPPlaceholder:
+    ar: الأذونات
+    context: -p placeholder
+    de: Berechtigungen
+    en: permissions
+    es: permisos
+    fr: autorisations
+    hi: अनुमति
+    ja: 権限
+    nl: rechten
+    pt: permissões
+    ru: разрешения
+    zh: 权限
+  HelpersFlagsPUsage:
+    ar: إدارة الأذونات
+    context: -p usage
+    de: Verwalten der Berechtigungen
+    en: Manage the permissions
+    es: Administrar los permisos
+    fr: Gérer les autorisations
+    hi: अनुमतियाँ प्रबंधित करें
+    ja: 権限を管理する
+    nl: Beheer de machtigingen
+    pt: Gerenciar as permissões
+    ru: Управление разрешениями
+    zh: 管理权限
+  InitArg1:
+    ar: 'الدليل الافتراضي: الدليل الحالي'
+    context: init arg1
+    de: 'Verzeichnis, Standard: aktuelles Verzeichnis'
+    en: 'directory, default: current directory'
+    es: 'directorio, predeterminado: directorio actual'
+    fr: 'répertoire, par défaut : répertoire courant'
+    hi: 'निर्देशिका, डिफ़ॉल्ट: वर्तमान निर्देशिका'
+    ja: 'ディレクトリ、デフォルト: 現在のディレクトリ'
+    nl: 'map, standaard: huidige map'
+    pt: 'diretório, padrão: diretório atual'
+    ru: 'каталог, по умолчанию: текущий каталог'
+    zh: 目录，默认：当前目录
+  InitUsage:
+    ar: تهيئة دليل لتطوير النمط
+    context: init usage
+    de: Initialisieren Sie ein Verzeichnis für die Musterentwicklung
+    en: Initialize a directory for pattern development
+    es: Inicializar un directorio para el desarrollo de patrones
+    fr: Initialiser un répertoire pour le développement de modèles
+    hi: पैटर्न विकास के लिए निर्देशिका आरंभ करें
+    ja: パターン開発用のディレクトリを初期化する
+    nl: Initialiseer een map voor patroonontwikkeling
+    pt: Inicialize um diretório para desenvolvimento de padrões
+    ru: Инициализировать каталог для разработки шаблонов
+    zh: 初始化模式开发目录
+  JWTUsage:
+    ar: عرض محتويات JWT
+    context: jwt usage
+    de: Den Inhalt eines JWT anzeigen
+    en: Show the contents of a JWT
+    es: Mostrar el contenido de un JWT
+    fr: Afficher le contenu d&#39;un JWT
+    hi: JWT की सामग्री दिखाएँ
+    ja: JWTの内容を表示する
+    nl: Toon de inhoud van een JWT
+    pt: Mostrar o conteúdo de um JWT
+    ru: Показать содержимое JWT
+    zh: 显示 JWT 的内容
+  LineArg2:
+    ar: المسار أو - لـ stdin
+    context: line arg2
+    de: Pfad oder - für stdin
+    en: path or - for stdin
+    es: ruta o - para stdin
+    fr: chemin ou - pour stdin
+    hi: पथ या - stdin के लिए
+    ja: パスまたは - （標準入力用）
+    nl: pad of - voor stdin
+    pt: caminho ou - para stdin
+    ru: путь или - для стандартного ввода
+    zh: 路径或 - 用于标准输入
+  LineArg3:
+    ar: مطابقة التعبير العادي
+    context: line arg3
+    de: Übereinstimmung mit regulärem Ausdruck
+    en: match regexp
+    es: coincidir con expresiones regulares
+    fr: correspondre à l&#39;expression rationnelle
+    hi: रेगेक्सपी से मिलान करें
+    ja: 正規表現に一致
+    nl: overeenkomen met regexp
+    pt: combinar regexp
+    ru: совпадение с регулярным выражением
+    zh: 匹配正则表达式
+  LineArg4:
+    ar: نص بديل
+    context: line arg4
+    de: Ersatztext
+    en: replacement text
+    es: texto de reemplazo
+    fr: texte de remplacement
+    hi: प्रतिस्थापन पाठ
+    ja: 置換テキスト
+    nl: vervangende tekst
+    pt: texto de substituição
+    ru: текст замены
+    zh: 替换文本
+  LineUsage:
+    ar: إدارة سطر في النص باستخدام regex. إذا كان المسار -، فستتم قراءة المحتويات
+      من stdin وإخراجها إلى stdout. وإلا فسيتم فحص/تغيير/إزالة المسار المحدد باستخدام
+      السطر.
+    context: line usage
+    de: Verwalten Sie eine Textzeile mit regulären Ausdrücken. Wenn der Pfad - ist,
+      wird der Inhalt von stdin gelesen und auf stdout ausgegeben. Andernfalls wird
+      der angegebene Pfad mit der Zeile überprüft/geändert/entfernt.
+    en: Manage a line in text using regex.  If path is -, the contents will be read
+      from stdin and output to stdout.  Otherwise the path specified will be checked/changed/removed
+      with the line.
+    es: Administre una línea de texto usando expresiones regulares. Si la ruta es
+      -, el contenido se leerá desde stdin y se enviará a stdout. De lo contrario,
+      la ruta especificada se verificará/cambiará/eliminará con la línea.
+    fr: Gérez une ligne de texte à l&#39;aide de regex. Si le chemin est -, le contenu
+      sera lu depuis stdin et sorti vers stdout. Sinon, le chemin spécifié sera vérifié/modifié/supprimé
+      avec la ligne.
+    hi: रेगेक्स का उपयोग करके पाठ में एक पंक्ति प्रबंधित करें। यदि पथ - है, तो सामग्री
+      stdin से पढ़ी जाएगी और stdout पर आउटपुट की जाएगी। अन्यथा निर्दिष्ट पथ को पंक्ति
+      के साथ जाँचा/बदला/हटाया जाएगा।
+    ja: 正規表現を使用してテキスト内の行を管理します。パスが - の場合、内容は stdin から読み取られ、stdout に出力されます。それ以外の場合は、指定されたパスが行とともにチェック/変更/削除されます。
+    nl: Beheer een tekstregel met regex. Als pad - is, wordt de inhoud gelezen van
+      stdin en uitgevoerd naar stdout. Anders wordt het opgegeven pad met de regel
+      gecontroleerd/gewijzigd/verwijderd.
+    pt: Gerencie uma linha no texto usando regex. Se o caminho for -, o conteúdo será
+      lido de stdin e enviado para stdout. Caso contrário, o caminho especificado
+      será verificado/alterado/removido com a linha.
+    ru: Управляйте строкой в тексте с помощью регулярного выражения. Если путь равен
+      -, содержимое будет прочитано со стандартного ввода и выведено на стандартный
+      вывод. В противном случае указанный путь будет проверен/изменен/удален вместе
+      с линией.
+    zh: 使用正则表达式管理文本中的一行。如果路径为 -，则内容将从 stdin 读取并输出到 stdout。否则将使用行检查/更改/删除指定的路径。
+  LinkUsage:
+    ar: إدارة الروابط الرمزية للمصدر والوجهة
+    context: link usage
+    de: Symlinks für Quelle und Ziel verwalten
+    en: Manage symlinks for source and destination
+    es: Administrar enlaces simbólicos para origen y destino
+    fr: Gérer les liens symboliques pour la source et la destination
+    hi: स्रोत और गंतव्य के लिए सिम्बलिंक प्रबंधित करें
+    ja: ソースと宛先のシンボリックリンクを管理する
+    nl: Beheer symlinks voor bron en bestemming
+    pt: Gerenciar links simbólicos para origem e destino
+    ru: Управление символическими ссылками для источника и назначения
+    zh: 管理源和目标的符号链接
+  LintFlagsFUsage:
+    ar: التحقق من التنسيق
+    context: lint arg2
+    de: Formatierung prüfen
+    en: Check formatting
+    es: Comprobar formato
+    fr: Vérifier le formatage
+    hi: फ़ॉर्मेटिंग जांचें
+    ja: 書式を確認する
+    nl: Controleer de opmaak
+    pt: Verifique a formatação
+    ru: Проверьте форматирование
+    zh: 检查格式
+  LintUsage:
+    ar: لينت نمط أو دليل
+    context: lint usage
+    de: Ein Muster oder Verzeichnis fusseln
+    en: Lint a pattern or directory
+    es: Lint un patrón o directorio
+    fr: Linter un modèle ou un répertoire
+    hi: पैटर्न या निर्देशिका को लिंट करें
+    ja: パターンまたはディレクトリをLintする
+    nl: Lint een patroon of map
+    pt: Lint um padrão ou diretório
+    ru: Связать шаблон или каталог
+    zh: 对模式或目录进行 Lint 检查
+  LocalArg1:
+    ar: مسار النمط (ينتهي بـ .jsonnet) أو Jsonnet للعرض
+    context: local arg1
+    de: Musterpfad (mit der Endung .jsonnet) oder Jsonnet zum Rendern
+    en: pattern path (ending in .jsonnet) or Jsonnet to render
+    es: ruta del patrón (que termina en .jsonnet) o Jsonnet para renderizar
+    fr: chemin du modèle (se terminant par .jsonnet) ou Jsonnet à restituer
+    hi: पैटर्न पथ (.jsonnet में समाप्त) या रेंडर करने के लिए Jsonnet
+    ja: パターンパス（.jsonnetで終わる）またはレンダリングするJsonnet
+    nl: patroonpad (eindigend op .jsonnet) of Jsonnet om weer te geven
+    pt: caminho padrão (terminando em .jsonnet) ou Jsonnet para renderizar
+    ru: путь к шаблону (оканчивающийся на .jsonnet) или Jsonnet для рендеринга
+    zh: 要渲染的模式路径（以 .jsonnet 结尾）或 Jsonnet
+  LocalFlagsRUsage:
+    ar: 'اضبط الوضع على إزالة (الافتراضي: تغيير)'
+    context: local -r usage
+    de: 'Modus auf Entfernen setzen (Standard: Ändern)'
+    en: 'Set mode to Remove (default: Change)'
+    es: 'Establecer el modo en Eliminar (predeterminado: Cambiar)'
+    fr: 'Définir le mode sur Supprimer (par défaut: Modifier)'
+    hi: 'मोड को हटाएँ पर सेट करें (डिफ़ॉल्ट: बदलें)'
+    ja: 'モードを削除に設定します（デフォルト: 変更）'
+    nl: 'Modus instellen op Verwijderen (standaard: Wijzigen)'
+    pt: 'Defina o modo como Remover (padrão: Alterar)'
+    ru: 'Установите режим «Удалить» (по умолчанию: «Изменить»).'
+    zh: 将模式设置为删除（默认：更改）
+  LocalFlagsSUsage:
+    ar: اسم المصدر للاستخدامات
+    context: local -s usage
+    de: Zu verwendender Quellenname
+    en: Source name to uses
+    es: Nombre de fuente para usos
+    fr: Nom de la source à utiliser
+    hi: स्रोत नाम से उपयोग
+    ja: 使用するソース名
+    nl: Bronnaam voor gebruik
+    pt: Nome da fonte para usos
+    ru: Название источника для использования
+    zh: 源名称至用途
+  LocalUsage:
+    ar: تشغيل الأوامر في نمط محليًا
+    context: local usage
+    de: Befehle in einem Muster lokal ausführen
+    en: Run commands in a pattern locally
+    es: Ejecute comandos en un patrón localmente
+    fr: Exécuter des commandes dans un modèle localement
+    hi: स्थानीय रूप से पैटर्न में कमांड चलाएं
+    ja: パターンに従ってコマンドをローカルで実行する
+    nl: Voer opdrachten lokaal in een patroon uit
+    pt: Execute comandos em um padrão localmente
+    ru: Локальный запуск команд по шаблону
+    zh: 在本地按模式运行命令
+  Mode:
+    ar: وضع
+    context: Mode of something
+    de: Modus
+    en: mode
+    es: modo
+    fr: mode
+    hi: तरीका
+    ja: モード
+    nl: modus
+    pt: modo
+    ru: режим
+    zh: 模式
+  PathDestination:
+    ar: مسار الوجهة
+    context: Destination path
+    de: Weg zum Ziel
+    en: destination path
+    es: ruta de destino
+    fr: chemin de destination
+    hi: गंतव्य पथ
+    ja: 宛先パス
+    nl: bestemming pad
+    pt: caminho de destino
+    ru: путь назначения
+    zh: 目标路径
+  PathSource:
+    ar: مسار المصدر
+    context: Source path
+    de: Quellpfad
+    en: source path
+    es: ruta de origen
+    fr: chemin source
+    hi: स्रोत पथ
+    ja: ソースパス
+    nl: bron pad
+    pt: caminho de origem
+    ru: исходный путь
+    zh: 源路径
+  PathUsage:
+    ar: استخدم مسار مضيف محدد
+    context: port usage
+    de: Einen bestimmten Hostpfad verwenden
+    en: Use a specific host path
+    es: Utilice una ruta de host específica
+    fr: Utiliser un chemin d&#39;hôte spécifique
+    hi: विशिष्ट होस्ट पथ का उपयोग करें
+    ja: 特定のホストパスを使用する
+    nl: Gebruik een specifiek hostpad
+    pt: Use um caminho de host específico
+    ru: Используйте определенный путь к хосту
+    zh: 使用特定主机路径
+  PortUsage:
+    ar: استخدم منفذ مضيف محدد
+    context: port usage
+    de: Einen bestimmten Host-Port verwenden
+    en: Use a specific host port
+    es: Utilice un puerto de host específico
+    fr: Utiliser un port hôte spécifique
+    hi: किसी विशिष्ट होस्ट पोर्ट का उपयोग करें
+    ja: 特定のホストポートを使用する
+    nl: Gebruik een specifieke hostpoort
+    pt: Use uma porta de host específica
+    ru: Использовать определенный хост-порт
+    zh: 使用特定主机端口
+  PushArg1:
+    ar: اسم المصدر
+    context: push arg1
+    de: Quellenname
+    en: source name
+    es: nombre de la fuente
+    fr: nom de la source
+    hi: स्रोत का नाम
+    ja: ソース名
+    nl: bron naam
+    pt: nome da fonte
+    ru: имя источника
+    zh: 源名称
+  PushArg2:
+    ar: مسار الأمر أو النمط
+    context: push arg2
+    de: Befehls- oder Musterpfad
+    en: command or pattern path
+    es: ruta de comando o patrón
+    fr: chemin de commande ou de modèle
+    hi: आदेश या पैटर्न पथ
+    ja: コマンドまたはパターンパス
+    nl: opdracht- of patroonpad
+    pt: comando ou caminho padrão
+    ru: путь к команде или шаблону
+    zh: 命令或模式路径
+  PushFlagsCUsage:
+    ar: وضع التحقق
+    context: push -c usage
+    de: Prüfmodus
+    en: Check mode
+    es: Modo de verificación
+    fr: Mode vérification
+    hi: चेक मोड
+    ja: チェックモード
+    nl: Controleer modus
+    pt: Modo de verificação
+    ru: Режим проверки
+    zh: 检查模式
+  PushFlagsHPlaceholder:
+    ar: يستضيف
+    context: push -h placeholder
+    de: Gastgeber
+    en: host
+    es: anfitrión
+    fr: hôte
+    hi: मेज़बान
+    ja: ホスト
+    nl: gastheer
+    pt: hospedar
+    ru: хозяин
+    zh: 主持人
+  PushFlagsHUsage:
+    ar: ادفع إلى عنوان مضيف محدد
+    context: push -h usage
+    de: Push an eine bestimmte Hostadresse
+    en: Push to a specific host address
+    es: Enviar a una dirección de host específica
+    fr: Push vers une adresse d&#39;hôte spécifique
+    hi: किसी विशिष्ट होस्ट पते पर पुश करें
+    ja: 特定のホストアドレスにプッシュする
+    nl: Push naar een specifiek hostadres
+    pt: Enviar para um endereço de host específico
+    ru: Отправка на определенный адрес хоста
+    zh: 推送到特定主机地址
+  PushFlagsNUsage:
+    ar: هدف التصفية
+    context: push -n usage
+    de: Filterziel
+    en: Filter target
+    es: Objetivo del filtro
+    fr: Cible du filtre
+    hi: लक्ष्य फ़िल्टर करें
+    ja: フィルター対象
+    nl: Doel filteren
+    pt: Filtrar alvo
+    ru: Цель фильтра
+    zh: 过滤目标
+  PushUsage:
+    ar: دفع الأوامر أو الأنماط الموقعة إلى عنوان URL المقصود. يجب تحديد مصدر، والذي
+      سيدفع الأوامر أو الأنماط المحددة في build.pushTargets إلى الأهداف ذات هذا المصدر.
+      يمكن اختياريًا تحديد عوامل التصفية والأهداف المخصصة. يمكن أيضًا تحديد نمط أو
+      أمر ليتم تشغيله على المصادر، وإلا فسيتم استخدام النمط أو الأمر المحدد في sourcePatterns.
+    context: push usage
+    de: Pushen Sie signierte Befehle oder Muster an eine Ziel-URL. Sie müssen eine
+      Quelle angeben, die die in build.pushTargets angegebenen Befehle oder Muster
+      an Ziele mit dieser Quelle pusht. Optional können Filter und benutzerdefinierte
+      Ziele angegeben werden. Sie können auch ein Muster oder einen Befehl angeben,
+      der für die Quellen ausgeführt werden soll. Andernfalls wird das in sourcePatterns
+      angegebene Muster oder der angegebene Befehl verwendet.
+    en: Push signed commands or patterns to a destination URL.  Must specify a Source,
+      which will push Commands or Patterns specified in build.pushTargets to targets
+      with that Source.  Can optionally specify filters and custom targets.  May also
+      specify a Pattern or Command to run against the Sources, otherwise the Pattern
+      or Command specified in sourcePatterns will be used.
+    es: Envíe comandos o patrones firmados a una URL de destino. Debe especificar
+      una Fuente, que enviará los Comandos o Patrones especificados en build.pushTargets
+      a los destinos con esa Fuente. Opcionalmente, puede especificar filtros y objetivos
+      personalizados. También puede especificar un patrón o comando para ejecutar
+      en las fuentes; de lo contrario, se utilizará el patrón o comando especificado
+      en sourcePatterns.
+    fr: Envoyez des commandes ou des modèles signés vers une URL de destination. Doit
+      spécifier une source, qui poussera les commandes ou les modèles spécifiés dans
+      build.pushTargets vers les cibles avec cette source. Peut éventuellement spécifier
+      des filtres et des cibles personnalisées. Peut également spécifier un modèle
+      ou une commande à exécuter sur les sources, sinon le modèle ou la commande spécifié
+      dans sourcePatterns sera utilisé.
+    hi: हस्ताक्षरित कमांड या पैटर्न को गंतव्य URL पर पुश करें। एक स्रोत निर्दिष्ट
+      करना होगा, जो build.pushTargets में निर्दिष्ट कमांड या पैटर्न को उस स्रोत वाले
+      लक्ष्यों पर पुश करेगा। वैकल्पिक रूप से फ़िल्टर और कस्टम लक्ष्य निर्दिष्ट कर
+      सकते हैं। स्रोतों के विरुद्ध चलाने के लिए पैटर्न या कमांड भी निर्दिष्ट कर सकते
+      हैं, अन्यथा sourcePatterns में निर्दिष्ट पैटर्न या कमांड का उपयोग किया जाएगा।
+    ja: 署名されたコマンドまたはパターンを宛先 URL にプッシュします。ソースを指定する必要があります。これにより、build.pushTargets で指定されたコマンドまたはパターンがそのソースを持つターゲットにプッシュされます。オプションでフィルターとカスタム
+      ターゲットを指定できます。ソースに対して実行するパターンまたはコマンドを指定することもできます。指定しない場合は、sourcePatterns で指定されたパターンまたはコマンドが使用されます。
+    nl: Push ondertekende opdrachten of patronen naar een bestemmings-URL. Moet een
+      bron opgeven, die opdrachten of patronen die zijn opgegeven in build.pushTargets
+      naar doelen met die bron pusht. Kan optioneel filters en aangepaste doelen opgeven.
+      Kan ook een patroon of commando opgeven dat tegen de bronnen moet worden uitgevoerd,
+      anders wordt het patroon of commando dat is opgegeven in sourcePatterns gebruikt.
+    pt: Envie comandos ou padrões assinados para um URL de destino. Deve especificar
+      uma fonte, que enviará comandos ou padrões especificados em build.pushTargets
+      para destinos com essa fonte. Opcionalmente, pode especificar filtros e destinos
+      personalizados. Também pode especificar um Padrão ou Comando para executar nas
+      Fontes, caso contrário, o Padrão ou Comando especificado em sourcePatterns será
+      usado.
+    ru: Отправьте подписанные команды или шаблоны на целевой URL-адрес. Необходимо
+      указать источник, который будет передавать команды или шаблоны, указанные в
+      build.pushTargets, в целевые объекты с этим источником. При желании можно указать
+      фильтры и пользовательские цели. Также можно указать шаблон или команду для
+      работы с источниками, в противном случае будет использоваться шаблон или команда,
+      указанные в sourcePatterns.
+    zh: 将签名的命令或模式推送到目标 URL。必须指定一个源，它将把 build.pushTargets 中指定的命令或模式推送到具有该源的目标。可以选择指定过滤器和自定义目标。还可以指定针对源运行的模式或命令，否则将使用
+      sourcePatterns 中指定的模式或命令。
+  RenderArg1:
+    ar: jwt أو مسار النمط
+    context: render arg1
+    de: jwt oder Musterpfad
+    en: jwt or pattern path
+    es: jwt o ruta de patrón
+    fr: jwt ou chemin de modèle
+    hi: जेडब्ल्यूटी या पैटर्न पथ
+    ja: jwt またはパターンパス
+    nl: jwt of patroonpad
+    pt: jwt ou caminho padrão
+    ru: jwt или путь к шаблону
+    zh: jwt 或者 pattern 路径
+  RenderUsage:
+    ar: إظهار النموذج المعروض لملف JWT أو ملف النمط
+    context: render usage
+    de: Das gerenderte Muster eines JWT oder einer Musterdatei anzeigen
+    en: Show the rendered pattern of a JWT or pattern file
+    es: Mostrar el patrón renderizado de un archivo JWT o de patrón
+    fr: Afficher le modèle rendu d&#39;un JWT ou d&#39;un fichier de modèles
+    hi: JWT या पैटर्न फ़ाइल का रेंडर किया गया पैटर्न दिखाएँ
+    ja: JWT またはパターン ファイルのレンダリングされたパターンを表示します。
+    nl: Toon het weergegeven patroon van een JWT- of patroonbestand
+    pt: Mostrar o padrão renderizado de um JWT ou arquivo de padrão
+    ru: Показать визуализированный шаблон JWT или файла шаблона.
+    zh: 显示 JWT 或模式文件的渲染模式
+  RunFlagsOUsage:
+    ar: تشغيل مرة واحدة
+    context: run -o usage
+    de: Renn einmal
+    en: Run once
+    es: Corre una vez
+    fr: Exécuter une fois
+    hi: एक बार रन करें
+    ja: 一度実行
+    nl: Eén keer rennen
+    pt: Executar Uma Vez
+    ru: Запустить один раз
+    zh: 运行一次
+  RunUsage:
+    ar: قم بالتشغيل في وضع الاستماع، أو سحب أنماط جديدة بشكل دوري أو تلقي أنماط جديدة
+      عبر الدفع
+    context: run usage
+    de: Wird im Abhörmodus ausgeführt und ruft in regelmäßigen Abständen neue Muster
+      ab oder empfängt neue Muster per Push
+    en: Run in listening mode, periodically pulling new patterns or receiving new
+      patterns via push
+    es: Ejecute en modo de escucha, extrayendo periódicamente nuevos patrones o recibiendo
+      nuevos patrones mediante push
+    fr: Exécutez en mode d&#39;écoute, en extrayant périodiquement de nouveaux modèles
+      ou en recevant de nouveaux modèles via push
+    hi: सुनने के मोड में चलाएं, समय-समय पर नए पैटर्न खींचें या पुश के माध्यम से नए
+      पैटर्न प्राप्त करें
+    ja: リスニングモードで実行し、定期的に新しいパターンをプルするか、プッシュ経由で新しいパターンを受信します。
+    nl: Ren in de luistermodus, waarbij u periodiek nieuwe patronen ophaalt of nieuwe
+      patronen ontvangt via push
+    pt: Execute no modo de escuta, extraindo periodicamente novos padrões ou recebendo
+      novos padrões via push
+    ru: Запускайте в режиме прослушивания, периодически извлекая новые шаблоны или
+      получая новые шаблоны посредством push-уведомлений.
+    zh: 以监听模式运行，定期拉取新模式或通过推送接收新模式
+  ShellArg1:
+    ar: اسم المصدر
+    context: shell arg1
+    de: Quellenname
+    en: source name
+    es: nombre de la fuente
+    fr: nom de la source
+    hi: स्रोत का नाम
+    ja: ソース名
+    nl: bron naam
+    pt: nome da fonte
+    ru: имя источника
+    zh: 源名称
+  ShellArg2:
+    ar: اسم الهدف أو عنوان المضيف
+    context: shell arg2
+    de: Zielname oder Hostadresse
+    en: target name or host address
+    es: nombre de destino o dirección de host
+    fr: nom de la cible ou adresse de l&#39;hôte
+    hi: लक्ष्य नाम या होस्ट पता
+    ja: ターゲット名またはホストアドレス
+    nl: doelnaam of hostadres
+    pt: nome de destino ou endereço de host
+    ru: целевое имя или адрес хоста
+    zh: 目标名称或主机地址
+  ShellUsage:
+    ar: افتح غلافًا تفاعليًا للهدف والمصدر. ستستخدم Shell الأوامر الموقعة التي يتم
+      دفعها إلى عنوان URL وتتلقى الاستجابات باستخدام الأحداث المرسلة من الخادم (SSE).
+      يجب تحديد مصدر. يمكن تحديد اسم الهدف من التكوين، أو تفاصيل الهدف الفردية.
+    context: shell usage
+    de: Öffnen Sie eine interaktive Shell für Ziel und Quelle. Die Shell verwendet
+      signierte Befehle, die an die URL gesendet werden, und empfängt Antworten mithilfe
+      von Server-Sent Events (SSE). Sie müssen eine Quelle angeben. Sie können einen
+      Zielnamen aus der Konfiguration oder individuelle Zieldetails angeben.
+    en: Open an interactive shell for the Target and Source.  Shell will use signed
+      commands pushed to URL and receive responses using Server-Sent Events (SSE).  Must
+      specify a Source.  Can specify a Target name from he configuration, or individual
+      target details.
+    es: Abra un shell interactivo para el destino y el origen. Shell utilizará comandos
+      firmados enviados a la URL y recibirá respuestas mediante eventos enviados por
+      el servidor (SSE). Debe especificar una fuente. Puede especificar un nombre
+      de destino desde la configuración o detalles de destino individuales.
+    fr: Ouvrez un shell interactif pour la cible et la source. Shell utilisera des
+      commandes signées poussées vers l&#39;URL et recevra des réponses à l&#39;aide
+      d&#39;événements envoyés par le serveur (SSE). Doit spécifier une source. Peut
+      spécifier un nom de cible à partir de la configuration ou des détails de cible
+      individuels.
+    hi: लक्ष्य और स्रोत के लिए एक इंटरैक्टिव शेल खोलें। शेल URL पर पुश किए गए हस्ताक्षरित
+      कमांड का उपयोग करेगा और सर्वर-सेंट इवेंट (SSE) का उपयोग करके प्रतिक्रियाएँ प्राप्त
+      करेगा। स्रोत निर्दिष्ट करना होगा। कॉन्फ़िगरेशन से लक्ष्य नाम या व्यक्तिगत लक्ष्य
+      विवरण निर्दिष्ट कर सकते हैं।
+    ja: ターゲットとソースの対話型シェルを開きます。シェルは URL にプッシュされた署名済みコマンドを使用し、サーバー送信イベント (SSE) を使用して応答を受信します。ソースを指定する必要があります。構成からターゲット名を指定するか、個々のターゲットの詳細を指定できます。
+    nl: Open een interactieve shell voor het doel en de bron. Shell gebruikt ondertekende
+      opdrachten die naar de URL worden gepusht en ontvangt reacties met behulp van
+      Server-Sent Events (SSE). Moet een bron opgeven. Kan een doelnaam opgeven vanuit
+      de configuratie, of individuele doeldetails.
+    pt: Abra um shell interativo para Target e Source. O Shell usará comandos assinados
+      enviados para URL e receberá respostas usando eventos enviados pelo servidor
+      (SSE). Deve especificar uma fonte. Pode especificar um nome de destino na configuração
+      ou detalhes individuais do destino.
+    ru: Откройте интерактивную оболочку для цели и источника. Shell будет использовать
+      подписанные команды, передаваемые по URL-адресу, и получать ответы с помощью
+      событий, отправленных сервером (SSE). Необходимо указать источник. Можно указать
+      имя цели из конфигурации или отдельные сведения о цели.
+    zh: 为目标和源打开一个交互式 shell。Shell 将使用推送到 URL 的签名命令并使用服务器发送事件 (SSE) 接收响应。必须指定源。可以从配置中指定目标名称，或指定单个目标详细信息。
+  TestFlagsBUsage:
+    ar: اختبار أوامر البناء
+    context: test -b usage
+    de: Testen von Build-Befehlen
+    en: Test build commands
+    es: Comandos de compilación de prueba
+    fr: Tester les commandes de build
+    hi: परीक्षण बिल्ड आदेश
+    ja: テストビルドコマンド
+    nl: Test build-opdrachten
+    pt: Testar comandos de compilação
+    ru: Команды тестовой сборки
+    zh: 测试构建命令
+  TestUsage:
+    ar: اختبار كافة الأنماط في المسار
+    context: test usage
+    de: Testen Sie alle Muster im Pfad
+    en: Test all Patterns in path
+    es: Pruebe todos los patrones en el camino
+    fr: Testez tous les modèles du chemin
+    hi: पथ में सभी पैटर्न का परीक्षण करें
+    ja: パス内のすべてのパターンをテストする
+    nl: Test alle patronen in het pad
+    pt: Teste todos os padrões no caminho
+    ru: Проверьте все шаблоны на пути
+    zh: 测试路径中的所有模式
