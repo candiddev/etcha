@@ -7,7 +7,6 @@
 [:speech_balloon: Discussions](https://github.com/candiddev/etcha/discussions)\
 [:book: Docs](https://etcha.dev/docs/)\
 [:arrow_down: Download](https://etcha.dev/docs/guides/install-etcha/)\
-[:motorway: Roadmap](https://github.com/orgs/candiddev/projects/6/views/37)
 
 Etcha is a tool for building and running distributed applications.
 
