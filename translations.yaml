@@ -701,31 +701,37 @@ translations:
     zh: 将签名的命令或模式推送到目标 URL。必须指定一个源，它将把 build.pushTargets 中指定的命令或模式推送到具有该源的目标。可以选择指定过滤器和自定义目标。还可以指定针对源运行的模式或命令，否则将使用
       sourcePatterns 中指定的模式或命令。
   RenderArg1:
-    ar: jwt أو مسار النمط
+    ar: المسار إلى ملف jwt أو النمط أو jsonnet أو Jsonnet الخام
     context: render arg1
-    de: jwt oder Musterpfad
-    en: jwt or pattern path
-    es: jwt o ruta de patrón
-    fr: jwt ou chemin de modèle
-    hi: जेडब्ल्यूटी या पैटर्न पथ
-    ja: jwt またはパターンパス
-    nl: jwt of patroonpad
-    pt: jwt ou caminho padrão
-    ru: jwt или путь к шаблону
-    zh: jwt 或者 pattern 路径
+    de: Pfad zur JWT-, Muster- oder JSONNET-Datei oder zum Raw-JSONNET
+    en: path to jwt, pattern, or jsonnet file, or raw Jsonnet
+    es: ruta al archivo jwt, patrón o jsonnet, o Jsonnet sin formato
+    fr: chemin vers le fichier jwt, pattern ou jsonnet, ou Jsonnet brut
+    hi: jwt, पैटर्न, या jsonnet फ़ाइल, या कच्चे jsonnet का पथ
+    ja: jwt、パターン、jsonnet ファイル、または生の Jsonnet へのパス
+    nl: pad naar jwt-, patroon- of jsonnet-bestand, of onbewerkt Jsonnet
+    pt: caminho para o arquivo jwt, padrão ou jsonnet ou Jsonnet bruto
+    ru: путь к файлу jwt, шаблону или jsonnet или необработанному Jsonnet
+    zh: jwt、pattern 或 jsonnet 文件的路径，或者原始 Jsonnet
   RenderUsage:
-    ar: إظهار النموذج المعروض لملف JWT أو ملف النمط
+    ar: إظهار القيمة المقدمة لملف JWT أو Pattern أو Jsonnet أو Jsonnet الخام
     context: render usage
-    de: Das gerenderte Muster eines JWT oder einer Musterdatei anzeigen
-    en: Show the rendered pattern of a JWT or pattern file
-    es: Mostrar el patrón renderizado de un archivo JWT o de patrón
-    fr: Afficher le modèle rendu d&#39;un JWT ou d&#39;un fichier de modèles
-    hi: JWT या पैटर्न फ़ाइल का रेंडर किया गया पैटर्न दिखाएँ
-    ja: JWT またはパターン ファイルのレンダリングされたパターンを表示します。
-    nl: Toon het weergegeven patroon van een JWT- of patroonbestand
-    pt: Mostrar o padrão renderizado de um JWT ou arquivo de padrão
-    ru: Показать визуализированный шаблон JWT или файла шаблона.
-    zh: 显示 JWT 或模式文件的渲染模式
+    de: Den gerenderten Wert eines JWT, Musters, einer JSONNET-Datei oder eines Raw-JSONNET
+      anzeigen
+    en: Show the rendered value of a JWT, Pattern, Jsonnet file, or raw Jsonnet
+    es: Mostrar el valor renderizado de un archivo JWT, Pattern, Jsonnet o Jsonnet
+      sin formato
+    fr: Afficher la valeur rendue d&#39;un fichier JWT, Pattern, Jsonnet ou Jsonnet
+      brut
+    hi: JWT, पैटर्न, Jsonnet फ़ाइल या कच्चे Jsonnet का रेंडर किया गया मान दिखाएँ
+    ja: JWT、パターン、Jsonnet ファイル、または生の Jsonnet のレンダリングされた値を表示します。
+    nl: Toon de weergegeven waarde van een JWT-, patroon-, Jsonnet-bestand of onbewerkt
+      Jsonnet
+    pt: Mostrar o valor renderizado de um JWT, padrão, arquivo Jsonnet ou Jsonnet
+      bruto
+    ru: Показать визуализированное значение файла JWT, Pattern, Jsonnet или необработанного
+      Jsonnet.
+    zh: 显示 JWT、Pattern、Jsonnet 文件或原始 Jsonnet 的渲染值
   RunFlagsOUsage:
     ar: تشغيل مرة واحدة
     context: run -o usage
