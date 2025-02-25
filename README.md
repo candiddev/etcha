@@ -4,7 +4,7 @@
 
 **Latest Release Notes: [v2025.02](https://etcha.dev/blog/whats-new-202502/)**
 
-[:speech_balloon: Discussions](https://github.com/candiddev/etcha/discussions)\
+[:speech_balloon: Mailing Lists](https://etcha.dev/docs/references/mailing-lists/)\
 [:book: Docs](https://etcha.dev/docs/)\
 [:arrow_down: Download](https://etcha.dev/docs/guides/install-etcha/)\
 [:eyes: Open Source Details](https://candid.dev/open-source)
