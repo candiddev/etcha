@@ -1,6 +1,6 @@
 # <img alt=logo src=etcha.png width=40px> Etcha
 
-> Configuration Management That Evolves With Your Infrastructure
+> Full-Stack Configuration Management for Developers and Sysadmins
 
 **Latest Release Notes: [v2025.03](https://etcha.dev/blog/whats-new-202503/)**
 
