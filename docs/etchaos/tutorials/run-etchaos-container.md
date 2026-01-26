@@ -28,7 +28,7 @@ etcha copy change https://etcha.dev/releases/etchaos_deb_amd64.vmlinuz etchaos/e
 Etcha uses cryptographic keys to validate configurations.  We need to generate a keypair that we can use signing and verifying:
 
 ```bash
-$ etcha gen-keys
+$ etcha generate-keys
 New Password (empty string skips PBKDF): 
 Confirm Password (empty string skips PBKDF): 
 {
