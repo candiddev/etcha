@@ -9,6 +9,10 @@ title: Config
 
 ## Configuration Values
 
+### `build` {#build}
+
+Configurations for build mode.
+
 {{% snippet config_key "build_pushDomainSuffix" %}}
 
 String, a domain suffix to append to all [`targets`](#targets) for hostname resolution.
@@ -49,9 +53,9 @@ String, a path to a [cryptographic signing key]({{< ref "/docs/references/crypto
 
 **Default:** `""`
 
-{{% snippet config_cli etcha %}}
+{{% snippet config_cli etcha red %}}
 
-{{% snippet config_key "exec" %}}
+### `exec` {#exec}
 
 The main `exec` configuration.  Can be overridden by other configurations.  The format for all `exec` configurations is below.  The defaults for the main `exec` are:
 
@@ -180,13 +184,17 @@ String, the working directory to execute commands within.
 
 {{% snippet config_licenseKey Etcha %}}
 
+### `lint` {#lint}
+
+Lint configuration options.
+
 {{% snippet config_key "lint_exclude" %}}
 
 String, a regexp of files to exclude from linting.
 
 **Default:** `"etcha.jsonnet"`
 
-{{% snippet config_key "exec_linters" "(recommended)" %}}
+{{% snippet config_key "lint_linters" "(recommended)" %}}
 
 A map of strings and [Exec](#exec) configurations for linters.  These linters are ran using {{% cli lint %}}.  See [Linting Patterns]({{< ref "/docs/guides/linting-patterns" >}}) for more information.
 
@@ -199,6 +207,10 @@ A map of strings and [Exec](#exec) configurations for linters.  These linters ar
   }
 }
 ```
+
+### `run` {#run}
+
+Configurations for Run mode.
 
 {{% snippet config_key "run_jwtFilters" %}}
 
@@ -270,69 +282,69 @@ List of [cryptographic verify keys]({{< ref "/docs/references/cryptography" >}})
 
 **Default:** `[]`
 
-{{% snippet config_key "sources" %}}
+### `sources` {#sources}
 
 Sources is a map of source names to source configurations.  See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
 
 **Default:** `{}`
 
-### `sources_[source]_allowPush` {#sources_allowPush}
+#### `sources_[source]_allowPush` {#sources_allowPush}
 
 Boolean, allow a source to receive patterns via push.
 
 **Default:** `false`
 
-### `sources_[source]_checkOnly` {#sources_checkOnly}
+#### `sources_[source]_checkOnly` {#sources_checkOnly}
 
 Boolean, prevents patterns received on this source from running change commands.
 
 **Default:** `false`
 
-### `sources_[source]_commands` {#sources_commands}
+#### `sources_[source]_commands` {#sources_commands}
 
 List of static [Commands]({{< ref "/docs/references/commands" >}}) to run for this source.  If allowed, Pattern pushes and pulls will override the list of Commands.  Commands will use the source's `exec` config, if allowed by the main `exec` config.  Commands will be ran at startup unless `triggerOnly` is set to true.  See [Running Commands]({{< ref "/docs/guides/running-commands#static-source-commands" >}}) for more information.
 
-### `sources_[source]_eventsReceive` {#sources_eventsReceive}
-
+#### `sources_[source]_eventsReceive` {#sources_eventsReceive}
+#
 List of event names that the source patterns can receive.
 
 **Default:** `[]`
 
-### `sources_[source]_eventsSend` {#sources_eventsSend}
+#### `sources_[source]_eventsSend` {#sources_eventsSend}
 
 String, a regular expression to match event names that the source patterns can send.  Can specify `".*"` to allow everything.
 
 **Default:** `""`
 
-### `sources_[source]_exec` {#sources_exec}
+#### `sources_[source]_exec` {#sources_exec}
 
 [Exec](#exec) configuration for the source.
 
 **Default:** `{}`
 
-### `sources_[source]_jwtFilters` {#sources_jwtFilters}
+#### `sources_[source]_jwtFilters` {#sources_jwtFilters}
 
 [run_jwtFilters](#run_jwtFIlters) configuration for the source.  Will replace global `run_jwtFilters` for this source.
 
 **Default:** `[]`
 
-### `sources_[source]_noRemove` {#sources_noRemove}
+#### `sources_[source]_noRemove` {#sources_noRemove}
 
 Boolean, never remove [Commands]({{< ref "/docs/references/commands" >}}) for a [Pattern]({{< ref "/docs/references/patterns" >}}) [source](#sources) when diffing.
 
 **Default:** `false`
 
-### `sources_[source]_noRestore` {#sources_noRestore}
+#### `sources_[source]_noRestore` {#sources_noRestore}
 
 Boolean, prevents Etcha from saving/restoring the JWTs for this `source`.  Useful for preventing `push-commands` from re-running at startup.
 
-### `sources_[source]_pullIgnoreVersion` {#sources_pullIgnoreVersion}
+#### `sources_[source]_pullIgnoreVersion` {#sources_pullIgnoreVersion}
 
 Boolean, don't consider `etchaVersion` property differences in [JWTs]({{< ref "/docs/references/jwt" >}}) to require a new pull.
 
 **Default:** `false`
 
-### `sources_[source]_pullPaths` {#sources_pullPaths}
+#### `sources_[source]_pullPaths` {#sources_pullPaths}
 
 List of paths to pull JWTs from for this source.  Can be local disk paths or http/https paths.  For http/https paths, HTTP headers can be specified by appending `#header:value` and separating headers using `\r\n`, e.g. `#header1:value1\r\nheader2:value2`.  A special header, `skipVerify`, can also be added to ignore certificate verification errors.
 
@@ -340,31 +352,31 @@ See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more inf
 
 **Default:** `[]`
 
-### `sources_[source]_runFrequency` {#sources_runFrequency}
+#### `sources_[source]_runFrequency` {#sources_runFrequency}
 
 String, duration between (optionally pulling) and running the source pattern.  Setting this to "" means the source will never be pulled/ran except at startup.  {{% config_duration %}}
 
 **Default:** `""`
 
-### `sources_[source]_runMulti` {#sources_runMulti}
+#### `sources_[source]_runMulti` {#sources_runMulti}
 
 Boolean, allows for multiple runs to of the source to happen at the same time.  By default, multiple runs will queue.  Some scenarios where this might occur include repeated pushes, or pulls with too low of a [`runFrequencySec`](#sources_runfrequencysec).  Use with caution.
 
 **Default:** `false`
 
-### `sources_[source]_shell` {#sources_shell}
+#### `sources_[source]_shell` {#sources_shell}
 
 [Exec](#exec) configuration for starting a shell via {{% cli shell %}}.  Setting the `command` value will enable shell access.
 
 **Default:** `""`
 
-### `sources_[source]_triggerOnly` {#sources_triggerOnly}
+#### `sources_[source]_triggerOnly` {#sources_triggerOnly}
 
 Boolean, when `true`, never run a Pattern unless it's triggered via [Events or Webhooks]({{< ref "/docs/guides/running-patterns" >}}).
 
 **Default:** `false`
 
-### `sources_[source]_verifyCommands` {#sources_verifyCommands}
+#### `sources_[source]_verifyCommands` {#sources_verifyCommands}
 
 {{% alert title="License Required" color="warning" %}}
 This requires an [Unlimited License]({{< ref "/pricing" >}})
@@ -374,31 +386,31 @@ See [Run > verifyCommands](#run_verifyCommands).  Setting this value overrides `
 
 **Default:** `[]`
 
-### `sources_[source]_verifyExec` {#sources_verifyExec}
+#### `sources_[source]_verifyExec` {#sources_verifyExec}
 
 See [Run > verifyExec](#run_verifyExec).  Setting this value overrides `run.verifyExec` if `run.verifyExec` allows overrides.
 
 **Default:** `{}`
 
-### `sources_[source]_verifyKeys` {#sources_verifyKeys}
+#### `sources_[source]_verifyKeys` {#sources_verifyKeys}
 
 See [Run > verifyKeys](#run_verifyKeys).  Setting this value appends it to `run.verifyKeys`.
 
 **Default:** `[]`
 
-### `sources_[source]_webhookPaths` {#sources_webhookPaths}
+#### `sources_[source]_webhookPaths` {#sources_webhookPaths}
 
 List of HTTP paths to listen for webhooks.  See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
 
 **Default:** `[]`
 
-### `sources_[source]_vars` {#sources_vars}
+#### `sources_[source]_vars` {#sources_vars}
 
 A map of Source-specific [`vars`](#vars).
 
 **Default:** `{}`
 
-{{% snippet config_key "targets" %}}
+### `targets` {#targets}
 
 A map of target names to target options for use by {{% cli push %}} and {{% cli shell %}}:
 
@@ -425,49 +437,49 @@ See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more inf
 
 Targets are meant to be flexible **and proxyable**.  Etcha uses standard HTTP/HTTP2 functionality, including Server-Sent Events (SSE) for shell access, and it should work out of the box with most reverse proxies (NGINX, Traefik, HAProxy, etc).  You could have all of your Etcha devices behind a proxy and use separate paths (`/server1/etcha/v1/push`) or host-based routing on your proxy.  This would be the Etcha equivalent of a jumpbox.
 
-### `targets_[target]_hostname` {#targets_hostname}
+#### `targets_[target]_hostname` {#targets_hostname}
 
 String, the hostname or IP address of the target (default: the target name).
 
 **Default:** The target name
 
-### `targets_[target]_insecure` {#targets_insecure}
+#### `targets_[target]_insecure` {#targets_insecure}
 
 Boolean, will use an insecure (not HTTPS) connection when connecting to the target.
 
 **Default:** `false`
 
-### `targets_[target]_pathPush` {#targets_pathPush}
+#### `targets_[target]_pathPush` {#targets_pathPush}
 
 String, the URL path for the push endpoint without any sources.
 
 **Default:** `"/etcha/v1/push"`
 
-### `targets_[target]_pathShell` {#targets_pathShell}
+#### `targets_[target]_pathShell` {#targets_pathShell}
 
 String, the URL path for the shell endpoint without any sources.
 
 **Default:** `"/etcha/v1/shell"`
 
-### `targets_[target]_port` {#targets_port}
+#### `targets_[target]_port` {#targets_port}
 
 String, the port number of the target.
 
 **Default:** `"4000"`
 
-### `targets_[target]_sourcePatterns` {#targets_sourcePatterns}
+#### `targets_[target]_sourcePatterns` {#targets_sourcePatterns}
 
 A map of source names to Pattern paths or Commands.  Etcha will push to this target if the source is specified with `etcha push`.  If the Pattern is an empty string, Etcha will allow any Pattern or Command to be pushed if the Source is matched.
 
 **Default:** `{}`
 
-### `targets_[target]_vars` {#targets_vars}
+#### `targets_[target]_vars` {#targets_vars}
 
 A map of Target-specific [`vars`](#vars).
 
 **Default:** `false`
 
-{{% snippet config_key "vars" %}}
+### `vars` {#vars}
 
 A map of strings and any type of value.  Can be used during rendering to get/set values.  See [Patterns - Variables]({{< ref "/docs/references/patterns#variables" >}}), [Building Patterns]({{< ref "/docs/guides/building-patterns" >}}), and [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
 
