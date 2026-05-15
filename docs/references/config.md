@@ -212,29 +212,21 @@ A map of strings and [Exec](#exec) configurations for linters.  These linters ar
 
 Configurations for Run mode.
 
-{{% snippet config_key "run_jwtFilters" %}}
+{{% snippet config_key "run_jwtRule" %}}
 
-List of strings representing JWT property filters that must be present for a JWT to accepted.  This setting applies to all JWTs that Etcha parses.
-
-The filter format is a list of comma separated filters.  Within the list, filters are OR, within a comma separated string, filters are AND:
+String, an {{% expr %}} for evaluating JWTs.  The object passed to it will be a `map[string]any` of the JWT.
 
 ```json
 {
   "run": {
-    "jwtFilters": [
-      "aud=^a$,sub",
-      "aud=^b",
-    ],
+    "jwtRule": "any(aud, {# in ['a', 'b']})"
   }
 }
 ```
 
-In this example, the JWT must match one of these conditions:
+In this example, the JWT must contain the value `a` or `b` in the `aud` property.
 
-- Contain the property `aud` with a value that starts with `a`, and contain the property `sub` with any value.
-- Contain the property `aud` with a value that starts with `b`.
-
-**Default:** `[]`
+**Default:** `""`
 
 {{% snippet config_key "run_randomizedStartDelaySec" %}}
 
@@ -322,11 +314,11 @@ String, a regular expression to match event names that the source patterns can s
 
 **Default:** `{}`
 
-#### `sources_[source]_jwtFilters` {#sources_jwtFilters}
+#### `sources_[source]_jwtRule` {#sources_jwtRule}
 
-[run_jwtFilters](#run_jwtFIlters) configuration for the source.  Will replace global `run_jwtFilters` for this source.
+[run_jwtRule](#run_jwtRule) configuration for the source.  Will replace global `run_jwtRule` for this source.
 
-**Default:** `[]`
+**Default:** `""`
 
 #### `sources_[source]_noRemove` {#sources_noRemove}
 

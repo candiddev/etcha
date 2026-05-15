@@ -17,10 +17,10 @@ Let us design a custom Variant for your software or application. \
 |-|-|-|-|-|-|-|-|-|-|
 | arc | Arch Linux | {{% asterisk %}} | Not Supported | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
 | alm | AlmaLinux 9 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
-| deb | Debian 13 "trixie" | {{% check %}} | {{% check %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
-| fed | Fedora Linux 42 | {{% check %}} | {{% check %}} | {{% check %}} | {{% asterisk %}} | {{% check %}} | docker | containerd |
+| deb | Debian 13 "trixie" | {{% check %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
+| fed | Fedora Linux 42 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% asterisk %}} | {{% check %}} | docker | containerd |
 | sus | openSUSE Leap 15 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
-| ubu | Ubuntu 24.04 "Noble Numbat" | {{% check %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
+| ubu | Ubuntu 24.04 "Noble Numbat" | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
 
 {{% asterisk %}} - Requires customizations or considerations before using.  {{%  contactus "EtchaOS%20Varian%20Support" %}} for access.
 
