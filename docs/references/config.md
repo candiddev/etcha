@@ -234,9 +234,21 @@ Number, the maximum seconds to delay starting Etcha in listen mode.  A random nu
 
 **Default:** `0`
 
-{{% snippet config_key "run_shellTimeout" %}}
+{{% snippet config_key "run_timeoutPush" %}}
+
+String, the maximum duration for a source push.  {{% config_duration %}}
+
+**Default:** `"10m"`
+
+{{% snippet config_key "run_timeoutShell" %}}
 
 String, the maximum duration until a shell session is ended.  {{% config_duration %}}
+
+**Default:** `"10m"`
+
+{{% snippet config_key "run_timeoutWebhook" %}}
+
+String, the maximum duration for a webhook.  {{% config_duration %}}
 
 **Default:** `"10m"`
 
