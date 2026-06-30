@@ -27,9 +27,31 @@ Lets break down the sources individually:
 
 Etcha is configured with a base configuration defining a {{% config run_stateDir %}} and a {{% config vars %}} for future usage by Patterns.
 
-### 2. SMBIOS (QEMU) {#smbios}
+### 2. Kernel Command Line {#cmdline}
 
-Etcha then attempts to render a Jsonnet or JSON value from SMBIOS data located under `/sys/firmware/dmi/tables/DMI`.  It looks for a string starting with `etchaos=` and attempts to parse the remaining text.  If no text is found, or the config value `fallthrough` is `true`, Etcha tries to resolve configs using the next step.
+Etcha then attempts to render a Jsonnet or JSON value from the kernel command line, `etchaos.config`.  If no text is found, or the config value `fallthrough` is `true`, Etcha tries to resolve configs using the next step.
+
+Given this kernel command line:
+```
+etchaos.config="{fallthrough:true,sources:{push:{allowPush:true}}}"
+```
+
+Etcha would render and apply this config to the configuration at boot:
+
+```json
+{
+  "fallthrough": true,
+  "sources": {
+    "push": {
+      "allowPush": true
+    }
+  }
+}
+```
+
+### 3. SMBIOS (QEMU) {#smbios}
+
+If the kernel command line fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from SMBIOS data located under `/sys/firmware/dmi/tables/DMI`.  It looks for a string starting with `etchaos=` and attempts to parse the remaining text.  If no text is found, or the config value `fallthrough` is `true`, Etcha tries to resolve configs using the next step.
 
 The SMBIOS data is typically used by virtual machines, such as QEMU.  The value can be specified using the QEMU command line argument `-smbios type=11`.  It's recommended to put the SMBIOS data as a single line Jsonnet value and store it in a file.
 
@@ -56,7 +78,7 @@ Etcha would render and apply this config to the configuration at boot:
 }
 ```
 
-### 3. cidata (any) {#cidata}
+### 4. cidata (any) {#cidata}
 
 If SMBIOS fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from `cidata`:
 
@@ -99,7 +121,7 @@ Etcha would render and apply this config to the configuration at boot:
 }
 ```
 
-### 4. Instance User Data (AWS, OpenStack) {#user-data}
+### 5. Instance User Data (AWS, OpenStack) {#user-data}
 
 
 If cidata fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from Instance User Data:
@@ -109,7 +131,7 @@ If cidata fails to resolve or allows fallthrough, Etcha then attempts to render 
 
 This is primarily used on Amazon Web Services (AWS) and OpenStack, however the same functionality can be replicated by routing the IP address `169.254.169.254` to a web server and serving a config file with the path `/latest/user-data`.
 
-### 5. Instance Metadata (GCP)
+### 6. Instance Metadata (GCP)
 
 
 If Instance User Data fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from Instance Metadata on Google Cloud Platform (GCP):
