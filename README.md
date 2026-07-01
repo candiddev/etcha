@@ -2,7 +2,7 @@
 
 > Full-Stack Configuration Management for Developers and Sysadmins
 
-**Latest Release Notes: [v2026.06](https://etcha.dev/blog/whats-new-202606/)**
+**Latest Release Notes: [v2026.07](https://etcha.dev/blog/whats-new-202607/)**
 
 [:speech_balloon: Mailing Lists](https://etcha.dev/docs/references/mailing-lists/)\
 [:book: Docs](https://etcha.dev/docs/)\
