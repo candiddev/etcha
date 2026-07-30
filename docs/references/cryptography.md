@@ -21,6 +21,8 @@ Etcha understands these public key algorithm types:
 
 - `ed25519public`
 - `ecp256public`
+- `ecp384public`
+- `ecp521public`
 - `rsa2048public`
 
 ## Sign Keys
