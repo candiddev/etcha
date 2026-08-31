@@ -7,6 +7,34 @@ title: Patterns
 
 Patterns are what Etcha uses to build and run [Commands]({{< ref "/docs/references/commands" >}}).
 
+Patterns can be a JSON object defining specific `build`, `run`, and other properties:
+
+```json
+{
+  "run": [
+    "apt-get install postgresql",
+    {
+      "always": true,
+      "id": "start postgresql",
+      "change": "systemctl start postgresql"
+    }
+  ]
+}
+```
+
+or just a list of Commands that will be implicitly added to a `run` list:
+
+```json
+[
+  "apt-get install postgresql",
+  {
+    "always": true,
+    "id": "start postgresql",
+    "change": "systemctl start postgresql"
+  }
+]
+```
+
 ## Build vs Run
 
 Patterns have two separate list of [Commands]({{< ref "/docs/references/commands" >}}): [`build`](#build) and [`run`](#run).  `build` Commands are ran on the local instance when the Pattern is built using {{% cli build %}}.  `run` Commands are ran on an instance when a Pattern is push, pulled, manually applied via [CLI]({{< ref "/docs/references/cli" >}}), or triggered via {{% config sources_eventsReceive %}} and {{% config sources_webhookPaths %}} in a {{% config sources %}}.

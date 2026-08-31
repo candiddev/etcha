@@ -17,6 +17,6 @@ Etcha contains numerous importable [Command]({{< ref "/docs/references/commands"
 
 See [Writing Patterns]({{< ref "/docs/guides/writing-patterns" >}}) for more information about initializing these files.
 
-Think we're missing something?  [Request a library on GitHub](https://github.com/candiddev/etcha/discussions/categories/feedback).
+Think we're missing something?  [Start a discussion]({{% ref "/docs/references/mailing-lists" %}}) or open a pull request.  The `etcha/lib/etcha` directory is available in the [Etcha git repo](https://github.com/candiddev/etcha).
 
 {{% etcha-library %}}

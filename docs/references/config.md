@@ -13,6 +13,12 @@ title: Config
 
 Configurations for build mode.
 
+{{% snippet config_key "build_commandsMaxWorkers" %}}
+
+Number, parallel `build` commands that can run at one time.
+
+**Default:** Number of CPUs
+
 {{% snippet config_key "build_pushDomainSuffix" %}}
 
 String, a domain suffix to append to all [`targets`](#targets) for hostname resolution.
@@ -208,9 +214,21 @@ A map of strings and [Exec](#exec) configurations for linters.  These linters ar
 }
 ```
 
+### `macroDir` {#macroDir}
+
+String, the directory to parse `.jsonnet` files from to inject into Etcha's CLI as [Macros]({{% ref "/docs/references/macros" %}}).  If this is not an absolute path, it will be relative to the etcha.jsonnet config file.
+
+See [Local Workflows]({{% ref "/docs/guides/local-workflows" %}}) for more details.
+
 ### `run` {#run}
 
 Configurations for Run mode.
+
+{{% snippet config_key "run_commandsMaxWorkers" %}}
+
+Number, parallel `run` commands that can run at one time.
+
+**Default:** Number of CPUs
 
 {{% snippet config_key "run_jwtRule" %}}
 

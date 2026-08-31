@@ -12,9 +12,22 @@ Etcha can lint Patterns, libraries, and more--basically if it's written in Jsonn
 
 You can lint an entire path or specific files using {{% cli lint %}}.  Lint will traverse directories and perform linting on all `.jsonnet` and `.libsonnet` files.  It will ensure they can be imported into Etcha correctly.  Any errors will be shown in the console, and the tool will exit with a non-zero status code.
 
-You can also check the formatting of the files by adding the flag `-f` : `etcha -c lint mydir`.  Formatting errors will be reported, along with diffs on what the correct formatting should be.  The tool will exit with a non-zero status code on formatting errors, too.
+You can also check the formatting of the files by adding the flag `-f` : `etcha -f lint mydir`.  Formatting errors will be reported, along with diffs on what the correct formatting should be.  The tool will exit with a non-zero status code on formatting errors, too.
 
 **For Continuous Delivery/Continuous Integration Usage**, it's highly recommended to run linting across your entire Etcha codebase.
+
+### Linting Errors
+
+Etcha will check for the following issues with Patterns and Commands:
+
+| Error | Fix |
+|----|----|
+| `check and always should not be combined` | Remove the `always` or `check` properties from the Command. |
+| `async within parallel commands is redundant` | Remove the `async` property from the Command. |
+| `changeIgnore without change is redundant` | Remove the `changeIgnore` property from the Command. |
+| `parallel can only be used with commands` | Remove the `parallel` property from the Command. |
+| `setting check, change, or remove along with commands is ignored` | Remove the `check`, `change`, and `remove` properties from the Command. |
+| `removeAfter without remove is redundant` | Remove the `removeAfter` property from the Command. |
 
 ## Test Mode
 

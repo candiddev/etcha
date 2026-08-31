@@ -52,6 +52,14 @@ Generate cryptographic keys for use with signing and encryption.  The keys will 
 
 See [Cryptography]({{< ref "/docs/references/cryptography" >}}) for more details around key formats and usage guides.
 
+### `file`
+
+Manages a file on the local machine using check/change/remove.  Can optionally provide contents directly or via stdin, or set permissions, owner, or group, otherwise permissions will be `0644` and the user and group will be inherited from the current user.
+
+### `graph`
+
+Render a Mermaid flowchart or Graphviz digraph for Commands in a Pattern.
+
 ### `init`
 
 Create folders, files, and libraries for developing [Patterns]({{< ref "/docs/references/patterns" >}}).  Subsequent runs of init will only update the files under `lib/etcha`.  See [libraries]({{< ref "/docs/references/libraries" >}}) for documentation on the modules created by init.
@@ -82,9 +90,13 @@ Import [Pattern]({{< ref "/docs/references/patterns" >}}) [Jsonnet]({{< ref "/do
 
 Push ad-hoc commands or a signed pattern to a remote Etcha instance.  See [Running Commands]({{< ref "/docs/guides/running-commands" >}}) for more information.
 
-### `render`
+### `render-jsonnet`
 
-Render a Pattern from JWT or Jsonnet and display the result.
+Render Jsonnet and display the result.
+
+### `render-pattern`
+
+Render Pattern and display the result.
 
 ### `run`
 

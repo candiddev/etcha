@@ -50,6 +50,7 @@ function(name)
 We use a monorepo, and our Etcha directory looks something like this:
 - lib/
   - etcha/
+- macros/
 - patterns/
   - candid/
     - lib/
@@ -119,7 +120,7 @@ Patterns contain build and run Command lists, as well as values for [JWTs]({{< r
 ```
 
 {{% alert title="Candid Commentary" color="info" %}}
-`build` commands are optional, you can think of them as Commands that are ran locally.
+`build` commands are optional, you can think of them as Commands that are ran locally when building a Pattern.
 {{% /alert %}}
 
 ### Using Jsonnet
@@ -192,6 +193,6 @@ Etcha will flatten lists into a single, ordered list.  If you're curious to see 
 
 The `build` commands in a Pattern are ran during {{% cli build %}}, most likely on your local instance or a CI/CD runner.
 
-The `run` commands in a Pattern are ran on an Etcha instance after pulling or pushing the Pattern.  **All Patterns are rendered immediately before they are used**.  If you use [dynamic lookups]({{< ref "/docs/references/jsonnet#native-functions" >}})) in your Pattern, like `getEnv`, `getRecord`, or `getURL`, those functions will be called and rendered on the _instance performing the run_.
+The `run` commands in a Pattern are ran on an Etcha instance after pulling or pushing the Pattern.  **All Patterns are rendered immediately before they are used**.  If you use [dynamic lookups]({{< ref "/docs/references/jsonnet#native-functions" >}}) in your Pattern, like `getEnv`, `getRecord`, or `getURL`, those functions will be called and rendered on the _instance performing the run_.
 
 `build` and `run` lists are not required to have Commands.  A server configuration may not have any `build` Commands, just `run` Commands.

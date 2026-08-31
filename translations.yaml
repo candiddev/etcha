@@ -11,6 +11,7 @@ translations:
     es: ruta del patrón
     fr: chemin de modèle
     hi: पैटर्न पथ
+    it: percorso del modello
     ja: パターンパス
     nl: patroon pad
     pl: ścieżka wzoru
@@ -25,6 +26,7 @@ translations:
     es: ruta de destino
     fr: chemin de destination
     hi: गंतव्य पथ
+    it: percorso di destinazione
     ja: 宛先パス
     nl: bestemming pad
     pl: ścieżka docelowa
@@ -39,6 +41,7 @@ translations:
     es: Construir un patrón
     fr: Construire un modèle
     hi: एक पैटर्न बनाएं
+    it: Costruisci uno schema
     ja: パターンを構築する
     nl: Bouw een patroon
     pl: Zbuduj wzór
@@ -53,6 +56,7 @@ translations:
     es: nueva ruta jwt o URL
     fr: nouveau chemin ou URL jwt
     hi: नया jwt पथ या URL
+    it: nuovo percorso o URL jwt
     ja: 新しい jwt パスまたは URL
     nl: nieuw jwt-pad of URL
     pl: nowa ścieżka JWT lub adres URL
@@ -67,6 +71,7 @@ translations:
     es: antigua ruta jwt o URL
     fr: ancien chemin ou URL jwt
     hi: पुराना jwt पथ या URL
+    it: vecchio percorso o URL jwt
     ja: 古い jwt パスまたは URL
     nl: oud jwt-pad of URL
     pl: stara ścieżka JWT lub adres URL
@@ -81,6 +86,7 @@ translations:
     es: Ignorar las diferencias de versión de JWT etcha
     fr: Ignorer les différences JWT etchaVersion
     hi: JWT etchaVersion अंतरों को अनदेखा करें
+    it: Ignora le differenze di versione di JWT etcha
     ja: JWT etchaVersion の違いを無視する
     nl: Negeer JWT etchaVersion-verschillen
     pl: Zignoruj różnice w wersji etcha JWT
@@ -101,6 +107,8 @@ translations:
       et éventuellement etchaVersion
     hi: दो JWT की तुलना करके देखें कि क्या उनमें समान etchaBuildManifest, etchaPattern
       और वैकल्पिक रूप से etchaVersion है
+    it: Confronta due JWT per verificare se hanno lo stesso etchaBuildManifest, etchaPattern
+      e, facoltativamente, etchaVersion.
     ja: 2 つの JWT を比較して、etchaBuildManifest、etchaPattern、およびオプションでetchaVersion が同じかどうかを確認します。
     nl: Vergelijk twee JWT&#39;s om te zien of ze dezelfde etchaBuildManifest, etchaPattern
       en optioneel etchaVersion hebben
@@ -119,6 +127,7 @@ translations:
     es: ruta de destino o - para stdout
     fr: chemin de destination ou - pour la sortie standard
     hi: गंतव्य पथ या - stdout के लिए
+    it: percorso di destinazione o - per stdout
     ja: 宛先パスまたは - （標準出力用）
     nl: bestemmingspad of - voor stdout
     pl: ścieżka docelowa lub - dla stdout
@@ -139,6 +148,8 @@ translations:
       spécifier les en-têtes HTTP en ajoutant
     hi: किसी स्थानीय फ़ाइल या HTTP पथ को गंतव्य पर कॉपी करें। वैकल्पिक रूप से HTTP
       हेडर को जोड़कर निर्दिष्ट कर सकते हैं
+    it: Copia un file locale o un percorso HTTP in una destinazione. È possibile specificare
+      facoltativamente le intestazioni HTTP aggiungendo
     ja: ローカルファイルまたはHTTPパスを宛先にコピーします。オプションでHTTPヘッダーを追加して指定できます。
     nl: Kopieer een lokaal bestand of HTTP-pad naar een bestemming. Kan optioneel
       HTTP-headers opgeven door deze toe te voegen
@@ -150,19 +161,75 @@ translations:
       можно указать заголовки HTTP, добавив
     zh: 将本地文件或 HTTP 路径复制到目标。可以选择通过附加来指定 HTTP 标头
   Description:
-    ar: إدارة التكوين التي تتطور مع البنية التحتية الخاصة بك
+    ar: إدارة التكوين التي تتطور مع بنيتك التحتية
     context: app description
     de: Konfigurationsmanagement, das sich mit Ihrer Infrastruktur weiterentwickelt
-    en: Configuration management tha evolves with your infrastructure
-    es: Gestión de configuración que evoluciona con su infraestructura.
-    fr: Une gestion de configuration qui évolue avec votre infrastructure
+    en: Configuration management that evolves with your infrastructure
+    es: Gestión de la configuración que evoluciona con su infraestructura
+    fr: Une gestion de la configuration qui évolue avec votre infrastructure
     hi: कॉन्फ़िगरेशन प्रबंधन जो आपके बुनियादी ढांचे के साथ विकसित होता है
+    it: Gestione della configurazione che si evolve con la tua infrastruttura
     ja: インフラストラクチャに合わせて進化する構成管理
-    nl: Configuratiebeheer dat mee evolueert met uw infrastructuur
-    pl: Zarządzanie konfiguracją, które ewoluuje wraz z infrastrukturą
-    pt: Gerenciamento de configuração que evolui com sua infraestrutura
-    ru: Управление конфигурацией, которое развивается вместе с вашей инфраструктурой
-    zh: 随基础设施一起发展的配置管理
+    nl: Configuratiebeheer dat meegroeit met uw infrastructuur.
+    pl: Zarządzanie konfiguracją, które ewoluuje wraz z Twoją infrastrukturą
+    pt: Gerenciamento de configuração que evolui com sua infraestrutura.
+    ru: Управление конфигурациями, развивающееся вместе с вашей инфраструктурой.
+    zh: 随基础架构演进的配置管理
+  DiffArg1:
+    ar: ملف قديم أو - للإدخال القياسي
+    context: diff arg1, old file
+    de: alte Datei oder - für stdin
+    en: old file or - for stdin
+    es: archivo antiguo o - para stdin
+    fr: ancien fichier ou - pour l&#39;entrée standard
+    hi: पुरानी फ़ाइल या - stdin के लिए
+    it: vecchio file o - per stdin
+    ja: 古いファイル、または標準入力の場合は「-」
+    nl: oud bestand of - voor stdin
+    pl: stary plik lub - dla standardowego wejścia
+    pt: arquivo antigo ou - para stdin
+    ru: старый файл или - для стандартного ввода
+    zh: 旧文件或 - 用于标准输入
+  DiffArg2:
+    ar: ملف جديد أو - للإدخال القياسي
+    context: diff arg2, new file
+    de: neue Datei oder - für stdin
+    en: new file or - for stdin
+    es: nuevo archivo o - para entrada estándar
+    fr: nouveau fichier ou - pour l&#39;entrée standard
+    hi: नई फ़ाइल या - stdin के लिए
+    it: nuovo file o - per stdin
+    ja: 新しいファイル、または標準入力の場合は「-」
+    nl: nieuw bestand of - voor stdin
+    pl: nowy plik lub - dla standardowego wejścia
+    pt: novo arquivo ou - para stdin
+    ru: новый файл или - для стандартного ввода
+    zh: 新建文件或 - 用于标准输入
+  DiffUsage:
+    ar: يقارن بين ملفين أو المدخلات القياسية. سيخرج البرنامج برمز خطأ 1 إذا لم تتطابق
+      الملفات.
+    context: diff command usage
+    de: Vergleicht zwei Dateien oder die Standardeingabe. Gibt den Fehlercode 1 zurück,
+      wenn die Dateien nicht übereinstimmen.
+    en: Diff two files or stdin.  Will exit 1 if files do not match.
+    es: Compara dos archivos o la entrada estándar. Si los archivos no coinciden,
+      saldrá con código de salida 1.
+    fr: Compare deux fichiers ou l&#39;entrée standard. Retourne le code 1 si les
+      fichiers ne correspondent pas.
+    hi: दो फ़ाइलों या स्टैंडर्ड इनपुट (stdin) का अंतर देखें। यदि फ़ाइलें मेल नहीं
+      खाती हैं तो 1 का आउटपुट देगा।
+    it: Confronta due file o l&#39;input standard. Se i file non corrispondono, il
+      programma esce con codice di uscita 1.
+    ja: 2つのファイルまたは標準入力を比較します。ファイルが一致しない場合は終了コード1を返します。
+    nl: Vergelijk twee bestanden of de standaardinvoer (stdin). Het programma stopt
+      als exitcode 1 als de bestanden niet overeenkomen.
+    pl: Porównaj dwa pliki lub wejście standardowe. Wyjście z kodem 1, jeśli pliki
+      nie pasują do siebie.
+    pt: Compara dois arquivos ou a entrada padrão (stdin). Retorna o código 1 se os
+      arquivos não corresponderem.
+    ru: Сравнивает два файла или стандартный ввод. Завершение работы с кодом 1, если
+      файлы не совпадают.
+    zh: 比较两个文件或标准输入之间的差异。如果文件不匹配，则返回退出代码 1。
   DirUsage:
     ar: إدارة دير على النظام
     context: dir usage
@@ -171,6 +238,7 @@ translations:
     es: Administrar un directorio en el sistema
     fr: Gérer un répertoire sur le système
     hi: सिस्टम पर निर्देशिका प्रबंधित करें
+    it: Gestire una directory sul sistema
     ja: システム上のディレクトリを管理する
     nl: Beheer een map op het systeem
     pl: Zarządzaj katalogiem w systemie
@@ -189,6 +257,8 @@ translations:
       utilisant stdin.
     hi: सिस्टम पर फ़ाइल प्रबंधित करें। फ़ाइल सामग्री stdin का उपयोग करके प्रदान की
       जा सकती है।
+    it: Gestisce un file sul sistema. Il contenuto del file può essere fornito tramite
+      stdin.
     ja: システム上のファイルを管理します。ファイルの内容は stdin を使用して提供できます。
     nl: Beheer een bestand op het systeem. Bestandsinhoud kan worden geleverd met
       behulp van stdin.
@@ -207,12 +277,75 @@ translations:
     es: Filtrar ID de comando principal
     fr: Filtrer les ID de commande parent
     hi: पैरेंट कमांड आईडी फ़िल्टर करें
+    it: Filtra gli ID dei comandi padre
     ja: 親コマンドIDをフィルターする
     nl: Filter bovenliggende opdracht-ID&#39;s
     pl: Filtruj identyfikatory poleceń nadrzędnych
     pt: Filtrar IDs de comando pai
     ru: Фильтровать идентификаторы родительских команд
     zh: 筛选父命令 ID
+  FlagSUsage:
+    ar: اسم المصدر المراد استخدامه
+    context: -s usage
+    de: Zu verwendender Quellname
+    en: Source name to use
+    es: Nombre de la fuente a utilizar
+    fr: Nom de la source à utiliser
+    hi: उपयोग करने के लिए स्रोत का नाम
+    it: Nome sorgente da utilizzare
+    ja: 使用するソース名
+    nl: Bronnaam die gebruikt moet worden
+    pl: Nazwa źródła do użycia
+    pt: Nome da fonte a ser usada
+    ru: Название источника для использования
+    zh: 要使用的源名称
+  GraphFlagsBUsage:
+    ar: أوامر بناء العرض
+    context: usage for -b
+    de: Befehle zum Erstellen von Renderings
+    en: Render build commands
+    es: Comandos de compilación de renderizado
+    fr: Commandes de rendu de la construction
+    hi: रेंडर बिल्ड कमांड
+    it: Comandi di rendering della build
+    ja: レンダリングビルドコマンド
+    nl: Render build commando&#39;s
+    pl: Polecenia kompilacji renderowania
+    pt: Comandos de compilação de renderização
+    ru: Команды рендеринга сборки
+    zh: 渲染构建命令
+  GraphFlagsGUsage:
+    ar: عرض كرسم بياني موجه Graphviz
+    context: usage for -g
+    de: Als Graphviz-Digraph darstellen
+    en: Render as a Graphviz digraph
+    es: Representar como un digrafo de Graphviz
+    fr: Rendu sous forme de digraphe Graphviz
+    hi: इसे ग्राफ़विज़ डाइग्राफ़ के रूप में प्रस्तुत करें
+    it: Visualizza come digrafo Graphviz
+    ja: Graphvizの有向グラフとしてレンダリングする
+    nl: Weergeven als een Graphviz-richtingsgraaf
+    pl: Renderuj jako digraf Graphviz
+    pt: Renderizar como um dígrafo Graphviz
+    ru: Отобразить как ориентированный граф Graphviz
+    zh: 渲染为 Graphviz 有向图
+  GraphUsage:
+    ar: قم بإنشاء مخطط انسيابي لحورية البحر لأوامر التشغيل في النمط
+    context: Usage for graph command
+    de: Erstelle ein Mermaid-Flussdiagramm für die Ausführungsbefehle im Muster.
+    en: Render a Mermaid flowchart for the run commands in the Pattern
+    es: Genera un diagrama de flujo de Mermaid para los comandos de ejecución en el
+      patrón.
+    fr: Générez un organigramme Mermaid pour les commandes d&#39;exécution du modèle.
+    hi: पैटर्न में रन कमांड के लिए मरमेड फ्लोचार्ट बनाएं।
+    it: Genera un diagramma di flusso della sirena per i comandi di esecuzione nel
+      modello
+    ja: パターン内の実行コマンドのマーメイドフローチャートを描画します
+    nl: Maak een Mermaid-stroomdiagram voor de uitvoeringsopdrachten in het patroon.
+    pl: Wygeneruj schemat blokowy syreny dla poleceń uruchamiania w wzorcu
+    pt: Gere um fluxograma Mermaid para os comandos de execução no padrão.
+    ru: Отобразите блок-схему Mermaid для выполнения команд в шаблоне.
+    zh: 为模式中的运行命令渲染 Mermaid 流程图
   HelpersArgsFile:
     ar: محتويات، أو - للقراءة من stdin
     context: helpers args file
@@ -221,6 +354,7 @@ translations:
     es: contenidos, o - para leer desde stdin
     fr: contenu, ou - pour lire depuis stdin
     hi: सामग्री, या - stdin से पढ़ने के लिए
+    it: contenuti, oppure - da leggere da stdin
     ja: 内容、または - 標準入力から読み取る
     nl: inhoud, of - om te lezen van stdin
     pl: zawartość lub - odczyt ze standardowego wejścia
@@ -235,6 +369,7 @@ translations:
     es: Eliminar directorios no vacíos
     fr: Supprimer les répertoires non vides
     hi: गैर-रिक्त निर्देशिकाएँ हटाएँ
+    it: Rimuovere le directory non vuote
     ja: 空でないディレクトリを削除する
     nl: Verwijder niet-lege mappen
     pl: Usuń niepuste katalogi
@@ -249,6 +384,7 @@ translations:
     es: grupo
     fr: groupe
     hi: समूह
+    it: gruppo
     ja: グループ
     nl: groep
     pl: grupa
@@ -263,6 +399,7 @@ translations:
     es: Administrar el grupo
     fr: Gérer le groupe
     hi: समूह का प्रबंधन करें
+    it: Gestire il gruppo
     ja: グループを管理する
     nl: Beheer de groep
     pl: Zarządzaj grupą
@@ -277,6 +414,7 @@ translations:
     es: dueño
     fr: propriétaire
     hi: मालिक
+    it: proprietario
     ja: 所有者
     nl: eigenaar
     pl: właściciel
@@ -291,6 +429,7 @@ translations:
     es: Administrar el propietario
     fr: Gérer le propriétaire
     hi: स्वामी को प्रबंधित करें
+    it: Gestire il proprietario
     ja: 所有者を管理する
     nl: Beheer de eigenaar
     pl: Zarządzaj właścicielem
@@ -305,6 +444,7 @@ translations:
     es: permisos
     fr: autorisations
     hi: अनुमति
+    it: autorizzazioni
     ja: 権限
     nl: rechten
     pl: uprawnienia
@@ -319,6 +459,7 @@ translations:
     es: Administrar los permisos
     fr: Gérer les autorisations
     hi: अनुमतियाँ प्रबंधित करें
+    it: Gestisci le autorizzazioni
     ja: 権限を管理する
     nl: Beheer de machtigingen
     pl: Zarządzaj uprawnieniami
@@ -333,6 +474,7 @@ translations:
     es: 'directorio, predeterminado: directorio actual'
     fr: 'répertoire, par défaut : répertoire courant'
     hi: 'निर्देशिका, डिफ़ॉल्ट: वर्तमान निर्देशिका'
+    it: 'directory, predefinita: directory corrente'
     ja: 'ディレクトリ、デフォルト: 現在のディレクトリ'
     nl: 'map, standaard: huidige map'
     pl: 'katalog, domyślnie: bieżący katalog'
@@ -347,6 +489,7 @@ translations:
     es: Inicializar un directorio para el desarrollo de patrones
     fr: Initialiser un répertoire pour le développement de modèles
     hi: पैटर्न विकास के लिए निर्देशिका आरंभ करें
+    it: Inizializza una directory per lo sviluppo dei modelli
     ja: パターン開発用のディレクトリを初期化する
     nl: Initialiseer een map voor patroonontwikkeling
     pl: Zainicjuj katalog do opracowania wzorca
@@ -361,6 +504,7 @@ translations:
     es: Mostrar el contenido de un JWT
     fr: Afficher le contenu d&#39;un JWT
     hi: JWT की सामग्री दिखाएँ
+    it: Mostra il contenuto di un JWT
     ja: JWTの内容を表示する
     nl: Toon de inhoud van een JWT
     pl: Pokaż zawartość JWT
@@ -375,6 +519,7 @@ translations:
     es: ruta o - para stdin
     fr: chemin ou - pour stdin
     hi: पथ या - stdin के लिए
+    it: percorso o - per stdin
     ja: パスまたは - （標準入力用）
     nl: pad of - voor stdin
     pl: ścieżka lub - dla wejścia standardowego
@@ -389,6 +534,7 @@ translations:
     es: coincidir con expresiones regulares
     fr: correspondre à l&#39;expression rationnelle
     hi: रेगेक्सपी से मिलान करें
+    it: corrispondenza regexp
     ja: 正規表現に一致
     nl: overeenkomen met regexp
     pl: dopasuj wyrażenie regularne
@@ -403,6 +549,7 @@ translations:
     es: texto de reemplazo
     fr: texte de remplacement
     hi: प्रतिस्थापन पाठ
+    it: testo sostitutivo
     ja: 置換テキスト
     nl: vervangende tekst
     pl: tekst zastępczy
@@ -429,6 +576,10 @@ translations:
     hi: रेगेक्स का उपयोग करके पाठ में एक पंक्ति प्रबंधित करें। यदि पथ - है, तो सामग्री
       stdin से पढ़ी जाएगी और stdout पर आउटपुट की जाएगी। अन्यथा निर्दिष्ट पथ को पंक्ति
       के साथ जाँचा/बदला/हटाया जाएगा।
+    it: Gestisci una riga di testo usando le espressioni regolari. Se il percorso
+      è -, il contenuto verrà letto dallo standard input e inviato allo standard output.
+      Altrimenti, il percorso specificato verrà controllato/modificato/rimosso insieme
+      alla riga.
     ja: 正規表現を使用してテキスト内の行を管理します。パスが - の場合、内容は stdin から読み取られ、stdout に出力されます。それ以外の場合は、指定されたパスが行とともにチェック/変更/削除されます。
     nl: Beheer een tekstregel met regex. Als pad - is, wordt de inhoud gelezen van
       stdin en uitgevoerd naar stdout. Anders wordt het opgegeven pad met de regel
@@ -453,6 +604,7 @@ translations:
     es: Administrar enlaces simbólicos para origen y destino
     fr: Gérer les liens symboliques pour la source et la destination
     hi: स्रोत और गंतव्य के लिए सिम्बलिंक प्रबंधित करें
+    it: Gestire i collegamenti simbolici per origine e destinazione
     ja: ソースと宛先のシンボリックリンクを管理する
     nl: Beheer symlinks voor bron en bestemming
     pl: Zarządzaj linkami symbolicznymi dla źródła i miejsca docelowego
@@ -467,6 +619,7 @@ translations:
     es: Comprobar formato
     fr: Vérifier le formatage
     hi: फ़ॉर्मेटिंग जांचें
+    it: Verifica la formattazione
     ja: 書式を確認する
     nl: Controleer de opmaak
     pl: Sprawdź formatowanie
@@ -481,6 +634,7 @@ translations:
     es: Lint un patrón o directorio
     fr: Linter un modèle ou un répertoire
     hi: पैटर्न या निर्देशिका को लिंट करें
+    it: Analizza un modello o una directory
     ja: パターンまたはディレクトリをLintする
     nl: Lint een patroon of map
     pl: Lintuj wzór lub katalog
@@ -495,6 +649,7 @@ translations:
     es: ruta del patrón (que termina en .jsonnet) o Jsonnet para renderizar
     fr: chemin du modèle (se terminant par .jsonnet) ou Jsonnet à restituer
     hi: पैटर्न पथ (.jsonnet में समाप्त) या रेंडर करने के लिए Jsonnet
+    it: percorso del modello (che termina con .jsonnet) o Jsonnet da renderizzare
     ja: パターンパス（.jsonnetで終わる）またはレンダリングするJsonnet
     nl: patroonpad (eindigend op .jsonnet) of Jsonnet om weer te geven
     pl: ścieżka wzorca (kończąca się na .jsonnet) lub Jsonnet do renderowania
@@ -509,26 +664,13 @@ translations:
     es: 'Establecer el modo en Eliminar (predeterminado: Cambiar)'
     fr: 'Définir le mode sur Supprimer (par défaut: Modifier)'
     hi: 'मोड को हटाएँ पर सेट करें (डिफ़ॉल्ट: बदलें)'
+    it: 'Imposta la modalità su Rimuovi (predefinito: Cambia)'
     ja: 'モードを削除に設定します（デフォルト: 変更）'
     nl: 'Modus instellen op Verwijderen (standaard: Wijzigen)'
     pl: 'Ustaw tryb na Usuń (domyślnie: Zmień)'
     pt: 'Defina o modo como Remover (padrão: Alterar)'
     ru: 'Установите режим «Удалить» (по умолчанию: «Изменить»).'
     zh: 将模式设置为删除（默认：更改）
-  LocalFlagsSUsage:
-    ar: اسم المصدر للاستخدامات
-    context: local -s usage
-    de: Zu verwendender Quellenname
-    en: Source name to uses
-    es: Nombre de fuente para usos
-    fr: Nom de la source à utiliser
-    hi: स्रोत नाम से उपयोग
-    ja: 使用するソース名
-    nl: Bronnaam voor gebruik
-    pl: Nazwa źródła do użycia
-    pt: Nome da fonte para usos
-    ru: Название источника для использования
-    zh: 源名称至用途
   LocalUsage:
     ar: تشغيل الأوامر في نمط محليًا
     context: local usage
@@ -537,6 +679,7 @@ translations:
     es: Ejecute comandos en un patrón localmente
     fr: Exécuter des commandes dans un modèle localement
     hi: स्थानीय रूप से पैटर्न में कमांड चलाएं
+    it: Eseguire i comandi secondo uno schema in locale
     ja: パターンに従ってコマンドをローカルで実行する
     nl: Voer opdrachten lokaal in een patroon uit
     pl: Uruchamiaj polecenia lokalnie w określonym wzorcu
@@ -551,12 +694,58 @@ translations:
     es: modo
     fr: mode
     hi: तरीका
+    it: modalità
     ja: モード
     nl: modus
     pl: tryb
     pt: modo
     ru: режим
     zh: 模式
+  ModifiedArg2:
+    ar: مسار الملف أو المجلد المستهدف
+    context: etcha modified arg2
+    de: Pfad zur Zieldatei oder zum Zielverzeichnis
+    en: path to target file or directory
+    es: Ruta al archivo o directorio de destino.
+    fr: chemin d&#39;accès au fichier ou répertoire cible
+    hi: लक्ष्य फ़ाइल या निर्देशिका का पथ
+    it: percorso al file o alla directory di destinazione
+    ja: 対象ファイルまたはディレクトリへのパス
+    nl: pad naar het doelbestand of de doelmap
+    pl: ścieżka do pliku lub katalogu docelowego
+    pt: caminho para o arquivo ou diretório de destino
+    ru: путь к целевому файлу или каталогу
+    zh: 目标文件或目录的路径
+  ModifiedArg3:
+    ar: مسار لمقارنة الملف أو الدليل
+    context: etcha modified arg3
+    de: Pfad zur zu vergleichenden Datei oder zum zu vergleichenden Verzeichnis
+    en: path to compare file or directory
+    es: Ruta para comparar el archivo o directorio.
+    fr: chemin d&#39;accès au fichier ou répertoire à comparer
+    hi: तुलना करने के लिए फ़ाइल या निर्देशिका का पथ
+    it: percorso per confrontare file o directory
+    ja: ファイルまたはディレクトリを比較するパス
+    nl: pad naar het te vergelijken bestand of de te vergelijken map
+    pl: ścieżka do porównywania pliku lub katalogu
+    pt: caminho para comparar arquivo ou diretório
+    ru: путь для сравнения файла или каталога
+    zh: 要比较的文件或目录路径
+  ModifiedUsage:
+    ar: مسار الملف أو الدليل
+    context: Compare or set the last modified date on a file or directory
+    de: Pfad zu Datei oder Verzeichnis
+    en: path to file or directory
+    es: ruta al archivo o directorio
+    fr: chemin d&#39;accès au fichier ou au répertoire
+    hi: फ़ाइल या निर्देशिका का पथ
+    it: percorso al file o alla directory
+    ja: ファイルまたはディレクトリへのパス
+    nl: pad naar bestand of map
+    pl: ścieżka do pliku lub katalogu
+    pt: caminho para o arquivo ou diretório
+    ru: путь к файлу или каталогу
+    zh: 文件或目录路径
   PathDestination:
     ar: مسار الوجهة
     context: Destination path
@@ -565,6 +754,7 @@ translations:
     es: ruta de destino
     fr: chemin de destination
     hi: गंतव्य पथ
+    it: percorso di destinazione
     ja: 宛先パス
     nl: bestemming pad
     pl: ścieżka docelowa
@@ -579,6 +769,7 @@ translations:
     es: ruta de origen
     fr: chemin source
     hi: स्रोत पथ
+    it: percorso sorgente
     ja: ソースパス
     nl: bron pad
     pl: ścieżka źródłowa
@@ -593,6 +784,7 @@ translations:
     es: Utilice una ruta de host específica
     fr: Utiliser un chemin d&#39;hôte spécifique
     hi: विशिष्ट होस्ट पथ का उपयोग करें
+    it: Utilizzare un percorso host specifico
     ja: 特定のホストパスを使用する
     nl: Gebruik een specifiek hostpad
     pl: Użyj określonej ścieżki hosta
@@ -607,6 +799,7 @@ translations:
     es: Utilice un puerto de host específico
     fr: Utiliser un port hôte spécifique
     hi: किसी विशिष्ट होस्ट पोर्ट का उपयोग करें
+    it: Utilizzare una porta host specifica
     ja: 特定のホストポートを使用する
     nl: Gebruik een specifieke hostpoort
     pl: Użyj określonego portu hosta
@@ -621,6 +814,7 @@ translations:
     es: nombre de la fuente
     fr: nom de la source
     hi: स्रोत का नाम
+    it: nome della fonte
     ja: ソース名
     nl: bron naam
     pl: nazwa źródła
@@ -635,6 +829,7 @@ translations:
     es: ruta de comando o patrón
     fr: chemin de commande ou de modèle
     hi: आदेश या पैटर्न पथ
+    it: percorso di comando o modello
     ja: コマンドまたはパターンパス
     nl: opdracht- of patroonpad
     pl: ścieżka polecenia lub wzorca
@@ -649,6 +844,7 @@ translations:
     es: Modo de verificación
     fr: Mode vérification
     hi: चेक मोड
+    it: Modalità di controllo
     ja: チェックモード
     nl: Controleer modus
     pl: Sprawdź tryb
@@ -663,6 +859,7 @@ translations:
     es: anfitrión
     fr: hôte
     hi: मेज़बान
+    it: ospite
     ja: ホスト
     nl: gastheer
     pl: gospodarz
@@ -677,6 +874,7 @@ translations:
     es: Enviar a una dirección de host específica
     fr: Push vers une adresse d&#39;hôte spécifique
     hi: किसी विशिष्ट होस्ट पते पर पुश करें
+    it: Invia a uno specifico indirizzo host
     ja: 特定のホストアドレスにプッシュする
     nl: Push naar een specifiek hostadres
     pl: Prześlij na konkretny adres hosta
@@ -691,6 +889,7 @@ translations:
     es: Objetivo del filtro
     fr: Cible du filtre
     hi: लक्ष्य फ़िल्टर करें
+    it: Filtro target
     ja: フィルター対象
     nl: Doel filteren
     pl: Cel filtra
@@ -731,6 +930,12 @@ translations:
       लक्ष्यों पर पुश करेगा। वैकल्पिक रूप से फ़िल्टर और कस्टम लक्ष्य निर्दिष्ट कर
       सकते हैं। स्रोतों के विरुद्ध चलाने के लिए पैटर्न या कमांड भी निर्दिष्ट कर सकते
       हैं, अन्यथा sourcePatterns में निर्दिष्ट पैटर्न या कमांड का उपयोग किया जाएगा।
+    it: Invia comandi o pattern firmati a un URL di destinazione. È necessario specificare
+      una sorgente, che invierà i comandi o i pattern specificati in build.pushTargets
+      ai target con tale sorgente. È possibile specificare facoltativamente filtri
+      e target personalizzati. È inoltre possibile specificare un pattern o un comando
+      da eseguire sulle sorgenti, altrimenti verrà utilizzato il pattern o il comando
+      specificato in sourcePatterns.
     ja: 署名されたコマンドまたはパターンを宛先 URL にプッシュします。ソースを指定する必要があります。これにより、build.pushTargets で指定されたコマンドまたはパターンがそのソースを持つターゲットにプッシュされます。オプションでフィルターとカスタム
       ターゲットを指定できます。ソースに対して実行するパターンまたはコマンドを指定することもできます。指定しない場合は、sourcePatterns で指定されたパターンまたはコマンドが使用されます。
     nl: Push ondertekende opdrachten of patronen naar een bestemmings-URL. Moet een
@@ -758,39 +963,50 @@ translations:
     zh: 将签名的命令或模式推送到目标 URL。必须指定一个源，它将把 build.pushTargets 中指定的命令或模式推送到具有该源的目标。可以选择指定过滤器和自定义目标。还可以指定针对源运行的模式或命令，否则将使用
       sourcePatterns 中指定的模式或命令。
   RenderArg1:
-    ar: المسار إلى ملف jwt أو النمط أو jsonnet أو Jsonnet الخام
+    ar: نص أو مسار JWT، نص أو مسار النمط
     context: render arg1
-    de: Pfad zur JWT-, Muster- oder JSONNET-Datei oder zum Raw-JSONNET
-    en: path to jwt, pattern, or jsonnet file, or raw Jsonnet
-    es: ruta al archivo jwt, patrón o jsonnet, o Jsonnet sin formato
-    fr: chemin vers le fichier jwt, pattern ou jsonnet, ou Jsonnet brut
-    hi: jwt, पैटर्न, या jsonnet फ़ाइल, या कच्चे jsonnet का पथ
-    ja: jwt、パターン、jsonnet ファイル、または生の Jsonnet へのパス
-    nl: pad naar jwt-, patroon- of jsonnet-bestand, of onbewerkt Jsonnet
-    pl: ścieżka do pliku jwt, wzorca lub jsonnet albo surowy Jsonnet
-    pt: caminho para o arquivo jwt, padrão ou jsonnet ou Jsonnet bruto
-    ru: путь к файлу jwt, шаблону или jsonnet или необработанному Jsonnet
-    zh: jwt、pattern 或 jsonnet 文件的路径，或者原始 Jsonnet
-  RenderUsage:
-    ar: إظهار القيمة المقدمة لملف JWT أو Pattern أو Jsonnet أو Jsonnet الخام
+    de: jwt Text oder Pfad, Muster Text oder Pfad
+    en: jwt text or path, pattern text or path
+    es: Texto o ruta JWT, texto o ruta de patrón
+    fr: texte ou chemin JWT, texte ou chemin de motif
+    hi: jwt टेक्स्ट या पथ, पैटर्न टेक्स्ट या पथ
+    it: testo o percorso jwt, testo o percorso pattern
+    ja: jwt テキストまたはパス、パターン テキストまたはパス
+    nl: jwt-tekst of -pad, patroontekst of -pad
+    pl: tekst lub ścieżka jwt, wzór tekstu lub ścieżki
+    pt: Texto ou caminho JWT, texto ou caminho de padrão
+    ru: JWT-текст или контур, шаблонный текст или контур
+    zh: JWT 文本或路径，模式文本或路径
+  RenderJUsage:
+    ar: عرض القيمة المعروضة لـ Jsonnet
     context: render usage
-    de: Den gerenderten Wert eines JWT, Musters, einer JSONNET-Datei oder eines Raw-JSONNET
-      anzeigen
-    en: Show the rendered value of a JWT, Pattern, Jsonnet file, or raw Jsonnet
-    es: Mostrar el valor renderizado de un archivo JWT, Pattern, Jsonnet o Jsonnet
-      sin formato
-    fr: Afficher la valeur rendue d&#39;un fichier JWT, Pattern, Jsonnet ou Jsonnet
-      brut
-    hi: JWT, पैटर्न, Jsonnet फ़ाइल या कच्चे Jsonnet का रेंडर किया गया मान दिखाएँ
-    ja: JWT、パターン、Jsonnet ファイル、または生の Jsonnet のレンダリングされた値を表示します。
-    nl: Toon de weergegeven waarde van een JWT-, patroon-, Jsonnet-bestand of onbewerkt
-      Jsonnet
-    pl: Pokaż wyrenderowaną wartość JWT, wzorca, pliku Jsonnet lub surowego Jsonnet
-    pt: Mostrar o valor renderizado de um JWT, padrão, arquivo Jsonnet ou Jsonnet
-      bruto
-    ru: Показать визуализированное значение файла JWT, Pattern, Jsonnet или необработанного
-      Jsonnet.
-    zh: 显示 JWT、Pattern、Jsonnet 文件或原始 Jsonnet 的渲染值
+    de: Den gerenderten Wert von Jsonnet anzeigen
+    en: Show the rendered value of Jsonnet
+    es: Mostrar el valor renderizado de Jsonnet
+    fr: Afficher la valeur rendue de Jsonnet
+    hi: Jsonnet का रेंडर किया गया मान दिखाएँ
+    it: Mostra il valore renderizzato di Jsonnet
+    ja: Jsonnetのレンダリングされた値を表示します
+    nl: Toon de weergegeven waarde van Jsonnet
+    pl: Pokaż wyrenderowaną wartość Jsonnet
+    pt: Exibir o valor renderizado do Jsonnet
+    ru: Отобразить отображаемое значение Jsonnet
+    zh: 显示 Jsonnet 的渲染值
+  RenderPUsage:
+    ar: عرض القيمة المعروضة للنمط
+    context: render usage
+    de: Den gerenderten Wert eines Musters anzeigen
+    en: Show the rendered value of a Pattern
+    es: Mostrar el valor renderizado de un patrón
+    fr: Afficher la valeur rendue d&#39;un motif
+    hi: किसी पैटर्न का रेंडर किया गया मान दिखाएँ
+    it: Mostra il valore renderizzato di un modello
+    ja: パターンのレンダリングされた値を表示する
+    nl: Toon de weergegeven waarde van een patroon.
+    pl: Pokaż wyrenderowaną wartość wzorca
+    pt: Exibir o valor renderizado de um padrão.
+    ru: Отобразить отображаемое значение шаблона
+    zh: 显示模式的渲染值
   RunFlagsOUsage:
     ar: تشغيل مرة واحدة
     context: run -o usage
@@ -799,6 +1015,7 @@ translations:
     es: Corre una vez
     fr: Exécuter une fois
     hi: एक बार रन करें
+    it: Eseguire una volta
     ja: 一度実行
     nl: Eén keer rennen
     pl: Uruchom raz
@@ -819,6 +1036,8 @@ translations:
       ou en recevant de nouveaux modèles via push
     hi: सुनने के मोड में चलाएं, समय-समय पर नए पैटर्न खींचें या पुश के माध्यम से नए
       पैटर्न प्राप्त करें
+    it: Esegui in modalità di ascolto, scaricando periodicamente nuovi modelli o ricevendo
+      nuovi modelli tramite push
     ja: リスニングモードで実行し、定期的に新しいパターンをプルするか、プッシュ経由で新しいパターンを受信します。
     nl: Ren in de luistermodus, waarbij u periodiek nieuwe patronen ophaalt of nieuwe
       patronen ontvangt via push
@@ -837,6 +1056,7 @@ translations:
     es: nombre de la fuente
     fr: nom de la source
     hi: स्रोत का नाम
+    it: nome della fonte
     ja: ソース名
     nl: bron naam
     pl: nazwa źródła
@@ -851,6 +1071,7 @@ translations:
     es: nombre de destino o dirección de host
     fr: nom de la cible ou adresse de l&#39;hôte
     hi: लक्ष्य नाम या होस्ट पता
+    it: nome di destinazione o indirizzo host
     ja: ターゲット名またはホストアドレス
     nl: doelnaam of hostadres
     pl: nazwa docelowa lub adres hosta
@@ -883,6 +1104,10 @@ translations:
       कमांड का उपयोग करेगा और सर्वर-सेंट इवेंट (SSE) का उपयोग करके प्रतिक्रियाएँ प्राप्त
       करेगा। स्रोत निर्दिष्ट करना होगा। कॉन्फ़िगरेशन से लक्ष्य नाम या व्यक्तिगत लक्ष्य
       विवरण निर्दिष्ट कर सकते हैं।
+    it: Apri una shell interattiva per la destinazione e la sorgente. La shell utilizzerà
+      comandi firmati inviati all&#39;URL e riceverà le risposte tramite Server-Sent
+      Events (SSE). È necessario specificare una sorgente. È possibile specificare
+      un nome di destinazione dalla configurazione o i dettagli della singola destinazione.
     ja: ターゲットとソースの対話型シェルを開きます。シェルは URL にプッシュされた署名済みコマンドを使用し、サーバー送信イベント (SSE) を使用して応答を受信します。ソースを指定する必要があります。構成からターゲット名を指定するか、個々のターゲットの詳細を指定できます。
     nl: Open een interactieve shell voor het doel en de bron. Shell gebruikt ondertekende
       opdrachten die naar de URL worden gepusht en ontvangt reacties met behulp van
@@ -910,6 +1135,7 @@ translations:
     es: Comandos de compilación de prueba
     fr: Tester les commandes de build
     hi: परीक्षण बिल्ड आदेश
+    it: Comandi di compilazione di prova
     ja: テストビルドコマンド
     nl: Test build-opdrachten
     pl: Testuj polecenia kompilacji
@@ -924,6 +1150,7 @@ translations:
     es: Pruebe todos los patrones en el camino
     fr: Testez tous les modèles du chemin
     hi: पथ में सभी पैटर्न का परीक्षण करें
+    it: Verifica tutti i modelli nel percorso
     ja: パス内のすべてのパターンをテストする
     nl: Test alle patronen in het pad
     pl: Przetestuj wszystkie wzorce na ścieżce

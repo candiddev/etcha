@@ -78,9 +78,17 @@ Etcha would render and apply this config to the configuration at boot:
 }
 ```
 
-### 4. cidata (any) {#cidata}
+### 4. EFI (any) {#efidata}
 
-If SMBIOS fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from `cidata`:
+If SMBIOS fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from `/boot/efi/etcha.jsonnet`:
+
+- EtchaOS's `/etc/fstab` is configured to mount any disk with the label `efi` to `/boot/efi`.
+- Etcha will attempt to read `/boot/efi/etcha.jsonnet` and parse it as Jsonnet or JSON.
+- If no text is found, or the config value `fallthrough` is `true`, Etcha tries to resolve configs using the next step.
+
+### 5. cidata (any) {#cidata}
+
+If EFI fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from `cidata`:
 
 - EtchaOS's `/etc/fstab` is configured to mount any disk with the label `cidata` to `/mnt/cidata`.
 - Etcha will attempt to read `/mnt/cidata/user-data` and parse it as Jsonnet or JSON.
@@ -121,8 +129,7 @@ Etcha would render and apply this config to the configuration at boot:
 }
 ```
 
-### 5. Instance User Data (AWS, OpenStack) {#user-data}
-
+### 6. Instance User Data (AWS, OpenStack) {#user-data}
 
 If cidata fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from Instance User Data:
 
@@ -131,8 +138,7 @@ If cidata fails to resolve or allows fallthrough, Etcha then attempts to render 
 
 This is primarily used on Amazon Web Services (AWS) and OpenStack, however the same functionality can be replicated by routing the IP address `169.254.169.254` to a web server and serving a config file with the path `/latest/user-data`.
 
-### 6. Instance Metadata (GCP)
-
+### 7. Instance Metadata (GCP)
 
 If Instance User Data fails to resolve or allows fallthrough, Etcha then attempts to render a Jsonnet or JSON value from Instance Metadata on Google Cloud Platform (GCP):
 

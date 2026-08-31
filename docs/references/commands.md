@@ -9,7 +9,78 @@ title: Commands
 
 A [Command](#command) is the smallest unit of work within Etcha.  [Patterns]({{< ref "/docs/references/patterns" >}}) contain build and run properties which are lists of [Commands](#commands), as well as Signing and Verify commands for integrating JWT signing/verification with other systems.
 
-Within a list of Commands, **Commands are executed in the order they are listed**.  Additionally, a list of Commands can contain nested lists of Commands.  Etcha will flatten the lists into one ordered list automatically.
+### Commands
+
+Commands are a list of Command objects in an array.  Commands can be specified as objects, or as just a string that will be interpreted as a Command that will always be changed:
+
+```json
+[
+  "apt-get install postgresql",
+  {
+    "always": true,
+    "id": "start postgresql",
+    "change": "systemctl start postgresql"
+  }
+]
+```
+
+In this example, `apt-get install postgresql` would become this Command:
+
+```json
+[
+  {
+    "always": true,
+    "change": "apt-get install postgresql",
+    "id": "apt-get install postgresql"
+  },
+  {
+    "always": true,
+    "id": "start postgresql",
+    "change": "systemctl start postgresql"
+  }
+]
+```
+
+Command IDs must be unique, however Etcha will deduplicate Commands that aren't unique.  If the Commands do not match, Etcha will throw an error during rendering.
+
+### Ordering
+
+Commands within a list are evaluated mostly in the order listed.  Etcha generates a Directed Acyclic Graph (DAG), which considers the order of Commands but also whether a Command depends on another via [`after`](#after) or [`before`](#before), or if a Command is [`async`](#async).  The DAG can be previewed using {{% cli graph %}}, which can be helpful to understand ordering and troubleshoot dependency ccyles.
+
+### Flattening
+
+Lists of Commands can contain nested arrays within them:
+
+```json
+[
+  {
+    "id": "my command"
+  },
+  [
+    [
+      [
+        {
+          "id": "my nested command"
+        }
+      ]
+    ]
+  ]
+]
+```
+
+Etcha will flatten these Commands:
+
+```json
+[
+  {
+    "id": "my command"
+  },
+  {
+    "id": "my nested command"
+  }
+]
+```
+
 
 ## Execution
 
@@ -122,9 +193,21 @@ For push and pull, Etcha by default diff Patterns and run checks and removes for
 
 ## Properties
 
+### `after`
+
+String or list of strings, IDs or Provides of Commands that must occur after this Command.  When Commands are defined in a top level or [`commands`](#commands) block without [`parallel`](#parallel) set to `true`, command IDs will be added to `after` based on the order they are defined.
+
 ### `always`
 
 Boolean, when true, [`change`](#change) will always be ran during [Change Mode](#change-mode)
+
+### `async`
+
+Boolean, when true, follow on Commands will not wait for this Command, unless explicitly referenced in `after`.
+
+### `before`
+
+String or list of strings, IDs or Provides of Commands that must before this Command.  When Commands are defined in a top level or [`commands`](#commands) block without [`parallel`](#parallel) set `true`, command IDs will be added to `before` based on the order they are defined.
 
 ### `change`
 
@@ -142,6 +225,10 @@ String, the commands or executable to run during [Change Mode](#change-mode) or 
 
 A list of sub Commands.  Other properties for this Command will be ignored except `id`.  These Commands will be ran in a group and not affect other groups.
 
+### `env`
+
+Map of strings keys and string values, environment variables that will be set for this Command specifically.
+
 ### `envPrefix`
 
 String, an environment variable name prefix to add to all [Environment Variables](#environment-variables) created by this command.  Must be a valid environment variable (does not start with a number, must only contain word characters or _).
@@ -154,37 +241,23 @@ See {{% config exec %}}.  Specifies a custom exec configuration for this command
 
 An ID for the Command.  Must be specified.  Can overlap with other Commands.
 
-### `onChange`, `onFail`, `onRemove` {#on}
+### `locks`
 
-A list of:
-- Other Command [`id`s](#id) to run
-- Regular expressions to match Command [`id`s](#id) to run
-- [Events]({{< ref "/docs/references/events" >}}) to trigger, if this Command changes, removes or fails.  Event names must be prefixed with `etcha:`.
+String or list of strings, locks that must succeed before this Command is run.  Locks are global within an Etcha instance, so Commands running in different sources will share the same locks.  Locks will be sorted alphabetically to avoid deadlocks.
 
-Cannot specify the current command ID (can't target self).  For onChange, targets must exist and occur after the current Command in the Command list (onRemove is the opposite, must occur before), or there will be an error during compilation.
+### `onChange`, `onRemove` {#on}
 
-These IDs can only target IDs within the current Command list:
+A list of other Command [`id`s](#id) or [`provides`](#provides) to run or [Events]({{< ref "/docs/references/events" >}}) to trigger, if this Command changes or removes.  Event names must be prefixed with `etcha:`.  Any matching Commands will be automatically added to this Command's `after` list.
 
-```json
-[
-  {
-    "id": "a",
-    "commands": [
-      {
-        "id": "b"
-      },
-      {
-        "id": "c"
-      },
-    ],
-  },
-  {
-    "id": "d"
-  }
-]
-```
+Cannot specify the current command ID (can't target self).
 
-In this example, `b` can target `c` but cannot target `d`.
+### `parallel`
+
+Boolean, when `true` and used with [`commands`](#commands), the Commands will be executed in parallel.
+
+### `provides`
+
+String or list of strings, additional matches for this Command to allow other Commands to target it using [`after`](#after), [`before`](#before), [`onChange` and `onRemove`](#on).
 
 ### `remove`
 
