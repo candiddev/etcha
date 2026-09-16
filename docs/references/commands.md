@@ -219,7 +219,9 @@ Boolean, will ignore changes to the `change` Command.  By default, `change` diff
 
 ### `check`
 
-String, the commands or executable to run during [Change Mode](#change-mode) or [Check Mode](#check-mode).  Can be multiple lines.  Will be appended to `exec.command`.  If this returns 0, [`remove`](#remove) will be ran in [Remove Mode](#remove-mode).  If this does not return 0, [`change`](#change) will be ran in [Change Mode](#change-mode).  If omitted, [`change`](#change) or [`remove`](#remove) will never run unless [`always`](#always) is `true` or [`id`](#id) is changed by another Command via [`onChange`](#onChange) or removed by another Command via [`onRemove`](#onRemove)
+String or boolean, the commands or executable to run during [Change Mode](#change-mode) or [Check Mode](#check-mode).  Can be multiple lines.  Will be appended to `exec.command`.  If this returns 0, [`remove`](#remove) will be ran in [Remove Mode](#remove-mode).  If this does not return 0, [`change`](#change) will be ran in [Change Mode](#change-mode).  If omitted, [`change`](#change) or [`remove`](#remove) will never run unless [`always`](#always) is `true` or [`id`](#id) is changed by another Command via [`onChange`](#onChange) or removed by another Command via [`onRemove`](#onRemove).
+
+If check is set to a boolean, like `false`, it will be evaluated similar to `always` except it won't run on failures.
 
 ### `commands`
 
@@ -267,6 +269,14 @@ String, the commands or executable to run during [Remove Mode](#remove-mode).  C
 
 Boolean, will change the ordering of `remove` to be executed after the Command's `change` is ran.  By default, `remove` is executed before `change`.
 
+### `stderr`
+
+Boolean, will copy the stderr output of the [`change`](#change) to the current terminal stderr.
+
 ### `stdin`
 
 String, sets the stdin for the Command for `change`, `check`, and `remove`.
+
+### `stdout`
+
+Boolean, will copy the stdout output of the [`change`](#change) to the current terminal stdout.

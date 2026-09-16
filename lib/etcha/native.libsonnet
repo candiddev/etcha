@@ -1,0 +1,16 @@
+{
+  get(object=null, filter, default=null, prefix=''): std.native('get')(object, filter, default, prefix),
+  getArch(): std.native('getArch')(),
+  getCmd(command, fallback=null, cache=false): std.native('getCmd')(command, fallback, cache),
+  getConfig(): std.native('getConfig')(),
+  getEnv(key, fallback=null, cache=false): std.native('getEnv')(key, fallback, cache),
+  getFile(path, fallback=null, cache=false): std.native('getFile')(path, fallback, cache),
+  getOS(): std.native('getOS')(),
+  getPath(): std.native('getPath')(),
+  getRecord(type, name, fallback=null, cache=false): std.native('getRecord')(type, name, fallback, cache),
+  jwtNew(claims, expiresDur, audience, id, issuer, subject, privateKey): std.native('jwtNew')(claims, expiresDur, audience, id, issuer, subject, privateKey),
+  jwtParse(jwt, publicKeys): std.native('jwtParse')(jwt, publicKeys),
+  randStr(length): std.native('randStr')(length),
+  regexMatch(regex, string): std.native('regexMatch')(regex, string),
+  render(string): std.native('render')(string),
+}

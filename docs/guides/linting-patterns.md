@@ -16,6 +16,26 @@ You can also check the formatting of the files by adding the flag `-f` : `etcha 
 
 **For Continuous Delivery/Continuous Integration Usage**, it's highly recommended to run linting across your entire Etcha codebase.
 
+## Linting Function Files
+
+Etcha can lint Jsonnet function files by specifying default values for the functions or including reasonable defaults in a `// test:` comment above the function:
+
+```
+// Build Hugo for production.
+// test: 'etcha'
+function(app, buildSource='main')
+  [
+    (import '../install/hugo.jsonnet'),
+    {
+      id: 'hugo build ' + app,
+      check: false,
+      change: '%s --cleanDestinationDir -e %s --gc --minify -s %s/hugo/%s' % [vars.paths.hugo, funcs.getBuildEnv(buildSource), vars.dir, app],
+    },
+  ]
+```
+
+In this example, Etcha will render the Jsonnet as `(import './func.libsonnet')('etcha')`.
+
 ### Linting Errors
 
 Etcha will check for the following issues with Patterns and Commands:

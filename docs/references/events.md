@@ -67,10 +67,6 @@ Firing any event with this prefix during a `build` will add the output of the [C
 
 This event is fired after a [shell]({{< ref "/docs/guides/shell-access" >}}) is started.
 
-### stdout
-
-Firing this event will log the output of the [Command's `change`]({{< ref "/docs/references/commands#change" >}}) to stdout.
-
 ### stop
 
 Firing this event will halt the execution of Commands after this Command's [Command's `check`]({{< ref "/docs/references/commands#check" >}}) is run.  The Command's [Command's `change`]({{< ref "/docs/references/commands#change" >}}) or [`remove`]({{< ref "/docs/references/commands#remove" >}}) will not run.  If other Commands are running in parallel, it is not possible to predict if they will complete or not.  Compared to [fail](#fail), the Commands execution will be considered successfully run and not return an exit code of 1.
