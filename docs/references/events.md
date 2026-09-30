@@ -36,6 +36,10 @@ These are the event names Etcha already knows about and what they're used for:
 
 Firing this event during a `build` will add the output of the [Command's `change`]({{< ref "/docs/references/commands#change" >}}) to the [JWT's `etchaBuildManifest` property]({{< ref "/docs/references/jwt#etchabuildmanifest" >}}).
 
+### etchaos_reboot
+
+This event is fired by EtchaOS when it needs to reboot a system.  It is fired when the vmlinuz or initrd files are updated.
+
 ### exit
 
 Firing this event during a `run` will cause Etcha to cleanly exit.  Any Sources that {{% config sources_eventsReceive receive %}} this event will fire first, and Etcha will save any JWTs to disk.  This is mostly used to trigger clean restarts of Etcha from within a Pattern.
