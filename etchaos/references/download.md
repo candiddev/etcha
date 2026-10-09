@@ -16,11 +16,11 @@ Let us design a custom Variant for your software or application. \
 | Variant | Base OS | amd64 | arm64 | UEFI | BIOS | Secure Boot | Container Engine | Container Runtime Interface (CRI) |
 |-|-|-|-|-|-|-|-|-|-|
 | arc | Arch Linux | {{% asterisk %}} | Not Supported | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
-| alm | AlmaLinux 9 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
+| alm | AlmaLinux 10 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
 | deb | Debian 13 "trixie" | {{% check %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
-| fed | Fedora Linux 42 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% asterisk %}} | {{% check %}} | docker | containerd |
-| sus | openSUSE Leap 15 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
-| ubu | Ubuntu 24.04 "Noble Numbat" | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
+| fed | Fedora Linux 44 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% asterisk %}} | {{% check %}} | docker | containerd |
+| sus | openSUSE Leap 16 | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
+| ubu | Ubuntu 26.04 "Resolute Raccoon" | {{% asterisk %}} | {{% asterisk %}} | {{% check %}} | {{% check %}} | {{% check %}} | docker | containerd |
 
 {{% asterisk %}} - Requires customizations or considerations before using.  {{%  contactus "EtchaOS%20Varian%20Support" %}} for access.
 

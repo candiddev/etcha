@@ -26,4 +26,10 @@ local native = import './native.libsonnet';
       serial: true,
       id: 'rot install',
     },
+  // Get a value metadata from a Rot datastore.
+  metadata: function(path, field, fallback=null, cache=false, env=[])
+    native.getCmd('rot value-get -m %s %s' % [field, path], fallback, cache, env=[]),
+  // Get a value from a Rot datastore.
+  value: function(path, fallback=null, cache=false, env=[])
+    native.getCmd('rot value-get -v ' + path, fallback, cache, env),
 }

@@ -18,11 +18,12 @@ You can also check the formatting of the files by adding the flag `-f` : `etcha 
 
 ## Linting Function Files
 
-Etcha can lint Jsonnet function files by specifying default values for the functions or including reasonable defaults in a `// test:` comment above the function:
+Etcha can lint Jsonnet function files by specifying default values for the functions or including reasonable defaults in a `// lint:` comment above the function.  This can be specified multiple times to have Etcha lint through different permutations of the function.
 
 ```
 // Build Hugo for production.
-// test: 'etcha'
+// lint: 'etcha'
+// lint: 'rot'
 function(app, buildSource='main')
   [
     (import '../install/hugo.jsonnet'),

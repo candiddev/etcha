@@ -19,20 +19,80 @@ translations:
     ru: путь к шаблону
     zh: 图案路径
   BuildArgs2:
-    ar: مسار الوجهة
+    ar: بيانات بيان إضافية، أو - للإدخال القياسي
     context: build arg2
-    de: Weg zum Ziel
-    en: destination path
-    es: ruta de destino
-    fr: chemin de destination
-    hi: गंतव्य पथ
-    it: percorso di destinazione
-    ja: 宛先パス
-    nl: bestemming pad
-    pl: ścieżka docelowa
-    pt: caminho de destino
-    ru: путь назначения
-    zh: 目标路径
+    de: zusätzliche Manifestdaten oder - für stdin
+    en: additional manifest data, or - for stdin
+    es: datos de manifiesto adicionales, o - para stdin
+    fr: données manifestes supplémentaires, ou - pour l&#39;entrée standard
+    hi: अतिरिक्त मैनिफेस्ट डेटा, या - stdin के लिए
+    it: dati manifest aggiuntivi, oppure - per stdin
+    ja: 追加のマニフェストデータ、または標準入力の場合は「-」
+    nl: aanvullende manifestgegevens, of - voor stdin
+    pl: dodatkowe dane manifestu lub - dla wejścia standardowego
+    pt: dados de manifesto adicionais, ou - para entrada padrão
+    ru: дополнительные данные манифеста или - для стандартного ввода
+    zh: 附加清单数据，或 - 用于标准输入
+  BuildFlagsDPlaceholder:
+    ar: طريق
+    context: build -d flag placeholder
+    de: Weg
+    en: path
+    es: camino
+    fr: chemin
+    hi: पथ
+    it: sentiero
+    ja: パス
+    nl: pad
+    pl: ścieżka
+    pt: caminho
+    ru: путь
+    zh: 小路
+  BuildFlagsDUsage:
+    ar: مسار الوجهة لحفظ JWT
+    context: build -d flag usage
+    de: Zielpfad zum Speichern des JWT
+    en: Destination path to save the JWT
+    es: Ruta de destino para guardar el JWT
+    fr: Chemin de destination pour enregistrer le JWT
+    hi: JWT को सहेजने के लिए गंतव्य पथ
+    it: Percorso di destinazione per salvare il JWT
+    ja: JWTを保存する宛先パス
+    nl: Bestemmingspad om de JWT op te slaan
+    pl: Ścieżka docelowa do zapisania JWT
+    pt: Caminho de destino para salvar o JWT
+    ru: Путь назначения для сохранения JWT
+    zh: 保存 JWT 的目标路径
+  BuildFlagsRPlaceholder:
+    ar: المتغير = القيمة
+    context: build -r flag placeholder
+    de: var=Wert
+    en: var=value
+    es: var=valor
+    fr: var=valeur
+    hi: var=value
+    it: var=valore
+    ja: var=値
+    nl: var=waarde
+    pl: zmienna=wartość
+    pt: var=valor
+    ru: var=value
+    zh: var=值
+  BuildFlagsRUsage:
+    ar: أضف متغيرات التشغيل إلى عملية البناء
+    context: build -r flag usage
+    de: Füge dem Build Laufzeitvariablen hinzu
+    en: Add run vars to the build
+    es: Agregue variables de ejecución a la compilación
+    fr: Ajoutez les variables d&#39;exécution à la compilation.
+    hi: बिल्ड में रन वैरिएबल जोड़ें
+    it: Aggiungi le variabili di esecuzione alla build
+    ja: ビルドに実行変数を追加する
+    nl: Voeg uitvoeringsvariabelen toe aan de build.
+    pl: Dodaj zmienne uruchomieniowe do kompilacji
+    pt: Adicione variáveis de execução à compilação.
+    ru: Добавьте переменные запуска в процесс сборки.
+    zh: 将运行变量添加到构建过程中
   BuildUsage:
     ar: بناء نمط
     context: build usage

@@ -3,7 +3,7 @@
 local file = import './file.libsonnet';
 
 function(args='', cap_add=[], command='', deviceChown=false, devices=[], engine='', engineEnv={}, env=[], image, name, network='', options='', ports=[], privileged=false, pull='', restart='on-failure', skipRemove=false, user='', volumes=[], workdir='')
-  local run = '%(args)s --name %(name)s %(cap_add)s %(devices)s %(env)s %(network)s %(options)s --restart %(restart)s %(ports)s %(privileged)s %(pull)s %(user)s %(volumes)s %(workdir)s %(image)s %(command)s' % {
+  local run = '%(args)s --name %(name)s %(cap_add)s %(devices)s %(env)s %(network)s %(options)s %(restart)s %(ports)s %(privileged)s %(pull)s %(user)s %(volumes)s %(workdir)s %(image)s %(command)s' % {
     args: args,
     cap_add: std.join(' ', [
       '--cap-add %s' % cap
@@ -32,7 +32,7 @@ function(args='', cap_add=[], command='', deviceChown=false, devices=[], engine=
     ]),
     privileged: if privileged then '--privileged' else '',
     pull: if pull == '' then '' else '--pull always',
-    restart: restart,
+    restart: if restart == '' then '' else '--restart ' + restart,
     user: if user == '' then '' else '--user ' + user,
     volumes: std.join(' ', [
       '--volume %s' % volume

@@ -237,7 +237,7 @@ String, an environment variable name prefix to add to all [Environment Variables
 
 ### `exec`
 
-See {{% config exec %}}.  Specifies a custom exec configuration for this command.  Parent exec configurations must allow overrides for this to work.
+See {{% config exec %}}.  Specifies a custom exec configuration for this command.  Parent exec configurations must allow overrides for this to work.  For Commands that have [`commands`](#commands-1), they will inherit the parent Command's exec unless they specify their own.
 
 ### `id` (required) {#id}
 
