@@ -2,7 +2,7 @@
 
 local file = import './file.libsonnet';
 
-function(args='', cap_add=[], command='', deviceChown=false, devices=[], engine='', engineEnv={}, env=[], image, name, network='', options='', ports=[], privileged=false, pull='', restart='on-failure', skipRemove=false, user='', volumes=[], workdir='')
+function(args='', cap_add=[], command='', devices=[], engine='', engineEnv={}, env=[], image, name, network='', options='', ports=[], privileged=false, pull='', restart='on-failure', skipRemove=false, user='', volumes=[], workdir='')
   local run = '%(args)s --name %(name)s %(cap_add)s %(devices)s %(env)s %(network)s %(options)s %(restart)s %(ports)s %(privileged)s %(pull)s %(user)s %(volumes)s %(workdir)s %(image)s %(command)s' % {
     args: args,
     cap_add: std.join(' ', [
@@ -48,30 +48,17 @@ function(args='', cap_add=[], command='', deviceChown=false, devices=[], engine=
   local userParts = std.split(user, ':');
 
   {
-    commands: [
-      [
-        file(group=if std.length(userParts) == 2 then userParts[1] else '""', mode='""', owner=if userParts[0] == '' then '""' else userParts[0], path=device, skipRemove=true)
-
-        for device in devices
-        if deviceChown
-      ] + [
-        {
-          id: 'start container %s' % name,
-          check: "[[ $(%s inspect %s -f '{{.State.Running}}') = true ]]" % [e, name],
-          change: '%(e)s %(rm)s -f %(name)s || true; %(e)s run -d %(run)s' % {
-            e: e,
-            name: name,
-            rm: rm,
-            run: run,
-          },
-          env: engineEnv,
-          locks: [
-            'start container %s' % name,
-          ],
-          remove: if !skipRemove then '%s %s -f %s' % [e, rm, name],
-        },
-      ],
-    ],
     id: 'container %s' % name,
-    serial: true,
+    check: "[[ $(%s inspect %s -f '{{.State.Running}}') = true ]]" % [e, name],
+    change: '%(e)s %(rm)s -f %(name)s || true; %(e)s run -d %(run)s' % {
+      e: e,
+      name: name,
+      rm: rm,
+      run: run,
+    },
+    env: engineEnv,
+    locks: [
+      'container %s' % name,
+    ],
+    remove: if !skipRemove then '%s %s -f %s' % [e, rm, name],
   }

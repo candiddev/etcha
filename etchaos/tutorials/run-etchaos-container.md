@@ -50,7 +50,7 @@ Next, we'll run the [`qemu` container](https://candid.dev/containers/qemu).  Thi
 Replace `ARCH` with the arch you chose and `verifyKeys` if you want to use your own.
 
 ```bash
-docker run -d $(if [[ -e /dev/kvm ]]; then echo "--device /dev/kvm --user root"; fi) -e ARCH=amd64 -e QEMUARGS="-initrd $(pwd)/etchaos/etchaos_deb_amd64.initrd -kernel $(pwd)/etchaos/etchaos_deb_amd64.vmlinuz -nic user,hostfwd=tcp::4000-:4000 -nographic -nodefaults" -e SMBIOS='etchaos={run:{verifyKeys:["ed25519public:MCowBQYDK2VwAyEA5noJdcrHmhEO8mQA89kSdd4/GQZbDz0kbxoPKNApTkc=:jjKByT4bnU"]},sources:{test:{allowPush:true,shell:{command:"machinectl shell root@"}}}}' -p 4000:4000 -v $(pwd)/etchaos:$(pwd)/etchaos --cap-add NET_ADMIN --name etchaos_test ghcr.io/candiddev/qemu
+docker run -d $(if [[ -e /dev/kvm ]]; then echo "--device /dev/kvm --user root"; fi) -e ARCH=amd64 -e QEMUARGS="-initrd $(pwd)/etchaos/etchaos_deb_amd64.initrd -kernel $(pwd)/etchaos/etchaos_deb_amd64.vmlinuz -nic user,hostfwd=tcp::4000-:4000 -nographic -nodefaults" -e SERIAL="0.0.0.0:23" -e SMBIOS='etchaos={run:{verifyKeys:["ed25519public:MCowBQYDK2VwAyEA5noJdcrHmhEO8mQA89kSdd4/GQZbDz0kbxoPKNApTkc=:jjKByT4bnU"]},sources:{test:{allowPush:true,shell:{command:"machinectl shell root@"}}}}' -p 4000:4000 -v $(pwd)/etchaos:$(pwd)/etchaos --cap-add NET_ADMIN --name etchaos_test ghcr.io/candiddev/qemu
 ```
 
 This command does a few things:
