@@ -1,7 +1,5 @@
 // Manages a container using Docker or Podman.  Will automatically detect the engine from sysinfo, or one can be provided.
 
-local file = import './file.libsonnet';
-
 function(args='', cap_add=[], command='', devices=[], engine='', engineEnv={}, env=[], image, name, network='', options='', ports=[], privileged=false, pull='', restart='on-failure', skipRemove=false, user='', volumes=[], workdir='')
   local run = '%(args)s --name %(name)s %(cap_add)s %(devices)s %(env)s %(network)s %(options)s %(restart)s %(ports)s %(privileged)s %(pull)s %(user)s %(volumes)s %(workdir)s %(image)s %(command)s' % {
     args: args,
