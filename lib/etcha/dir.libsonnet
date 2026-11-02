@@ -1,7 +1,7 @@
 // Manage a directory at path with a specific mode.
 
 // If force is true, non-empty directories will be removed, otherwise this may error during removal if the directory is not empty.
-function(absent=false, force=true, group='""', mode='0755', owner='""', path, skipRemove=false)
+function(absent=false, force=false, group='""', mode='0755', owner='""', path, skipRemove=false)
 
   local vars = {
     flags: '%(force)s -g %(group)s -o %(owner)s -p %(mode)s' % self,
