@@ -239,13 +239,25 @@ String, an environment variable name prefix to add to all [Environment Variables
 
 See {{% config exec %}}.  Specifies a custom exec configuration for this command.  Parent exec configurations must allow overrides for this to work.  For Commands that have [`commands`](#commands-1), they will inherit the parent Command's exec unless they specify their own.
 
+### `flocks`
+
+String or list of strings, file-based locks that must succeed before this Command is run.  Flocks will wait for [`flocksRead`](#flocksread) to release.  Etcha will create the files if they do not exist, but will not remove them once the flock is released.  These are useful for synchronizing multiple Etcha invocations, such as on a shared CI/CD host.  Locks will be sorted alphabetically to avoid deadlocks.
+
+### `flocksRead`
+
+String or list of strings, file-based rlocks that must succeed before this Command is run.  Flocks will wait for [`flocks`](#flocks) to release, but multiple Commands can share the same `flocksRead`.  Etcha will create the files if they do not exist, but will not remove them once the flock is released.  These are useful for synchronizing multiple Etcha invocations, such as on a shared CI/CD host.  Locks will be sorted alphabetically to avoid deadlocks.
+
 ### `id` (required) {#id}
 
 An ID for the Command.  Must be specified.  Can overlap with other Commands.
 
 ### `locks`
 
-String or list of strings, locks that must succeed before this Command is run.  Locks are global within an Etcha instance, so Commands running in different sources will share the same locks.  Locks will be sorted alphabetically to avoid deadlocks.
+String or list of strings, locks that must succeed before this Command is run.  Locks will wait for [`locksRead`](#locksread) to release.  Locks are global within an Etcha instance, so Commands running in different sources will share the same locks.  Locks will be sorted alphabetically to avoid deadlocks.
+
+### `locksRead`
+
+String or list of strings, rlocks that must succeed before this Command is run.  Locks will wait for [`locks`](#locks) to release, but multiple Commands can share the same `locksRead`.  Locks are global within an Etcha instance, so Commands running in different sources will share the same locks.  Locks will be sorted alphabetically to avoid deadlocks.
 
 ### `onChange`, `onRemove` {#on}
 

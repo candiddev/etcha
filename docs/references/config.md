@@ -308,6 +308,11 @@ List of [cryptographic verify keys]({{< ref "/docs/references/cryptography" >}})
 
 Sources is a map of source names to source configurations.  See [Running Patterns]({{< ref "/docs/guides/running-patterns" >}}) for more information.
 
+Etcha uses these sources out of the box:
+
+- `local`: Used as the source for {{% cli local %}} (and conversely, {{% config macroDir %}})
+- `test`: Used as the source for {{% cli lint %}} and {{% cli test %}}
+
 **Default:** `{}`
 
 #### `sources_[source]_allowPush` {#sources_allowPush}

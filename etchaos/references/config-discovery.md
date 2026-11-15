@@ -29,11 +29,11 @@ Etcha is configured with a base configuration defining a {{% config run_stateDir
 
 ### 2. Kernel Command Line {#cmdline}
 
-Etcha then attempts to render a Jsonnet or JSON value from the kernel command line, `etchaos.config`.  If no text is found, or the config value `fallthrough` is `true`, Etcha tries to resolve configs using the next step.
+Etcha then attempts to render a Jsonnet or JSON value from the kernel command line, `etchaos.config`.  If no text is found, or the config value `fallthrough` is `true`, Etcha tries to resolve configs using the next step.  **The commandline value must be the last cmdline parameter** and should be kept short as short as possible.
 
 Given this kernel command line:
 ```
-etchaos.config="{fallthrough:true,sources:{push:{allowPush:true}}}"
+initrd=initrd quiet rw etchaos.config="{fallthrough:true,sources:{push:{allowPush:true}}}"
 ```
 
 Etcha would render and apply this config to the configuration at boot:

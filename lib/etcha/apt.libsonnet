@@ -2,7 +2,7 @@
 
 function(name, options='', recommends=false, skipRemove=false)
   {
-    change: ('apt-get install %s ' % options) + (if recommends then '' else '--no-install-recommends ' + '-o DPkg::Options::="--force-confnew" -y %s' % name),
+    change: ('apt-get install %s ' % options) + ((if recommends then '' else '--no-install-recommends ') + '-o DPkg::Options::="--force-confnew" -y %s' % name),
     check: 'dpkg -L %s' % name,
     id: 'apt ' + name,
     locks: [
